@@ -18,7 +18,7 @@ var papi = new PapiClient
             var patron = papi.PatronCirculateBlocksGet("123000000456", "0000");
             Console.WriteLine($"Hello {patron.Data.NameFirst}");
 ```
-<br>
+
 ### Protected Method 
 ```csharp
 var papi = new PapiClient
@@ -37,7 +37,7 @@ var papi = new PapiClient
             var value = papi.SA_GetValueByOrg(1, "orgphone1");
             Console.WriteLine(value);
 ```
-<br>
+
 ### Public Method Override
 ```csharp
 var papi = new PapiClient
