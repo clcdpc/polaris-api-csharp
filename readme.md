@@ -4,10 +4,22 @@ The library was recently migrated from RestSharp to .NET HttpClient and is relat
 
 **Staff account credentials are only required for protected methods and overriding public methods**
 
+## Installation
+
+```
+#!c#
+
+Install-Package PolarisApiLibrary -Pre
+```
+
+
 ## Usage
 
 ### Public Method
-```csharp
+
+```
+#!c#
+
 var papi = new PapiClient
             {
                 AccessID = "your-access-id",
@@ -18,9 +30,12 @@ var papi = new PapiClient
             var patron = papi.PatronCirculateBlocksGet("123000000456", "0000");
             Console.WriteLine($"Hello {patron.Data.NameFirst}");
 ```
-<br>
+
 ### Protected Method 
-```csharp
+
+```
+#!c#
+
 var papi = new PapiClient
             {
                 AccessID = "your-access-id",
@@ -37,9 +52,12 @@ var papi = new PapiClient
             var value = papi.SA_GetValueByOrg(1, "orgphone1");
             Console.WriteLine(value);
 ```
-<br>
+
 ### Public Method Override
-```csharp
+
+```
+#!c#
+
 var papi = new PapiClient
             {
                 AccessID = "your-access-id",
