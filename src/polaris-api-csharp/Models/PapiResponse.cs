@@ -30,6 +30,8 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public HttpRequest Request { get; set; }
 
+        public Exception Exception { get; set; }
+
         /// <summary>
         /// Default constructor
         /// </summary>
