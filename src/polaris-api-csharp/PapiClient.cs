@@ -50,7 +50,15 @@ namespace Clc.Polaris.Api
             {
                 if (_token == null || _token.ExpirationDate <= DateTime.Now)
                 {
-                    _token = AuthenticateStaffUser(StaffOverrideAccount.Domain, StaffOverrideAccount.Username, StaffOverrideAccount.Password).Data;
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(StaffOverrideAccount.Domain) && !string.IsNullOrWhiteSpace(StaffOverrideAccount.Username) && !string.IsNullOrWhiteSpace(StaffOverrideAccount.Password))
+                        {
+                            var response = AuthenticateStaffUser(StaffOverrideAccount.Domain, StaffOverrideAccount.Username, StaffOverrideAccount.Password);
+                            _token = response?.Data;
+                        }                        
+                    }
+                    catch (Exception ex){ }
                 }
                 return _token;
             }
@@ -80,13 +88,26 @@ namespace Clc.Polaris.Api
         {
             var request = CreateRequest(method, url, pin, body, isOverride);
             var papiResponse = new PapiResponse<T>(request);
-            var response = client.SendAsync(request).Result;
-            papiResponse.Response = new HttpResponse(response);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                papiResponse.Data = (T)new XmlSerializer(typeof(T)).Deserialize(response.Content.ReadAsStreamAsync().Result);
+                var response = client.SendAsync(request).Result;
+                papiResponse.Response = new HttpResponse(response);
+                if (response.IsSuccessStatusCode)
+                {
+                    if (typeof(T) == typeof(string))
+                    {
+                        papiResponse.Data = (T)Convert.ChangeType(response.Content.ReadAsStringAsync().Result, typeof(T));
+                    }
+                    else
+                    {
+                        papiResponse.Data = (T)new XmlSerializer(typeof(T)).Deserialize(response.Content.ReadAsStreamAsync().Result);
+                    }
+                }
             }
-
+            catch (Exception ex)
+            {
+                papiResponse.Exception = ex;
+            }
             return papiResponse;
         }
 
@@ -113,10 +134,17 @@ namespace Clc.Polaris.Api
         /// <param name="isOverride">Execute as an override request</param>
         /// <returns>A string of the response XML</returns>
         public string Execute(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false)
-        {            
-            var request = CreateRequest(method, url, pin, body, isOverride);
-            var response = client.SendAsync(request).Result;
-            return response.Content.ReadAsStringAsync().Result;
+        {
+            try
+            {                
+                var request = CreateRequest(method, url, pin, body, isOverride);
+                var response = client.SendAsync(request).Result;
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch(Exception ex)
+            {
+                return ex.ToString();
+            }
         }
 
         /// <summary>
@@ -133,6 +161,7 @@ namespace Clc.Polaris.Api
         HttpRequestMessage CreateRequest(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false)
         {
             var password = isOverride ? Token.AccessSecret : pin;
+            if (!url.StartsWith("/")) url = "/" + url;
             url = BaseUrl.TrimEnd('/') + url.ToString();
             var request = new HttpRequestMessage(method, url);
             if (!string.IsNullOrWhiteSpace(body))
@@ -162,7 +191,7 @@ namespace Clc.Polaris.Api
             return Convert.ToBase64String(computedHash);
         }
 
-        static string PolarisEncode(string value)
+        public static string PolarisEncode(string value)
         {
             var encoded = Uri.EscapeDataString(value);
             var encodedFixed = Regex.Replace(encoded, "(%[0-9a-f][0-9a-f])", c => c.Value.ToUpper());
