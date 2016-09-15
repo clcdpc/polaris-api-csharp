@@ -365,5 +365,10 @@ namespace Clc.Polaris.Api.Models
 		/// The value of the element.
 		/// </summary>
 		public string Value { get; set; }
-	}
+
+        public override string ToString()
+        {
+            return $"{Label} - {Value}";
+        }
+    }
 }
