@@ -19,6 +19,7 @@ namespace Clc.Polaris.Api
         public PapiResponse<BibSearchResult> BibSearch(BibSearchOptions options)
         {
             var url = $"/PAPIService/REST/public/v1/1300/100/{options.Branch}/search/bibs/{options.SearchType}/{options.Qualifier}?q={PolarisEncode(options.Term)}&sort={options.SortOption}&page={options.Page}&bibsperpage={options.PageSize}";
+            if (!string.IsNullOrWhiteSpace(options.Limit)) url += $"&limit={options.Limit}";
             return Execute<BibSearchResult>(HttpMethod.Get, url);
         }
     }
