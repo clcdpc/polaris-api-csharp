@@ -65,7 +65,7 @@ namespace Clc.Polaris.Api
             set { _token = value; }
         }
 
-        HttpClient client = new HttpClient();
+        private static HttpClient client = new HttpClient();
 
         /// <summary>
         /// Default constructor
