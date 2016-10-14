@@ -136,7 +136,7 @@ namespace Clc.Polaris.Api
         public string Execute(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false)
         {
             try
-            {                
+            { 
                 var request = CreateRequest(method, url, pin, body, isOverride);
                 var response = client.SendAsync(request).Result;
                 return response.Content.ReadAsStringAsync().Result;
@@ -195,7 +195,7 @@ namespace Clc.Polaris.Api
         {
             var encoded = Uri.EscapeDataString(value);
             var encodedFixed = Regex.Replace(encoded, "(%[0-9a-f][0-9a-f])", c => c.Value.ToUpper());
-            return encodedFixed.Replace("%20", "+").Replace("%3D", "=").Replace("%2F", "/").Replace("%40", "@").Replace("%2C", ",").Replace("%26", "&");
+            return encodedFixed.Replace("%20", "+").Replace("%3D", "=").Replace("%2F", "/").Replace("%40", "@").Replace("%2C", ",").Replace("%26", "&").Replace("%2A", "*").Replace("\"", "%22");
         }
     }
 }
