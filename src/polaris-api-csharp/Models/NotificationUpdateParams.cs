@@ -1,4 +1,6 @@
-﻿namespace Clc.Polaris.Api.Models
+﻿using System;
+
+namespace Clc.Polaris.Api.Models
 {
 	/// <summary>
 	/// The parameters required to perform a NotificationUpdate.
@@ -31,6 +33,11 @@
 		/// How the message was delivered. In the currently implementation this is the patron's phone number.
 		/// </summary>
 		public string DeliveryString { get; set; }
+
+        /// <summary>
+        /// The date the notice was delivered
+        /// </summary>
+        public DateTime DeliveryDate { get; set; } = DateTime.Now;
 
 		/// <summary>
 		/// The ID of the patron.
