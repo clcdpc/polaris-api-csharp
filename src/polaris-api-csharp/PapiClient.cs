@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api
         /// <summary>
         /// The base URL of your PAPI service
         /// </summary>
-        public string BaseUrl { get; set; }
+        public string Hostname { get; set; }
 
         /// <summary>
         /// The staff credentials used for protected methods and public method overrides
@@ -72,6 +72,14 @@ namespace Clc.Polaris.Api
         /// </summary>
         public PapiClient()
         {
+        }
+
+        public PapiClient(string hostname, string accessId, string accessKey, PolarisUser staffAccount = null)
+        {
+            Hostname = hostname;
+            AccessID = accessId;
+            AccessKey = accessKey;
+            StaffOverrideAccount = staffAccount;
         }
 
         /// <summary>
@@ -133,17 +141,22 @@ namespace Clc.Polaris.Api
         /// <param name="body">The XML request body, if any</param>
         /// <param name="isOverride">Execute as an override request</param>
         /// <returns>A string of the response XML</returns>
-        public string Execute(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false)
+        public PapiResponse<string> Execute(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false)
         {
+            PapiResponse<string> papiResponse = new PapiResponse<string>();
             try
             { 
                 var request = CreateRequest(method, url, pin, body, isOverride);
+                papiResponse = new PapiResponse<string>(request);
                 var response = client.SendAsync(request).Result;
-                return response.Content.ReadAsStringAsync().Result;
+                papiResponse.Response = new HttpResponse(response);
+                papiResponse.Data = response.Content.ReadAsStringAsync().Result;
+                return papiResponse;
             }
             catch(Exception ex)
             {
-                return ex.ToString();
+                papiResponse.Exception = ex;
+                return papiResponse;
             }
         }
 
@@ -153,7 +166,7 @@ namespace Clc.Polaris.Api
         /// <param name="method">HTTP method of the PAPI method</param>
         /// <param name="url">The URL of the method, beginning with /PAPIService</param>
         /// <returns>A string of the response XML</returns>
-        public string OverrideExecute(HttpMethod method, string url)
+        public PapiResponse<string> OverrideExecute(HttpMethod method, string url)
         {
             return Execute(method, url, null, null, true);
         }
@@ -162,7 +175,7 @@ namespace Clc.Polaris.Api
         {
             var password = isOverride ? Token.AccessSecret : pin;
             if (!url.StartsWith("/")) url = "/" + url;
-            url = BaseUrl.TrimEnd('/') + url.ToString();
+            url = Hostname.TrimEnd('/') + url.ToString();
             var request = new HttpRequestMessage(method, url);
             if (!string.IsNullOrWhiteSpace(body))
             {

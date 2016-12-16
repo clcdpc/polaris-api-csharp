@@ -12,9 +12,6 @@ namespace Clc.Polaris.Api
 		/// <summary>
 		/// Updates a phone notification.
 		/// </summary>
-		/// <summary>
-		/// Currently only supports phone notifications; DeliveryOptionIDs 3, 4, and 5
-		/// </summary>
 		/// <param name="options">Contains all of the relevant parameters to process a NotificationUpdate.</param>
 		/// <returns>An object containing the result of the NotificationUpdate.</returns>
 		/// <seealso cref="NotificationUpdateParams"/>
@@ -23,7 +20,7 @@ namespace Clc.Polaris.Api
 		{
 			Require.Argument("AccessToken", Token.AccessToken);
 			Require.Argument("NotificationTypeID", options.NotificationTypeId);
-			Require.Argument("NotificationStatusID", options.CallStatus);
+			Require.Argument("NotificationStatusID", options.NotificationStatus);
 			Require.Argument("DeliveryOptionID", options.DeliveryOptionId);
 			Require.Argument("DeliveryString", options.DeliveryString);
 			Require.Argument("Details", options.Details);
@@ -35,7 +32,7 @@ namespace Clc.Polaris.Api
 				             new XElement("LogonBranchID", options.BranchId),
 				             new XElement("LogonUserID", options.UserId),
 				             new XElement("LogonWorkstationID", options.WorkstationId),
-				             new XElement("NotificationStatusID", options.CallStatus),
+				             new XElement("NotificationStatusID", (int)options.NotificationStatus),
 				             new XElement("NotificationDeliveryDate", options.DeliveryDate.ToString("yyyy-MM-dd")),
 				             new XElement("DeliveryOptionID", options.DeliveryOptionId),
 				             new XElement("DeliveryString", options.DeliveryString),

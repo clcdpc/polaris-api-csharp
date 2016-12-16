@@ -204,5 +204,20 @@ namespace Clc.Polaris.Api.Models
         /// eReceipt option ID
         /// </summary>
 		public int? EReceiptOptionID { get; set; }
-	}
+
+        /// <summary>
+        /// PatronCodeID
+        /// </summary>
+        public int PatronCode { get; set; }
+
+        /// <summary>
+        /// Date the account with expire
+        /// </summary>
+        public DateTime? ExpirationDate { get; set; }
+
+        /// <summary>
+        /// Date the account will require an address check
+        /// </summary>
+        public DateTime? AddrCheckDate { get; set; }
+    }
 }

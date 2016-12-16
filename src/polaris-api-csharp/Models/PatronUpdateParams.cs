@@ -62,5 +62,11 @@ namespace Clc.Polaris.Api.Models
         /// The patron's new Password/PIN
         /// </summary>
         public string NewPassword { get; set; }
+
+        public DateTime AddressCheckDate { get; set; }
+        public DateTime ExpirationDate { get; set; }
+
+
+        public List<PatronAddress> Addresses { get; set; } = new List<PatronAddress>();
 	}
 }

@@ -27,6 +27,11 @@ namespace Clc.Polaris.Api.Models
 		public int OrganizationID { get; set; }
 
         /// <summary>
+        /// Parent OrganizationID, if any
+        /// </summary>
+		public int? ParentOrganizationID { get; set; }
+
+        /// <summary>
         /// Type of organization
         /// </summary>
 		public int OrganizationCodeID { get; set; }

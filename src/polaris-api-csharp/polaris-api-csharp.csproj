@@ -51,8 +51,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\PatronTitleListHelper.cs" />
+    <Compile Include="Methods\AuthenticatePatron.cs" />
+    <Compile Include="Methods\ApiKeyValidate.cs" />
+    <Compile Include="Methods\DatesClosedGet.cs" />
     <Compile Include="Methods\PatronAccountGet.cs" />
     <Compile Include="Methods\PatronTitleListAddTitle.cs" />
+    <Compile Include="Methods\RecordSetRecordsGet.cs" />
+    <Compile Include="Methods\RecordSetRecordsPut.cs" />
+    <Compile Include="Models\DatesClosedGetResult.cs" />
+    <Compile Include="Models\PAPIResult.cs" />
+    <Compile Include="Models\NotificationStatus.cs" />
+    <Compile Include="Models\PatronAuthenicationResult.cs" />
+    <Compile Include="Models\RecordSetRecordsGetResult.cs" />
     <Compile Include="Models\PatronAccountGetResult.cs" />
     <Compile Include="Models\PatronAccountPayResult.cs" />
     <Compile Include="Models\PatronCirculateBlocksResult.cs" />
@@ -95,7 +105,7 @@
     <Compile Include="Methods\PatronValidate.cs" />
     <Compile Include="Methods\Patron_GetBarcodeFromID.cs" />
     <Compile Include="Methods\Template.cs" />
-    <Compile Include="Models\Address.cs" />
+    <Compile Include="Models\PatronAddress.cs" />
     <Compile Include="Models\BibGetResult.cs" />
     <Compile Include="Models\BibHoldingsGetResult.cs" />
     <Compile Include="Models\BibSearchOptions.cs" />

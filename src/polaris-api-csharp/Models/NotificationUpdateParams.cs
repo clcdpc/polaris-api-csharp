@@ -55,9 +55,9 @@ namespace Clc.Polaris.Api.Models
 		public string Details { get; set; }
 
 		/// <summary>
-		/// The status of the call.
+		/// The status of the notification.
 		/// </summary>
-		public int CallStatus { get; set; }
+		public NotificationStatus NotificationStatus { get; set; }
 
 		/// <summary>
 		/// The type of notification it was.

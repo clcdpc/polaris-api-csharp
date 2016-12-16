@@ -18,8 +18,14 @@ namespace Clc.Polaris.Api
         /// <returns></returns>
         public PapiResponse<BibSearchResult> BibSearch(BibSearchOptions options)
         {
-            var url = $"/PAPIService/REST/public/v1/1300/100/{options.Branch}/search/bibs/{options.SearchType}/{options.Qualifier}?q={PolarisEncode(options.Term)}&sort={options.SortOption}&page={options.Page}&bibsperpage={options.PageSize}";
+            var url = $"/PAPIService/REST/public/v1/1033/100/{options.Branch}/search/bibs/{options.SearchType}/{options.Qualifier}?q={PolarisEncode(options.Term)}&sort={options.SortOption}&page={options.Page}&bibsperpage={options.PageSize}";
             if (!string.IsNullOrWhiteSpace(options.Limit)) url += $"&limit={options.Limit}";
+            return Execute<BibSearchResult>(HttpMethod.Get, url);
+        }
+
+        public PapiResponse<BibSearchResult> BibKeywordSearch(string term)
+        {
+            var url = $"/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/kw?q={PolarisEncode(term)}";
             return Execute<BibSearchResult>(HttpMethod.Get, url);
         }
     }

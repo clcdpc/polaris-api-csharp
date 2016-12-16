@@ -32,6 +32,31 @@ namespace Clc.Polaris.Api.Helpers
             if (options.EmailAddress.HasValue()) root.Add(new XElement("EmailAddress", options.EmailAddress));
             if (options.PhoneVoice1.HasValue()) root.Add(new XElement("PhoneVoice1", options.PhoneVoice1));
             if (options.NewPassword.HasValue()) root.Add(new XElement("Password", options.NewPassword));
+            if (options.AddressCheckDate != null) root.Add(new XElement("AddrCheckDate", options.AddressCheckDate.ToUniversalTime().ToString("R")));
+            if (options.ExpirationDate != null) root.Add(new XElement("ExpirationDate", options.ExpirationDate.ToUniversalTime().ToString("R")));
+
+
+            //var addressListElement = new XElement("PatronAddresses");
+
+            //foreach (var address in options.Addresses.Take(1))
+            //{
+            //    var addressElement = new XElement("Address");
+            //    if (address.AddressId > 0) addressElement.Add(new XElement("AddressID", address.AddressId));
+            //    addressElement.Add(new XElement("FreeTextLabel", address.FreeTextLabel));
+            //    addressElement.Add(new XElement("StreetOne", address.StreetOne));
+            //    addressElement.Add(new XElement("StreetTwo", address.StreetTwo));
+            //    addressElement.Add(new XElement("City", address.City));
+            //    addressElement.Add(new XElement("State", address.State));
+            //    addressElement.Add(new XElement("County", address.County));
+            //    if (address.PostalCode > 0) addressElement.Add(new XElement("PostalCode", address.PostalCode));
+            //    //addressElement.Add(new XElement("ZipPlusFour", address.ZipPlusFour));
+            //    addressElement.Add(new XElement("Country", address.Country));
+            //    if (address.CountryID > 0) addressElement.Add(new XElement("CountryID", address.CountryID));
+            //    addressElement.Add(new XElement("AddressTypeID", address.AddressTypeID));
+            //    addressListElement.Add(addressElement);
+            //}
+
+            //root.Add(addressListElement);
 
             doc.Add(root);
 

@@ -59,5 +59,8 @@
 		/// The address type of this address.
 		/// </summary>
 		public int AddressTypeID { get; set; }
-	}
+
+
+        public string ZipPlusFour { get; set; }
+    }
 }

@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api
         /// <summary>
         /// Get a list of organizations
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">Organization type</param>
         /// <returns></returns>
         public PapiResponse<OrganizationsGetResult> OrganizationsGet(OrganizationType type)
         {
