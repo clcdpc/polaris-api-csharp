@@ -11,9 +11,9 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        private PapiResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue)
+        private PapiResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue, int workstationId = 1, int userid = 1)
         {
-            var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/patron/{barcode}/blocks";
+            var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/patron/{barcode}/blocks?wsid={workstationId}&userid={userid}";
 
             if (blockType != BlockType.FreeText)
             {
