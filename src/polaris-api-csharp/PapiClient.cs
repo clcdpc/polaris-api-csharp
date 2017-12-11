@@ -74,12 +74,36 @@ namespace Clc.Polaris.Api
         {
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hostname">PAPI Server Hostname</param>
+        /// <param name="accessId">PAPI AccessID</param>
+        /// <param name="accessKey">PAPI AccessKey</param>
+        /// <param name="staffAccount">Staff account to be used for protected methods and overrides, optional</param>
         public PapiClient(string hostname, string accessId, string accessKey, PolarisUser staffAccount = null)
         {
             Hostname = hostname;
             AccessID = accessId;
             AccessKey = accessKey;
             StaffOverrideAccount = staffAccount;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hostname">PAPI Server Hostname</param>
+        /// <param name="accessId">PAPI AccessID</param>
+        /// <param name="accessKey">PAPI AccessKey</param>
+        /// <param name="staffDomain">Domain of staff account to be used for protected methods and overrides, optional</param>
+        /// <param name="staffUsername">Username of staff account to be used for protected methods and overrides, optional</param>
+        /// <param name="staffPassword">Password of staff account to be used for protected methods and overrides, optional</param>
+        public PapiClient(string hostname, string accessId, string accessKey, string staffDomain, string staffUsername, string staffPassword)
+        {
+            Hostname = hostname;
+            AccessID = accessId;
+            AccessKey = accessKey;
+            StaffOverrideAccount = new PolarisUser { Domain = staffDomain, Username = staffUsername, Password = staffPassword };
         }
 
         /// <summary>
@@ -115,6 +139,7 @@ namespace Clc.Polaris.Api
             catch (Exception ex)
             {
                 papiResponse.Exception = ex;
+                papiResponse.Response = new HttpResponse() { StatusCode = System.Net.HttpStatusCode.NotFound, ReasonPhrase = ex.InnerException != null ? ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message : ex.Message };
             }
             return papiResponse;
         }
