@@ -38,6 +38,11 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\polaris-api-csharp.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <AssemblyInfoFilePath>Properties\AssemblyInfo.cs</AssemblyInfoFilePath>
+    <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
+    <UpdateAssemblyFileVersion>False</UpdateAssemblyFileVersion>
+    <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
+    <AssemblyVersionSettings>None.None.IncrementOnDemand.DeltaDayStamp</AssemblyVersionSettings>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
