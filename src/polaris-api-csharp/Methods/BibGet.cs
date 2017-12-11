@@ -15,9 +15,9 @@ namespace Clc.Polaris.Api
         /// </summary>
         /// <param name="bibId"></param>
         /// <returns></returns>
-        public PapiResponse<BibGetResult> BibGet(int bibId)
+        public PapiResponse<BibGetResult> BibGet(int bibId, int organizationId = 1)
         {
-            var url = $"/PAPIService/REST/public/v1/1033/100/1/bib/{bibId}";
+            var url = $"/PAPIService/REST/public/v1/1033/100/{organizationId}/bib/{bibId}";
             return Execute<BibGetResult>(HttpMethod.Get, url);
         }
     }
