@@ -46,25 +46,43 @@ namespace Clc.Polaris.Api.Models
 		/// 7 - EDI
 		/// 8- TXT Messaging
 		/// </summary>
-		public int? DeliveryOption { get; set; }
+		public int? DeliveryOptionID { get; set; }
 
-		/// <summary>
-		/// The patron's email address.
-		/// </summary>
-		public string EmailAddress { get; set; }
+        /// <summary>
+        /// The patron's email address.
+        /// </summary>
+        public string EmailAddress { get; set; }
 
-		/// <summary>
-		/// The patron's phone number.
+        /// <summary>
+		/// The patron's alternate email address.
 		/// </summary>
-		public string PhoneVoice1 { get; set; }
+		public string AltEmailAddress { get; set; }
+
+        /// <summary>
+        /// The patron's phone number.
+        /// </summary>
+        public string PhoneVoice1 { get; set; }
+        public string PhoneVoice2 { get; set; }
+        public string PhoneVoice3 { get; set; }
+
+        public int? Phone1CarrierID { get; set; }
+        public int? Phone2CarrierID { get; set; }
+        public int? Phone3CarrierID { get; set; }
+
+        public int? TxtPhoneNumber { get; set; }
+
+        /// <summary>
+        /// Enable 'Additional Txt notice'
+        /// </summary>
+        public bool? EnableSMS { get; set; }
 
         /// <summary>
         /// The patron's new Password/PIN
         /// </summary>
         public string NewPassword { get; set; }
 
-        public DateTime AddressCheckDate { get; set; }
-        public DateTime ExpirationDate { get; set; }
+        public DateTime? AddressCheckDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
 
 
         public List<PatronAddress> Addresses { get; set; } = new List<PatronAddress>();

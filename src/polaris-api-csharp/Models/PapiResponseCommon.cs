@@ -21,5 +21,10 @@ namespace Clc.Polaris.Api.Models
         /// Error message, if any
         /// </summary>
         public string ErrorMessage { get; set; }
+
+        public override string ToString()
+        {
+            return $"{PAPIErrorCode} - {ErrorMessage}";
+        }
     }
 }

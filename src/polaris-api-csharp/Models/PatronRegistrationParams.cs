@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// ZIP code
         /// </summary>
-		public int? PostalCode { get; set; }
+		public string PostalCode { get; set; }
 
         /// <summary>
         /// ZIP+4
@@ -208,7 +208,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// PatronCodeID
         /// </summary>
-        public int PatronCode { get; set; }
+        public int? PatronCode { get; set; }
 
         /// <summary>
         /// Date the account with expire

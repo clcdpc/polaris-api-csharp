@@ -40,7 +40,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The date this patron's registration expires.
 		/// </summary>
-		public DateTime ExpirationDate { get; set; }
+		public DateTime? ExpirationDate { get; set; }
 
 		/// <summary>
 		/// Indicates if the override was used in place of the patron's password.

@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// A list of items that could not be renewed.
 		/// </summary>
-		public List<ItemBlockRow> BlockRows { get; set; }
+		public List<ItemRenewBlockRow> BlockRows { get; set; }
 
 		/// <summary>
 		/// A list of successfully renewed items.
@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api.Models
 	/// <summary>
 	/// An item that could not be renewed by the Polaris API.
 	/// </summary>
-	public class ItemBlockRow
+	public class ItemRenewBlockRow
 	{
 		/// <summary>
 		/// A PAPI code to tell which 'process' caused the error

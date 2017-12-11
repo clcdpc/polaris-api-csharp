@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
     /// Protected token used to authenticate protected methods and public method overrides
     /// </summary>
     [XmlRoot(ElementName = "AuthenticationResult")]
-    public class ProtectedToken
+    public class ProtectedToken : PapiResponseCommon
     {
         /// <summary>
         /// Access token
@@ -27,6 +27,6 @@ namespace Clc.Polaris.Api.Models
         /// Token expiration date
         /// </summary>
         [XmlElement(ElementName = "AuthExpDate")]
-        public DateTime ExpirationDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
     }
 }

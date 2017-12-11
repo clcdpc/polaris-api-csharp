@@ -12,7 +12,13 @@ namespace Clc.Polaris.Api.Models
 		/// Patron information for the supplied patron.
 		/// </summary>
 		public PatronData PatronBasicData { get; set; }
-	}
+
+        public override string ToString()
+        {
+            if (PatronBasicData?.PatronID == 0) return base.ToString();
+            return $"{PatronBasicData.PatronID} - {PatronBasicData.Barcode} - {PatronBasicData.NameFirst} {PatronBasicData.NameLast}";
+        }
+    }
 
 	/// <summary>
 	/// Information about a patron.

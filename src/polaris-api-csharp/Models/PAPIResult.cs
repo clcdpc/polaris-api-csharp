@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api.Models
 {
-    public class PAPIResult
+    public class PAPIResult : PapiResponseCommon
     {
-        public int PAPIErrorCode { get; set; }
-        public string ErrorMessage { get; set; }
     }
 }

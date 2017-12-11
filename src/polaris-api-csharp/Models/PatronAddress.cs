@@ -43,7 +43,7 @@
 		/// <summary>
 		/// The ZIP code of the address.
 		/// </summary>
-		public int PostalCode { get; set; }
+		public string PostalCode { get; set; }
 
 		/// <summary>
 		/// The country of the address.

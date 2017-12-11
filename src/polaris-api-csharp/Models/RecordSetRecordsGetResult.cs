@@ -10,6 +10,8 @@ namespace Clc.Polaris.Api.Models
     {
         public List<RecordSetRecordsGetRow> RecordSetRecordsGetRows { get; set; }
 
+        public IEnumerable<int> Ids { get { return RecordSetRecordsGetRows.Select(r => r.PatronID); } }
+
         public override string ToString()
         {
             return string.Join(",", RecordSetRecordsGetRows.OrderBy(r => r.PatronID).Select(r => r.PatronID.ToString()));
@@ -25,5 +27,4 @@ namespace Clc.Polaris.Api.Models
             return PatronID.ToString();
         }
     }
-
 }
