@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api
@@ -29,7 +30,11 @@ namespace Clc.Polaris.Api
                 xmlserializer.Serialize(writer, value);
                 return stringWriter.ToString();
             }
+        }
 
+        public static void AddIfNotNull(this XElement root, string name, object val)
+        {
+            if (val != null) root.Add(new XElement(name, val));
         }
     }
 }
