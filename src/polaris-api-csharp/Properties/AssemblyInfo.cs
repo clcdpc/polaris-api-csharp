@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Polaris API Library")]
 [assembly: AssemblyDescription("Polaris API helper library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Central Library Consortium")]
+[assembly: AssemblyCompany("Central Library Consortium, Michael Fields")]
 [assembly: AssemblyProduct("Polaris API Library")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,4 +35,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("2.0.*")]
+//[assembly: AssemblyVersion("2.0.10")]
+[assembly: AssemblyInformationalVersion("2.1.1-beta")]
