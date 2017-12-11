@@ -25,7 +25,7 @@ namespace Clc.Polaris.Api
             string xml = HoldRequestHelper.BuildHoldRequestCreateXml(holdParams);
 
             var url = "/PAPIService/REST/public/v1/1033/100/1/holdrequest";
-            return Execute<HoldRequestResult>(HttpMethod.Post, url, password);
+            return Execute<HoldRequestResult>(HttpMethod.Post, url, password, xml);
 		}
 
 		/// <summary>
@@ -43,7 +43,7 @@ namespace Clc.Polaris.Api
             string xml = HoldRequestHelper.BuildHoldRequestCreateXml(holdParams);
 
             var url = "/PAPIService/REST/public/v1/1033/100/1/holdrequest";
-            return OverrideExecute<HoldRequestResult>(HttpMethod.Post, url);
+            return OverrideExecute<HoldRequestResult>(HttpMethod.Post, url, xml);
         }
 	}
 }
