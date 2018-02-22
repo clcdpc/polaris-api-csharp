@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Central Library Consortium, Michael Fields")]
 [assembly: AssemblyProduct("Polaris API Library")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 //[assembly: AssemblyVersion("2.0.10")]
-[assembly: AssemblyInformationalVersion("2.1.1-beta")]
+[assembly: AssemblyInformationalVersion("2.1.3-beta")]
