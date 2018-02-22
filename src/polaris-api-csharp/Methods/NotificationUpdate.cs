@@ -32,6 +32,7 @@ namespace Clc.Polaris.Api
 				             new XElement("LogonBranchID", options.BranchId),
 				             new XElement("LogonUserID", options.UserId),
 				             new XElement("LogonWorkstationID", options.WorkstationId),
+                             new XElement("ReportingOrgID", options.ReportingOrgID),
 				             new XElement("NotificationStatusID", (int)options.NotificationStatus),
 				             new XElement("NotificationDeliveryDate", options.DeliveryDate.ToString("yyyy-MM-dd")),
 				             new XElement("DeliveryOptionID", options.DeliveryOptionId),
