@@ -13,8 +13,8 @@ namespace Clc.Polaris.Api
         public PapiResponse<PatronAuthenticationResult> AuthenticatePatron(string barcode, string password)
         {
             var url = "/PAPIService/REST/public/v1/1033/100/1/authenticator/patron";
-            var body = $"<?xml version=\"1.0\"?><PatronAuthenticationData><Barcode>{barcode}</Barcode><Password>{password}</Password></PatronAuthenticationData>";
-            return Execute<PatronAuthenticationResult>(HttpMethod.Post, url, null, body);
+            var body = $"<PatronAuthenticationData><Barcode>{barcode}</Barcode><Password>{password}</Password></PatronAuthenticationData>";
+            return Execute<PatronAuthenticationResult>(HttpMethod.Post, url, body: body);
         }
     }
 }
