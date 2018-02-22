@@ -35,12 +35,16 @@ namespace Clc.Polaris.Api
         /// </summary>
         public string Hostname { get; set; }
 
+        public static bool UseNewPatronAuthentication = false;
+
         /// <summary>
         /// The staff credentials used for protected methods and public method overrides
         /// </summary>
         public PolarisUser StaffOverrideAccount { get; set; }
 
         private static ProtectedToken _token;
+
+        private static List<PatronAuthenticationToken> PatronAuthenticationTokens { get; } = new List<PatronAuthenticationToken>();
 
         /// <summary>
         /// Used for protected methods and public method overrides
@@ -83,7 +87,7 @@ namespace Clc.Polaris.Api
         /// <param name="accessId">PAPI AccessID</param>
         /// <param name="accessKey">PAPI AccessKey</param>
         /// <param name="staffAccount">Staff account to be used for protected methods and overrides, optional</param>
-        public PapiClient(string hostname, string accessId, string accessKey, PolarisUser staffAccount = null)
+        public PapiClient(string hostname, string accessId, string accessKey, PolarisUser staffAccount = null) : base()
         {
             Hostname = hostname;
             AccessID = accessId;
@@ -100,7 +104,7 @@ namespace Clc.Polaris.Api
         /// <param name="staffDomain">Domain of staff account to be used for protected methods and overrides, optional</param>
         /// <param name="staffUsername">Username of staff account to be used for protected methods and overrides, optional</param>
         /// <param name="staffPassword">Password of staff account to be used for protected methods and overrides, optional</param>
-        public PapiClient(string hostname, string accessId, string accessKey, string staffDomain, string staffUsername, string staffPassword)
+        public PapiClient(string hostname, string accessId, string accessKey, string staffDomain, string staffUsername, string staffPassword) : base()
         {
             Hostname = hostname;
             AccessID = accessId;
@@ -114,12 +118,18 @@ namespace Clc.Polaris.Api
         /// <typeparam name="T">Response data type</typeparam>
         /// <param name="method">HTTP method of the PAPI method</param>
         /// <param name="url">The URL of the method, beginning with /PAPIService</param>
+        /// <param name="barcode">The patron's barcode, for patron requests</param>
         /// <param name="pin">The patron's pin for public or protected token Access Secret for protected methods</param>
         /// <param name="body">The XML request body, if any</param>
         /// <param name="isOverride">Execute as an override request</param>
         /// <returns>A PapiResponse object with a deserialized data object of type T</returns>
-        public PapiResponse<T> Execute<T>(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false)
+        public PapiResponse<T> Execute<T>(HttpMethod method, string url, string pin = null, string body = null, bool isOverride = false, string barcode = null)
         {
+            if (barcode != null)
+            {
+                pin = HandlePatronAuth(barcode, pin);
+            }
+
             var request = CreateRequest(method, url, pin, body, isOverride);
             var papiResponse = new PapiResponse<T>(request);
             try
@@ -146,6 +156,21 @@ namespace Clc.Polaris.Api
             return papiResponse;
         }
 
+        private string HandlePatronAuth(string barcode, string pin)
+        {            
+            var token = PatronAuthenticationTokens.SingleOrDefault(t => string.Equals(t.Barcode, barcode, StringComparison.OrdinalIgnoreCase));            
+
+            if (token == null || token.Expiration <= DateTime.Now)
+            {
+                var newToken = AuthenticatePatron(barcode, pin);
+                token = new PatronAuthenticationToken { Barcode = barcode, Token = newToken.Data.AccessToken, Expiration = DateTime.Now.AddHours(12) };
+                PatronAuthenticationTokens.RemoveAll(t => t.Barcode == barcode);
+                PatronAuthenticationTokens.Add(token);
+            }
+
+            return token.Token;
+        }
+
         /// <summary>
         /// Perform an override PAPI request
         /// </summary>
@@ -156,7 +181,7 @@ namespace Clc.Polaris.Api
         /// <returns>A PapiResponse object with a deserialized data object of type T</returns>
         public PapiResponse<T> OverrideExecute<T>(HttpMethod method, string url, string body = null)
         {
-            return Execute<T>(method, url, null, body, true);
+            return Execute<T>(method, url, null, body, isOverride: true);
         }
 
         /// <summary>
