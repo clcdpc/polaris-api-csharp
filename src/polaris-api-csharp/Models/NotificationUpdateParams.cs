@@ -63,5 +63,7 @@ namespace Clc.Polaris.Api.Models
 		/// The type of notification it was.
 		/// </summary>
 		public int NotificationTypeId { get; set; }
+
+        public int ReportingOrgID { get; set; } = 1;
 	}
 }
