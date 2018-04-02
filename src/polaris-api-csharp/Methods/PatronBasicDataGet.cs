@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
         public PapiResponse<PatronBasicDataGetResult> PatronBasicDataGet(string barcode, string pin, bool addresses = false)
         {
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/basicdata?addresses={Convert.ToInt32(addresses)}";
-            return Execute<PatronBasicDataGetResult>(HttpMethod.Get, url, barcode, pin);
+            return Execute<PatronBasicDataGetResult>(HttpMethod.Get, url, pin, barcode: barcode);
         }
 
         /// <summary>
