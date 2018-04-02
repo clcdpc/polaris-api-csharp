@@ -67,6 +67,7 @@
     <Compile Include="Models\PAPIResult.cs" />
     <Compile Include="Models\NotificationStatus.cs" />
     <Compile Include="Models\PatronAuthenicationResult.cs" />
+    <Compile Include="Models\PatronAuthenticationToken.cs" />
     <Compile Include="Models\RecordSetRecordsGetResult.cs" />
     <Compile Include="Models\PatronAccountGetResult.cs" />
     <Compile Include="Models\PatronAccountPayResult.cs" />
