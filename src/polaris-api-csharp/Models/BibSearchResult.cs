@@ -207,5 +207,10 @@ namespace Clc.Polaris.Api.Models
 		/// Vernacular series of this record.
 		/// </summary>
 		public string VernacularSeries { get; set; }
-	}
+
+        public override string ToString()
+        {
+            return $"{ControlNumber} - {Title}";
+        }
+    }
 }
