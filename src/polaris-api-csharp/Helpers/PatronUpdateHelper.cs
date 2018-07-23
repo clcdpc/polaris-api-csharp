@@ -40,6 +40,7 @@ namespace Clc.Polaris.Api.Helpers
             root.AddIfNotNull("Phone1CarrierID", options.Phone1CarrierID);
             root.AddIfNotNull("Phone2CarrierID", options.Phone2CarrierID);
             root.AddIfNotNull("Phone3CarrierID", options.Phone3CarrierID);
+            if (options.EnableSMS.HasValue) root.Add(new XElement("EnableSMS", options.EnableSMS.Value ? 1 : 0));
             if (options.AddressCheckDate.HasValue) root.Add(new XElement("AddrCheckDate", XmlConvert.ToString(options.AddressCheckDate.Value, XmlDateTimeSerializationMode.Utc)));
             if (options.ExpirationDate.HasValue) root.Add(new XElement("ExpirationDate", XmlConvert.ToString(options.ExpirationDate.Value, XmlDateTimeSerializationMode.Utc)));
 
