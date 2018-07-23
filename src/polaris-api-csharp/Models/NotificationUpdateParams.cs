@@ -49,10 +49,12 @@ namespace Clc.Polaris.Api.Models
 		/// </summary>
 		public int ItemRecordId { get; set; }
 
-		/// <summary>
-		/// Any additional data/notes.
-		/// </summary>
-		public string Details { get; set; }
+        public string ItemBarcode { get; set; }
+
+        /// <summary>
+        /// Any additional data/notes.
+        /// </summary>
+        public string Details { get; set; }
 
 		/// <summary>
 		/// The status of the notification.
