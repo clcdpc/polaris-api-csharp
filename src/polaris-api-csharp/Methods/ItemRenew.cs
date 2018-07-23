@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             if (options == null) options = new ItemRenewOptions();
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{patronBarcode}/itemsout/{itemId}";
             var xml = ItemRenewHelper.BuildXml(options);
-            return Execute<ItemsOutActionResult>(HttpMethod.Put, url, password, xml);
+            return Execute<ItemsOutActionResult>(HttpMethod.Put, url, pin: password, body: xml);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Clc.Polaris.Api
             if (options == null) options = new ItemRenewOptions();
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{patronBarcode}/itemsout/{itemId}";
             var xml = ItemRenewHelper.BuildXml(options);
-            return OverrideExecute<ItemsOutActionResult>(HttpMethod.Put, url, xml);
+            return OverrideExecute<ItemsOutActionResult>(HttpMethod.Put, url, body: xml);
         }
     }
 }

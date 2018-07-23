@@ -1,6 +1,4 @@
-﻿
-
-using Clc.Polaris.Api.Models;
+﻿using Clc.Polaris.Api.Models;
 using System.Net.Http;
 
 namespace Clc.Polaris.Api
@@ -20,7 +18,7 @@ namespace Clc.Polaris.Api
 		public PapiResponse<HoldRequestCancelResult> HoldRequestCancel(string barcode, string password, int requestId, int workstationId = 1, int userId = 1)
         {
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/holdrequests/{requestId}/cancelled?wsid={workstationId}&userid={userId}";
-			return Execute<HoldRequestCancelResult>(HttpMethod.Put, url, password);
+			return Execute<HoldRequestCancelResult>(HttpMethod.Put, url, pin: password);
 		}
 
 		/// <summary>

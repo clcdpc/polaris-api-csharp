@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
         public PapiResponse<PatronItemsOutGetResult> PatronItemsOutGet(string barcode, string password, PatronItemsOutGetStatus status)
         {
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/itemsout/{status}";
-            return Execute<PatronItemsOutGetResult>(HttpMethod.Get, url, password);
+            return Execute<PatronItemsOutGetResult>(HttpMethod.Get, url, pin: password);
         }
 
         /// <summary>

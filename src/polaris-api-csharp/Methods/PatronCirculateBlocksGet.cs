@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
 		public PapiResponse<PatronCirculateBlocksResult> PatronCirculateBlocksGet(string barcode, string password)
 		{
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/circulationblocks";
-            return Execute<PatronCirculateBlocksResult>(HttpMethod.Get, url, password);
+            return Execute<PatronCirculateBlocksResult>(HttpMethod.Get, url, pin: password);
         }
 
         /// <summary>

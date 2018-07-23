@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
 		{
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}";
             var xml = PatronUpdateHelper.BuildXml(updateParams);
-            return Execute<PatronUpdateResult>(HttpMethod.Put, url, password, xml);
+            return Execute<PatronUpdateResult>(HttpMethod.Put, url, pin: password, body: xml);
 		}
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}";
             var xml = PatronUpdateHelper.BuildXml(updateParams);
-            return OverrideExecute<PatronUpdateResult>(HttpMethod.Put, url, xml);
+            return OverrideExecute<PatronUpdateResult>(HttpMethod.Put, url, body: xml);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
         public PapiResponse<PatronHoldRequestsGetResult> PatronHoldRequestsGet(string barcode, string password, HoldStatus status)
         {
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/holdrequests/{status}";
-            return Execute<PatronHoldRequestsGetResult>(HttpMethod.Get, url, password);
+            return Execute<PatronHoldRequestsGetResult>(HttpMethod.Get, url, pin: password);
         }
 
         /// <summary>

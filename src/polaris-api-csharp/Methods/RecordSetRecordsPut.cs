@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/recordsets/{recordSetId}?action={action.ToString()}&userid={userId}&wsid={workstationId}";
             var body = $"<?xml version=\"1.0\"?><ModifyRecordSetContent><Records>{string.Join(",", records)}</Records></ModifyRecordSetContent>";
-            return Execute<PAPIResult>(HttpMethod.Put, url, Token.AccessSecret, body);
+            return Execute<PAPIResult>(HttpMethod.Put, url, pin: Token.AccessSecret, body: body);
         }
 
         public PapiResponse<PAPIResult> RecordSetRecordsAdd(int recordSetId, int recordId, int userId = 1, int workstationId = 1)

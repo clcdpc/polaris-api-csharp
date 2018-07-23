@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
         public PapiResponse<PatronAccountGetResult> PatronAccountGet(string barcode, string pin)
         {
             string url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/account/outstanding";
-            return Execute<PatronAccountGetResult>(HttpMethod.Get, url, pin);
+            return Execute<PatronAccountGetResult>(HttpMethod.Get, url, pin: pin);
         }
 
         /// <summary>

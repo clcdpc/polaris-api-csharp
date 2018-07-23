@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api
 		public PapiResponse<PatronValidateResult> PatronValidate(string barcode, string password)
 		{
 			var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}";
-			return Execute<PatronValidateResult>(HttpMethod.Get, url, password);
+			return Execute<PatronValidateResult>(HttpMethod.Get, url, pin: password);
 		}
 
         /// <summary>

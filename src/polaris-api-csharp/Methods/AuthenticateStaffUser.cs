@@ -31,7 +31,7 @@ namespace Clc.Polaris.Api
                 );
 
             var xml = doc.ToString();
-            var result = Execute<ProtectedToken>(HttpMethod.Post, url, null, body: xml);
+            var result = Execute<ProtectedToken>(HttpMethod.Post, url, pin: null, body: xml);
             return result;
         }
     }

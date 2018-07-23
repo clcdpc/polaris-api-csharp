@@ -34,7 +34,7 @@ namespace Clc.Polaris.Api
                 )
             );
 
-            var response = Execute<PatronAccountPayResult>(HttpMethod.Put, url, Token.AccessSecret, doc.ToString());
+            var response = Execute<PatronAccountPayResult>(HttpMethod.Put, url, pin: Token.AccessSecret, body: doc.ToString());
             return response;
         }
     }

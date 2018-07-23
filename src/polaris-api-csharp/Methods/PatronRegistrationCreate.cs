@@ -25,7 +25,7 @@ namespace Clc.Polaris.Api
 
             var xml = PatronRegistrationHelper.BuildXml(_params);
             var url = "/PAPIService/REST/public/v1/1033/100/1/patron";
-            return Execute<PatronRegistrationCreateResult>(HttpMethod.Post, url, null, xml);
+            return Execute<PatronRegistrationCreateResult>(HttpMethod.Post, url, pin: null, body: xml);
         }
 	}
 }

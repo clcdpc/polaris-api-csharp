@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
 		public PapiResponse<PatronSearchResult> PatronSearch(string query, int page = 1, int pageSize = 10, PatronSortKeys sortBy = PatronSortKeys.PATN)
 		{
             var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/search/patrons/Boolean?q={PolarisEncode(query)}&patronsperpage={pageSize}&page={page}&sort={sortBy}";
-			return Execute<PatronSearchResult>(HttpMethod.Get, url, Token.AccessSecret);			
+			return Execute<PatronSearchResult>(HttpMethod.Get, url, pin: Token.AccessSecret);			
 		}
 	}
 }

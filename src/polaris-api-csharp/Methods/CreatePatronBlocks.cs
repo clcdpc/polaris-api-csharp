@@ -37,7 +37,7 @@ namespace Clc.Polaris.Api
                             )
                         );
 
-            return Execute<CreatePatronBlocksResult>(HttpMethod.Post, url, Token.AccessSecret, doc.ToString());            
+            return Execute<CreatePatronBlocksResult>(HttpMethod.Post, url, pin: Token.AccessSecret, body: doc.ToString());            
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
             //public/{version}/{lang-ID}/{app-ID}/{org-ID}/patron/{patron_barcode}/patrontitlelistaddtitle
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/patrontitlelistaddtitle/";
             var xml = PatronTitleListHelper.BuildAddTitleXml(recordStoreId, recordName, localControlNumber);
-            var response = Execute<PatronTitleListAddTitleResult>(HttpMethod.Post, url, password, xml);
+            var response = Execute<PatronTitleListAddTitleResult>(HttpMethod.Post, url, pin: password, body: xml);
             return response;
         }
     }

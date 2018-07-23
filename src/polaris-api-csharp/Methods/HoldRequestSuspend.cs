@@ -23,7 +23,7 @@ namespace Clc.Polaris.Api
         {
             var xml = HoldRequestHelper.BuildActivationXml(userId, activationDate);
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/holdrequests/{requestId}/inactive";
-            return Execute<HoldRequestActivationResult>(HttpMethod.Put, url, password, xml);
+            return Execute<HoldRequestActivationResult>(HttpMethod.Put, url, pin: password, body: xml);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Clc.Polaris.Api
         {
             var xml = HoldRequestHelper.BuildActivationXml(userId, activationDate);
             var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}/holdrequests/{requestId}/inactive";
-            return OverrideExecute<HoldRequestActivationResult>(HttpMethod.Put, url, xml);
+            return OverrideExecute<HoldRequestActivationResult>(HttpMethod.Put, url, body: xml);
         }
     }
 }

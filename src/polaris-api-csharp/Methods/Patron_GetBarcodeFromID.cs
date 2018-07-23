@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api
 		public PapiResponse<GetBarcodeAndPatronIDResult> Patron_GetBarcodeFromID(int patronId)
 		{
             var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/patron/barcode?patronid={patronId}";
-            return Execute<GetBarcodeAndPatronIDResult>(HttpMethod.Get, url, Token.AccessSecret);
+            return Execute<GetBarcodeAndPatronIDResult>(HttpMethod.Get, url, pin: Token.AccessSecret);
 		}
 	}
 }

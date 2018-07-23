@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
         public PapiResponse<StringResult> SA_GetValueByOrg(int orgId, string attribute)
         {
             var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/organization/{orgId}/sysadmin/attribute/{attribute}";
-            return Execute<StringResult>(HttpMethod.Get, url, Token.AccessSecret);
+            return Execute<StringResult>(HttpMethod.Get, url, pin: Token.AccessSecret);
         }
     }
 }
