@@ -23,10 +23,16 @@ namespace Clc.Polaris.Api
             return Execute<BibSearchResult>(HttpMethod.Get, url);
         }
 
-        public PapiResponse<BibSearchResult> BibKeywordSearch(string term)
+        public PapiResponse<BibSearchResult> BibKeywordSearch(string term, int branchId = 1, int pageSize = 10)
         {
-            var url = $"/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/kw?q={PolarisEncode(term)}";
-            return Execute<BibSearchResult>(HttpMethod.Get, url);
+            var options = new BibSearchOptions
+            {
+                Branch = branchId,
+                PageSize = pageSize,
+                Term = term
+            };
+
+            return BibSearch(options);
         }
     }
 }
