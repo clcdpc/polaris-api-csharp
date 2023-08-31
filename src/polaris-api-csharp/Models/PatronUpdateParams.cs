@@ -23,7 +23,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Transaction workstation ID
         /// </summary>
-        public int WorkstationId { get; set; } = 1;
+        public int LogonWorkstationId { get; set; } = 1;
 
         /// <summary>
         /// Enable or Disable the reading list feature for the patron.
@@ -84,7 +84,12 @@ namespace Clc.Polaris.Api.Models
         public DateTime? AddressCheckDate { get; set; }
         public DateTime? ExpirationDate { get; set; }
 
+        /// <summary>
+        /// 0 = None | 2 = Email | 8 = SMS
+        /// </summary>
+        public int? EReceiptOptionID { get; set; }
 
-        public List<PatronAddress> Addresses { get; set; } = new List<PatronAddress>();
+
+        public List<PatronAddress> PatronAddresses { get; set; }
 	}
 }

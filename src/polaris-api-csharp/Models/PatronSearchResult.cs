@@ -50,5 +50,7 @@ namespace Clc.Polaris.Api.Models
         /// Patron first and last name
         /// </summary>
 		public string PatronFirstLastName { get; set; }
-	}
+
+        public override string ToString() => $"{PatronID} | {Barcode} | {OrganizationID} | {PatronFirstLastName}";
+    }
 }

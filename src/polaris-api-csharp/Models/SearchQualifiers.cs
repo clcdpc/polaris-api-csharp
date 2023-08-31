@@ -5,6 +5,7 @@
 	/// </summary>
 	public enum SearchQualifiers
 	{
+		BOOLEAN,
 		/// <summary>
 		/// Keyword
 		/// </summary>

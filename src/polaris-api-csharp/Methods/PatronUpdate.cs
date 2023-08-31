@@ -1,6 +1,8 @@
-﻿using Clc.Polaris.Api.Helpers;
+﻿
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -10,30 +12,14 @@ using System.Xml.Linq;
 namespace Clc.Polaris.Api
 {
 	public partial class PapiClient
-	{
-        /// <summary>
-        /// Updates information in the patron's record.
-        /// </summary>
-        /// <param name="barcode">The patron's barcode.</param>
-        /// <param name="password">The patron's password.</param>
-        /// <param name="updateParams">Contains the values to update the patron's record with</param>
-        public PapiResponse<PatronUpdateResult> PatronUpdate(string barcode, string password, PatronUpdateParams updateParams)
-		{
-            var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}";
-            var xml = PatronUpdateHelper.BuildXml(updateParams);
-            return Execute<PatronUpdateResult>(HttpMethod.Put, url, pin: password, body: xml);
-		}
+    {
+        
 
-        /// <summary>
-        /// Updates information in the patron's record
-        /// </summary>
-        /// <param name="barcode">The patron's barcode.</param>
-        /// <param name="updateParams">Contains the values to update the patron's record with</param>
-        public PapiResponse<PatronUpdateResult> PatronUpdateOverride(string barcode, PatronUpdateParams updateParams)
+        public IRestResponse<PatronUpdateResult> PatronUpdate(string barcode, PatronUpdateParams updateParams, string password = "", bool ignoresa = true)
         {
-            var url = $"/PAPIService/REST/public/v1/1033/100/1/patron/{barcode}";
-            var xml = PatronUpdateHelper.BuildXml(updateParams);
-            return OverrideExecute<PatronUpdateResult>(HttpMethod.Put, url, body: xml);
+            var url = $"/public/v1/1033/100/1/patron/{barcode}?ignoresa={ignoresa}";
+            var request = new PapiRestRequest(HttpMethod.Put, url) { Password = password, Body = updateParams };
+            return Execute<PatronUpdateResult>(request);
         }
     }
 }

@@ -113,5 +113,10 @@ namespace Clc.Polaris.Api.Models
 		/// Is a borrow by mail request.
 		/// </summary>
 		public bool IsBorrowByMail { get; set; }
-	}
+
+        public override string ToString()
+        {
+			return $"{HoldRequestID} - {StatusDescription} - {Title}";
+        }
+    }
 }

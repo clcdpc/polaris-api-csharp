@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clc.Polaris.Api.Models.Models
+namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Options available when performing a bibliographic record search

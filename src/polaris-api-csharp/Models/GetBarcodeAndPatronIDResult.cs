@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -11,7 +12,14 @@ namespace Clc.Polaris.Api.Models
 		/// A collection of rows containing a PatronID and barcode.
 		/// </summary>
 		public List<BarcodeAndPatronIDRow> BarcodeAndPatronIDRows { get; set; }
-	}
+
+        public string Barcode => BarcodeAndPatronIDRows.FirstOrDefault()?.Barcode;
+
+        public override string ToString()
+        {
+            return Barcode;
+        }
+    }
 
 	/// <summary>
 	/// A simple row that contains a PatronID and barcode.
@@ -27,5 +35,10 @@ namespace Clc.Polaris.Api.Models
 		/// The patron's barcode
 		/// </summary>
 		public string Barcode { get; set; }
+
+		public override string ToString()
+		{
+			return Barcode;
+		}
 	}
 }

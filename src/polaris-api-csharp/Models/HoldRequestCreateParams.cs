@@ -8,17 +8,6 @@ namespace Clc.Polaris.Api.Models
 	public class HoldRequestCreateParams
 	{
 		/// <summary>
-		/// Initializes an object with default values for WorkstationID, UserID, RequestingOrgID, and ActivationDate
-		/// </summary>
-		public HoldRequestCreateParams()
-		{
-			WorkstationID = 1;
-			UserID = 1;
-			RequestingOrgID = 1;
-			ActivationDate = DateTime.Today;
-		}
-
-		/// <summary>
 		/// The patron's PatronID.
 		/// </summary>
 		public int PatronID { get; set; }
@@ -46,7 +35,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// OrganizationID of the hold pickup location.
 		/// </summary>
-		public int PickupOrgID { get; set; }
+		public int PickupOrgID { get; set; } = 0;
 
 		/// <summary>
 		/// If the request is a Borrow by Mail request.
@@ -61,26 +50,39 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The date this hold request will become active.
 		/// </summary>
-		public DateTime ActivationDate { get; set; }
+		public DateTime? ActivationDate { get; set; }
 
 		/// <summary>
 		/// ID of the workstation where this hold request was created.
 		/// </summary>
-		public int WorkstationID { get; set; }
+		public int WorkstationID { get; set; } = 1;
 
 		/// <summary>
 		/// ID of the Polaris user that created this request.
 		/// </summary>
-		public int UserID { get; set; }
+		public int UserID { get; set; } = 1;
 
 		/// <summary>
 		/// ID of branch where this hold request was created.
 		/// </summary>
-		public int RequestingOrgID { get; set; }
+		public int RequestingOrgID { get; set; } = 1;
 
 		/// <summary>
 		/// GUID of search target. ONLY USED IF NOT LOCAL.
 		/// </summary>
 		public Guid? TargetGUID { get; set; }
+
+		public HoldRequestCreateParams()
+		{
+
+		}
+
+		public HoldRequestCreateParams(int patronId, int bibId, int pickupBranchId, int requestingOrgId)
+		{
+			PatronID = patronId;
+			BibID = bibId;
+			PickupOrgID = pickupBranchId;
+			RequestingOrgID = requestingOrgId;
+		}
 	}
 }

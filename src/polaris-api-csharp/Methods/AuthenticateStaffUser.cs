@@ -1,38 +1,26 @@
-﻿using Clc.Polaris.Api.Models;
+﻿using Clc.Rest;
+using Clc.Polaris.Api.Models;
+
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        /// <summary>
-        /// Create a protected token to use to call protected methods
-        /// </summary>
-        /// <param name="domain"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        public PapiResponse<ProtectedToken> AuthenticateStaffUser(string domain, string username, string password)
+        public IRestResponse<ProtectedToken> AuthenticateStaffUser(PolarisUser staffUser)
         {
-            var url = "/PAPIService/REST/protected/v1/1033/100/1/authenticator/staff";
-
-            var doc = new XDocument(
-                new XElement("AuthenticationData",
-                    new XElement("Domain", domain),
-                    new XElement("Username", username),
-                    new XElement("Password", password)
-                    )
-                );
-
-            var xml = doc.ToString();
-            var result = Execute<ProtectedToken>(HttpMethod.Post, url, pin: null, body: xml);
-            return result;
+            var url = "/protected/v1/1033/100/1/authenticator/staff";
+            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = staffUser };
+            return Post<ProtectedToken>(url, body: staffUser);
+            //return Execute<ProtectedToken>(request);
         }
+
+        
     }
 }

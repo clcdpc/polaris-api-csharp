@@ -15,20 +15,7 @@ namespace Clc.Polaris.Api.Models
         /// Container for bib holding rows
         /// </summary>
         [XmlElement(ElementName = "BibHoldingsGetRows")]
-        public BibHoldingsGetRows BibHoldingsGetRows { get; set; }
-    }
-
-    /// <summary>
-    /// Big holding rows
-    /// </summary>
-    [XmlRoot(ElementName = "BibHoldingsGetRows")]
-    public class BibHoldingsGetRows
-    {
-        /// <summary>
-        /// List of bib holding data
-        /// </summary>
-        [XmlElement(ElementName = "BibHoldingsGetRow")]
-        public List<BibHoldingsGetRow> BibHoldingsGetRow { get; set; }
+        public List<BibHoldingsGetRow> BibHoldingsGetRows { get; set; }
     }
 
     /// <summary>

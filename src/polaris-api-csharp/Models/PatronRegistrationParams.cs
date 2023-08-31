@@ -140,6 +140,9 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
 		public int? LanguageID { get; set; }
 
+
+        public int? GenderID { get; set; }
+
         /// <summary>
         /// Delivery option ID
         /// </summary>
@@ -215,9 +218,28 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public DateTime? ExpirationDate { get; set; }
 
+        public int? RequestPickupBranchID { get; set; }
+
         /// <summary>
         /// Date the account will require an address check
         /// </summary>
         public DateTime? AddrCheckDate { get; set; }
+
+        public string LegalNameFirst { get; set; }
+        public string LegalNameMiddle { get; set; }
+        public string LegalNameLast { get; set; }
+        public bool UseLegalNameOnNotices { get; set; }
+
+        public PatronRegistrationParams()
+        {
+
+        }
+
+        public PatronRegistrationParams(int patronBranchId, string nameFirst, string nameLast)
+        {
+            PatronBranchID = patronBranchId;
+            NameFirst = nameFirst;
+            NameLast = nameLast;
+        }
     }
 }

@@ -50,5 +50,10 @@ namespace Clc.Polaris.Api.Models
         /// Display name
         /// </summary>
 		public string DisplayName { get; set; }
-	}	
+
+        public override string ToString()
+        {
+            return $"{OrganizationID} - {Abbreviation} - {Name}";
+        }
+    }	
 }

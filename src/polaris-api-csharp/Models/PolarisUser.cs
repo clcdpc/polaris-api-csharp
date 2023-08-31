@@ -25,5 +25,17 @@ namespace Clc.Polaris.Api.Models
         /// Password
         /// </summary>
         public string Password { get; set; }
+
+        public PolarisUser()
+        {
+            
+        }
+
+        public PolarisUser(string domain, string username, string password)
+        {
+            Domain = domain;
+            Username = username;
+            Password = password;
+        }
     }
 }

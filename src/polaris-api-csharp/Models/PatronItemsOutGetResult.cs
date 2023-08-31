@@ -98,5 +98,10 @@ namespace Clc.Polaris.Api.Models
 		/// The name of the branch this item was checked out from.
 		/// </summary>
 		public string LoaningBranchName { get; set; }
-	}
+
+        public override string ToString()
+        {
+			return $"{ItemID} - {Barcode} - {Title} - {DueDate.ToShortDateString()}";
+        }
+    }
 }

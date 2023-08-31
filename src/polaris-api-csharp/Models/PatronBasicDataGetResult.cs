@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Clc.Polaris.Api.Models
 {
-	/// <summary>
-	/// The result of a PatronBasicDataGet API call.
-	/// </summary>
-	public class PatronBasicDataGetResult : PapiResponseCommon
-	{
-		/// <summary>
-		/// Patron information for the supplied patron.
-		/// </summary>
-		public PatronData PatronBasicData { get; set; }
+    /// <summary>
+    /// The result of a PatronBasicDataGet API call.
+    /// </summary>
+    public class PatronBasicDataGetResult : PapiResponseCommon
+    {
+        /// <summary>
+        /// Patron information for the supplied patron.
+        /// </summary>
+        public PatronData PatronBasicData { get; set; }
 
         public override string ToString()
         {
@@ -20,179 +21,85 @@ namespace Clc.Polaris.Api.Models
         }
     }
 
-	/// <summary>
-	/// Information about a patron.
-	/// </summary>
-	public class PatronData
-	{
-		/// <summary>
-		/// The patron's ID.
-		/// </summary>
-		public int PatronID { get; set; }
+    /// <summary>
+    /// Information about a patron.
+    /// </summary>
+    public class PatronData
+    {
+        public int PatronID { get; set; }
+        public string Barcode { get; set; }
+        public string NameFirst { get; set; }
+        public string NameLast { get; set; }
+        public string NameMiddle { get; set; }
+        public string PhoneNumber { get; set; }
+        public string EmailAddress { get; set; }
+        public int ItemsOutCount { get; set; }
+        public int ItemsOverdueCount { get; set; }
+        public int ItemsOutLostCount { get; set; }
+        public int HoldRequestsTotalCount { get; set; }
+        public int HoldRequestsCurrentCount { get; set; }
+        public int HoldRequestsShippedCount { get; set; }
+        public int HoldRequestsHeldCount { get; set; }
+        public int HoldRequestsUnclaimedCount { get; set; }
+        public double ChargeBalance { get; set; }
+        public double CreditBalance { get; set; }
+        public double DepositBalance { get; set; }
+        public string NameTitle { get; set; }
+        public string NameSuffix { get; set; }
+        public string PhoneNumber2 { get; set; }
+        public string PhoneNumber3 { get; set; }
+        public int Phone1CarrierID { get; set; }
+        public int Phone2CarrierID { get; set; }
+        public int Phone3CarrierID { get; set; }
+        public string CellPhone { get; set; }
+        public int CellPhoneCarrierID { get; set; }
+        public string AltEmailAddress { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public DateTime? RegistrationDate { get; set; }
+        public DateTime? LastActivityDate { get; set; }
+        public DateTime? AddrCheckDate { get; set; }
+        public int MessageNewCount { get; set; }
+        public int MessageReadCount { get; set; }
+        public int PatronOrgID { get; set; }
+        public int PatronCodeID { get; set; }
+        public int DeliveryOptionID { get; set; }
+        public bool ExcludeFromAlmostOverdueAutoRenew { get; set; }
+        public bool ExcludeFromPatronRecExpiration { get; set; }
+        public bool ExcludeFromInactivePatron { get; set; }
+        public int EReceiptOptionID { get; set; }
+        public int TxtPhoneNumber { get; set; }
+        public int EmailFormatID { get; set; }
+        public List<PatronAddress> PatronAddresses { get; set; }
 
-		/// <summary>
-		/// The patron's barcode.
-		/// </summary>
-		public string Barcode { get; set; }
+        string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());
 
-		/// <summary>
-		/// The patron's first name.
-		/// </summary>
-		public string NameFirst { get; set; }
+        public string TxtDeliveryPhoneNumber => TxtPhoneNumber == 1 ? fixpn(PhoneNumber) : TxtPhoneNumber == 2 ? fixpn(PhoneNumber2) : TxtPhoneNumber == 3 ? fixpn(PhoneNumber3) : "";
 
-		/// <summary>
-		/// The patron's last name.
-		/// </summary>
-		public string NameLast { get; set; }
+        public string DeliveryString
+        {
+            get
+            {
+                switch (DeliveryOptionID)
+                {
+                    case 1:
+                        if (!PatronAddresses.Any()) { return ""; }
+                        var address = PatronAddresses.First();
+                        var street = !string.IsNullOrWhiteSpace(address.StreetTwo) ? $"{address.StreetOne} {address.StreetTwo}" : address.StreetOne;
+                        return $"{street} {address.City}, {address.State} {address.PostalCode}";
+                    case 2:
+                        return EmailAddress;
+                    case 3:
+                        return fixpn(PhoneNumber);
+                    case 4:
+                        return fixpn(PhoneNumber2);
+                    case 5:
+                        return fixpn(PhoneNumber3);
+                    case 8:
+                        return TxtDeliveryPhoneNumber;
+                }
 
-		/// <summary>
-		/// The patron's middle name.
-		/// </summary>
-		public string NameMiddle { get; set; }
-
-		/// <summary>
-		/// The patron's phone number.
-		/// </summary>
-		public string PhoneNumber { get; set; }
-
-		/// <summary>
-		/// The patron's email address.
-		/// </summary>
-		public string EmailAddress { get; set; }
-
-		/// <summary>
-		/// The number of items the patron has out.
-		/// </summary>
-		public int ItemsOutCount { get; set; }
-
-		/// <summary>
-		/// The number of overdue items the patron has out.
-		/// </summary>
-		public int ItemsOverdueCount { get; set; }
-
-		/// <summary>
-		/// The number of lost items the patron has out.
-		/// </summary>
-		public int ItemsOutLostCount { get; set; }
-
-		/// <summary>
-		/// The total number of hold requests the patron has.
-		/// </summary>
-		public int HoldRequestsTotalCount { get; set; }
-
-		/// <summary>
-		/// The number of shipped hold requests the patron has.
-		/// </summary>
-		public int HoldRequestsShippedCount { get; set; }
-
-		/// <summary>
-		/// The number of unclaimed hold requests the patron has.
-		/// </summary>
-		public int HoldRequestsUnclaimedCount { get; set; }
-
-		/// <summary>
-		/// The patron's charge balance.
-		/// </summary>
-		public decimal ChargeBalance { get; set; }
-
-		/// <summary>
-		/// The patron's credit balance.
-		/// </summary>
-		public decimal CreditBalance { get; set; }
-
-		/// <summary>
-		/// The patron's deposit balance.
-		/// </summary>
-		public decimal DepositBalance { get; set; }
-
-		/// <summary>
-		/// The patron's title.
-		/// </summary>
-		public string NameTitle { get; set; }
-
-		/// <summary>
-		/// The patron's suffix.
-		/// </summary>
-		public string NameSuffix { get; set; }
-
-		/// <summary>
-		/// The patron's second phone number.
-		/// </summary>
-		public string PhoneNumber2 { get; set; }
-
-		/// <summary>
-		/// The patron's second phone number.
-		/// </summary>
-		public string PhoneNumber3 { get; set; }
-
-		/// <summary>
-		/// The carrier for the patron's first phone.
-		/// </summary>
-		public int Phone1CarrierID { get; set; }
-
-		/// <summary>
-		/// he carrier for the patron's second phone.
-		/// </summary>
-		public int Phone2CarrierID { get; set; }
-
-		/// <summary>
-		/// he carrier for the patron's third phone.
-		/// </summary>
-		public int Phone3CarrierID { get; set; }
-
-		/// <summary>
-		/// The patron's cell phone number.
-		/// </summary>
-		public string CellPhone { get; set; }
-
-		/// <summary>
-		/// The carrier for the patron's cell phone.
-		/// </summary>
-		public int CellPhoneCarrierID { get; set; }
-
-		/// <summary>
-		/// The patron's alternate email address.
-		/// </summary>
-		public string AltEmailAddress { get; set; }
-
-		/// <summary>
-		/// The patron's birth date.
-		/// </summary>
-		public DateTime? BirthDate { get; set; }
-
-		/// <summary>
-		/// The date the patron registered.
-		/// </summary>
-		public DateTime RegistrationDate { get; set; }
-
-		/// <summary>
-		/// The date of this patron's last activity.
-		/// </summary>
-		public DateTime? LastActivityDate { get; set; }
-
-		/// <summary>
-		/// The date this patron will require an access check.
-		/// </summary>
-		public DateTime AddrCheckDate { get; set; }
-
-		/// <summary>
-		/// The number of new messages the patron has.
-		/// </summary>
-		public int MessageNewCount { get; set; }
-
-		/// <summary>
-		/// The number of read messages the patron has.
-		/// </summary>
-		public int MessageReadCount { get; set; }
-
-		/// <summary>
-		/// A list of the patron's addresses.
-		/// </summary>
-		public List<PatronAddress> PatronAddresses { get; set; }
-
-		/// <summary>
-		/// The patron's mobile phone number.
-		/// </summary>
-		public string MobilePhone { get; set; }
-	}
+                return "";
+            }
+        }
+    }
 }

@@ -1,76 +1,45 @@
-﻿using Clc.Polaris.Api.Models;
+﻿using Clc.Rest;
+using Clc.Polaris.Api.Models;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        private PapiResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue, int workstationId = 1, int userid = 1)
+        public IRestResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null)
         {
-            var url = $"/PAPIService/REST/protected/v1/1033/100/1/{Token.AccessToken}/patron/{barcode}/blocks?wsid={workstationId}&userid={userid}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{barcode}/blocks?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            var body = new CreatePatronBlocksRequest((int)blockType, blockValue);
+            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
 
-            if (blockType != BlockType.FreeText)
-            {
-                int intValue;
-
-                if (!int.TryParse(blockValue, out intValue))
-                {
-                    throw new Exception("Value for Library and System blocks must be numeric");
-                }
-
-                if (blockType == BlockType.System && !(new int[] { 64, 128, 256, 512 }).Contains(intValue))
-                {
-                    throw new Exception("Value for System blocks must be 64, 128, 256 or 512");
-                }
-            }
-
-            var doc = new XDocument(
-                        new XElement("CreatePatronBlocksData", 
-                            new XElement("BlockTypeID", (int)blockType),
-                            new XElement("BlockValue", blockValue)
-                            )
-                        );
-
-            return Execute<CreatePatronBlocksResult>(HttpMethod.Post, url, pin: Token.AccessSecret, body: doc.ToString());            
+            return Execute<CreatePatronBlocksResult>(request);
         }
 
-        /// <summary>
-        /// Add a free text block to a patron account
-        /// </summary>
-        /// <param name="barcode"></param>
-        /// <param name="blockText"></param>
-        /// <returns></returns>
-        public PapiResponse<CreatePatronBlocksResult> CreatePatronFreeTextBlock(string barcode, string blockText)
+        
+
+        public IRestResponse<CreatePatronBlocksResult> CreatePatronFreeTextBlock(string barcode, string blockText, int? userId = null, int? workstationId = null)
         {
-            return CreatePatronBlocks(barcode, BlockType.FreeText, blockText);
+            return CreatePatronBlocks(barcode, BlockType.FreeText, blockText, workstationId ?? WorkstationId, userId ?? UserId);
         }
 
-        /// <summary>
-        /// Add a library assigned block to a patron account
-        /// </summary>
-        /// <param name="barcode"></param>
-        /// <param name="blockId"></param>
-        /// <returns></returns>
-        public PapiResponse<CreatePatronBlocksResult> CreatePatronLibraryAssignedBlock(string barcode, int blockId)
+        
+
+        public IRestResponse<CreatePatronBlocksResult> CreatePatronLibraryAssignedBlock(string barcode, int blockId, int? userId = null, int? workstationId = null)
         {
-            return CreatePatronBlocks(barcode, BlockType.LibraryAssigned, blockId.ToString());
+            return CreatePatronBlocks(barcode, BlockType.LibraryAssigned, blockId.ToString(), workstationId ?? WorkstationId, userId ?? UserId);
         }
 
-        /// <summary>
-        /// Add a system block to a patron account
-        /// </summary>
-        /// <param name="barcode"></param>
-        /// <param name="block"></param>
-        /// <returns></returns>
-        public PapiResponse<CreatePatronBlocksResult> CreatePatronSystemBlock(string barcode, SystemBlocks block)
+        
+
+        public IRestResponse<CreatePatronBlocksResult> CreatePatronSystemBlock(string barcode, SystemBlocks systemBlock, int? userId = null, int? workstationId = null)
         {
-            return CreatePatronBlocks(barcode, BlockType.System, ((int)block).ToString());
+            return CreatePatronBlocks(barcode, BlockType.System, ((int)systemBlock).ToString(), workstationId ?? WorkstationId, userId ?? UserId);
         }
     }
 }

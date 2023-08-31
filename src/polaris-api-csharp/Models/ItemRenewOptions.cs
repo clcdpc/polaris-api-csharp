@@ -11,21 +11,28 @@ namespace Clc.Polaris.Api.Models
     /// </summary>
     public class ItemRenewOptions
     {
+        public string Action { get; set; } = "renew";
         /// <summary>
         /// The branch where the renewal takes place
         /// </summary>
-        public int BranchId { get; set; } = 1;
+        public int LogonBranchID { get; set; } = 1;
 
         /// <summary>
         /// The user performing the renewal
         /// </summary>
-        public int UserId { get; set; } = 1;
+        public int LogonUserID { get; set; } = 1;
 
         /// <summary>
         /// The workstation the renewal takes place
         /// </summary>
-        public int WorkstationId { get; set; } = 1;
+        public int LogonWorkstationID { get; set; } = 1;
 
+        public RenewData RenewData { get; set; } = new RenewData();
+
+    }
+
+    public class RenewData
+    {
         /// <summary>
         /// Ignore ignorable errors and continue if possible
         /// </summary>

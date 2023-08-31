@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,6 +29,19 @@ namespace Clc.Polaris.Api.Models
         /// Token expiration date
         /// </summary>
         [XmlElement(ElementName = "AuthExpDate")]
+        [JsonProperty("AuthExpDate")]
         public DateTime? ExpirationDate { get; set; }
+
+        public ProtectedToken()
+        {
+
+        }
+
+        public ProtectedToken(ProtectedToken pt)
+        {
+            AccessToken = pt.AccessToken;
+            AccessSecret = pt.AccessSecret;
+            ExpirationDate = pt.ExpirationDate;
+        }
     }
 }
