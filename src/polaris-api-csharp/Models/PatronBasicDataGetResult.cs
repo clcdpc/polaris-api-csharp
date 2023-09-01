@@ -70,6 +70,11 @@ namespace Clc.Polaris.Api.Models
         public int TxtPhoneNumber { get; set; }
         public int EmailFormatID { get; set; }
         public List<PatronAddress> PatronAddresses { get; set; }
+        public string User1 { get; set;}
+        public string User2 { get; set; }
+        public string User3 { get; set; }
+        public string User4 { get; set; }
+        public string User5 { get; set; }
 
         string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());
 
