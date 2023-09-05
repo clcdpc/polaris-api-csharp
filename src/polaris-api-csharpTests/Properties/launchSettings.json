@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Clc.Polaris.Api.Tests": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:49348;http://localhost:49349"
+    }
+  }
+}
