@@ -8,7 +8,7 @@
 		<Description>A helper library that assists in the consumption of the Polaris ILS API</Description>
 		<PackageTags>clc; polaris; papi; polarisapi</PackageTags>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-		<Version>3.0.5-alpha</Version>
+		<Version>3.0.6-alpha</Version>
 		<Title>Polaris Api Library Helper Library</Title>
 		<PackageProjectUrl>https://bitbucket.org/clcdpc/polaris-api-csharp</PackageProjectUrl>
 		<RepositoryUrl>https://bitbucket.org/clcdpc/polaris-api-csharp</RepositoryUrl>
