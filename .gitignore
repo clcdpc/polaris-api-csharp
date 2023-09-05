@@ -404,4 +404,5 @@ FodyWeavers.xsd
 # CLC CUSTOM
 ##################
 [Aa]pp[Ss]ettings.[Tt]est.json
+[Aa]pp[Ss]ettings.[Dd]evelopment.json
 polaris-api-csharpTests/
