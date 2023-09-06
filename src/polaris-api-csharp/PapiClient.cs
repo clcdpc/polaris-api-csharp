@@ -76,12 +76,17 @@ namespace Clc.Polaris.Api
             set { _token = value; }
         }
 
-        public PapiClient()
+        public PapiClient() : this(new HttpClient())
+        {
+
+        }
+
+        public PapiClient(HttpClient _client = null) : base(_client)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        public PapiClient(IPapiSettings settings) : this()
+        public PapiClient(IPapiSettings settings, HttpClient _client = null) : this(_client)
         {
             AccessID = settings.AccessId;
             AccessKey = settings.AccessKey;
