@@ -17,7 +17,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Clc.Rest.Client" Version="2.*" />
+		<PackageReference Include="Clc.Rest.Client" Version="2.*" />
 	</ItemGroup>
 
 </Project>
