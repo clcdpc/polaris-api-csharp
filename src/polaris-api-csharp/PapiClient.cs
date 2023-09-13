@@ -1,20 +1,12 @@
-﻿using Clc.Rest.Auth;
-using Clc.Rest.Models;
+﻿using Clc.Rest.Models;
 using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 namespace Clc.Polaris.Api
@@ -76,18 +68,22 @@ namespace Clc.Polaris.Api
             set { _token = value; }
         }
 
-        public PapiClient()
+        public PapiClient(HttpClient client,
+            IPapiSettings settings) : base(null, client)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            if (settings != null)
+            {
+                AccessID = settings.AccessId;
+                AccessKey = settings.AccessKey;
+                Hostname = settings.Hostname;
+                StaffOverrideAccount = settings.PolarisOverrideAccount;
+            } 
         }
 
-        public PapiClient(IPapiSettings settings) : this()
-        {
-            AccessID = settings.AccessId;
-            AccessKey = settings.AccessKey;
-            Hostname = settings.Hostname;
-            StaffOverrideAccount = settings.PolarisOverrideAccount;
-        }
+        public PapiClient() : this(null, null) { }
+        public PapiClient(IPapiSettings settings) : this(null, settings) { }
 
         // map BaseUrl to Hostname
         public override string BaseUrl { get => Hostname; set => Hostname = value; }
