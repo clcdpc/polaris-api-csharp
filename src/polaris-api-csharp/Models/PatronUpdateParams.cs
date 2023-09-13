@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Clc.Polaris.Api.Models
 {
-	/// <summary>
-	/// The parameters required to make a PatronUpdate request.
-	/// </summary>
-	public class PatronUpdateParams
-	{
+    /// <summary>
+    /// The parameters required to make a PatronUpdate request.
+    /// </summary>
+    public class PatronUpdateParams
+    {
         /// <summary>
         /// Transaction branch ID
         /// </summary>
@@ -30,23 +28,23 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public bool? ReadingListEnabled { get; set; }
 
-		/// <summary>
-		/// The format the patron wishes to receive email in. 1 = Plain Text, 2 = HTML
-		/// </summary>
-		public int? EmailFormat { get; set; }
+        /// <summary>
+        /// The format the patron wishes to receive email in. 1 = Plain Text, 2 = HTML
+        /// </summary>
+        public int? EmailFormat { get; set; }
 
-		/// <summary>
-		/// The method the patron wishes to use to receive their notifications.
-		/// 1- Mailing address
-		/// 2- Email address
-		/// 3- Telephone 1
-		/// 4- Telephone 2
-		/// 5- Telephone 3
-		/// 6- FAX
-		/// 7 - EDI
-		/// 8- TXT Messaging
-		/// </summary>
-		public int? DeliveryOptionID { get; set; }
+        /// <summary>
+        /// The method the patron wishes to use to receive their notifications.
+        /// 1- Mailing address
+        /// 2- Email address
+        /// 3- Telephone 1
+        /// 4- Telephone 2
+        /// 5- Telephone 3
+        /// 6- FAX
+        /// 7 - EDI
+        /// 8- TXT Messaging
+        /// </summary>
+        public int? DeliveryOptionID { get; set; }
 
         /// <summary>
         /// The patron's email address.
@@ -91,5 +89,26 @@ namespace Clc.Polaris.Api.Models
 
 
         public List<PatronAddress> PatronAddresses { get; set; }
-	}
+
+        /// <summary>
+        /// User-defined field
+        /// </summary>
+        public string User1 { get; set; }
+        /// <summary>
+        /// User-defined field
+        /// </summary>
+        public string User2 { get; set; }
+        /// <summary>
+        /// User-defined field
+        /// </summary>
+        public string User3 { get; set; }
+        /// <summary>
+        /// User-defined field
+        /// </summary>
+        public string User4 { get; set; }
+        /// <summary>
+        /// User-defined field
+        /// </summary>
+        public string User5 { get; set; }
+    }
 }

@@ -6,20 +6,15 @@ The library was recently migrated from RestSharp to .NET HttpClient and is relat
 
 ## Installation
 
-```
-#!c#
-
+```c#
 Install-Package PolarisApiLibrary -Pre
 ```
-
 
 ## Usage
 
 ### Public Method
 
-```
-#!c#
-
+```c#
 var papi = new PapiClient
             {
                 AccessID = "your-access-id",
@@ -31,11 +26,9 @@ var papi = new PapiClient
             Console.WriteLine($"Hello {patron.Data.NameFirst}");
 ```
 
-### Protected Method 
+### Protected Method
 
-```
-#!c#
-
+```c#
 var papi = new PapiClient
             {
                 AccessID = "your-access-id",
@@ -55,9 +48,7 @@ var papi = new PapiClient
 
 ### Public Method Override
 
-```
-#!c#
-
+```c#
 var papi = new PapiClient
             {
                 AccessID = "your-access-id",
