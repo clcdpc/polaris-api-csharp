@@ -69,12 +69,23 @@ namespace Clc.Polaris.Api.Models
         public int EReceiptOptionID { get; set; }
         public int TxtPhoneNumber { get; set; }
         public int EmailFormatID { get; set; }
+        public string LegalNameFirst { get; set; }
+        public string LegalNameLast { get; set; }
+        public string LegalNameMiddle { get; set; }
+        public bool UseLegalNameOnNotices { get; set; }
+        public string LegalFullName { get; set; }
         public List<PatronAddress> PatronAddresses { get; set; }
-        public string User1 { get; set;}
+        public DateTime ExpirationDate { get; set; }
+        public int RequestPickupBranchID { get; set; }
+        public string User1 { get; set; }
         public string User2 { get; set; }
         public string User3 { get; set; }
         public string User4 { get; set; }
         public string User5 { get; set; }
+        public int LanguageID { get; set; }
+        public int? FormerID { get; set; }
+        public int StatisticalClassID { get; set; }
+        public PatronSystemBlock[] PatronSystemBlocks { get; set; }
 
         string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());
 
@@ -106,5 +117,13 @@ namespace Clc.Polaris.Api.Models
                 return "";
             }
         }
+    }
+
+    public class PatronSystemBlock
+    {
+        public int BlockID { get; set; }
+        public string BlockDescription { get; set; }
+
+        public override string ToString() => $"{BlockID} | {BlockDescription}";
     }
 }

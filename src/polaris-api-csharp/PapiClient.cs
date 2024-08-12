@@ -68,8 +68,7 @@ namespace Clc.Polaris.Api
             set { _token = value; }
         }
 
-        public PapiClient(HttpClient client,
-            IPapiSettings settings) : base(null, client)
+        public PapiClient(HttpClient client, IPapiSettings settings) : base(null, client)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 

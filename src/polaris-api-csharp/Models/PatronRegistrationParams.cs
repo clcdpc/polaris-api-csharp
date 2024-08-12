@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.Models
     /// Options when creating a new patron registration
     /// </summary>
 	public class PatronRegistrationParams
-	{
+    {
         /// <summary>
         /// Branch processing the registration
         /// </summary>
@@ -235,8 +235,11 @@ namespace Clc.Polaris.Api.Models
 
         }
 
-        public PatronRegistrationParams(int patronBranchId, string nameFirst, string nameLast)
+        public PatronRegistrationParams(int patronBranchId, string nameFirst, string nameLast, int logonBranchId = 1, int logonUserId = 1, int logonWorkstationId = 1)
         {
+            LogonBranchID = logonBranchId;
+            LogonUserID = logonUserId;
+            LogonWorkstationID = logonWorkstationId;
             PatronBranchID = patronBranchId;
             NameFirst = nameFirst;
             NameLast = nameLast;
