@@ -65,5 +65,5 @@ namespace Clc.Polaris.Api.Models
         public int? ItemRecordId { get; set; }
 
         public string ItemBarcode { get; set; }
-	}
+    }
 }

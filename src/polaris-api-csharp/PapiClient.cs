@@ -61,7 +61,7 @@ namespace Clc.Polaris.Api
                     var response = AuthenticateStaffUser(StaffOverrideAccount);
                     _token = response?.Data;
 
-                    if (UseProtectedTokenCache && response.Response.IsSuccessStatusCode) { ProtectedTokenCache[$"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}"] = new ProtectedToken(_token); }
+                    if (UseProtectedTokenCache && response.Response.IsSuccessStatusCode && _token != null) { ProtectedTokenCache[$"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}"] = new ProtectedToken(_token); }
                 }
                 return _token;
             }

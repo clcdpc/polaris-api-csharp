@@ -110,5 +110,7 @@ namespace Clc.Polaris.Api.Models
         /// User-defined field
         /// </summary>
         public string User5 { get; set; }
+
+        public int? RequestPickupBranchID { get; set; }
     }
 }

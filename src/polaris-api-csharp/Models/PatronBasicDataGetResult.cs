@@ -83,7 +83,7 @@ namespace Clc.Polaris.Api.Models
         public string User4 { get; set; }
         public string User5 { get; set; }
         public int LanguageID { get; set; }
-        public int? FormerID { get; set; }
+        public string FormerID { get; set; }
         public int StatisticalClassID { get; set; }
         public PatronSystemBlock[] PatronSystemBlocks { get; set; }
 
