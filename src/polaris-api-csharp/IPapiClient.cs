@@ -82,6 +82,7 @@ namespace Clc.Polaris.Api
         IRestResponse<PapiResponseCommon> PatronReadingHistoryClear(string barcode, params int[] ids);
         IRestResponse<PatronReadingHistoryGetResult> PatronReadingHistoryGet(string barcode, int page = 1, int rowsPerPage = 50, string password = "");
         IRestResponse<PatronRegistrationCreateResult> PatronRegistrationCreate(PatronRegistrationParams _params);
+        IRestResponse<PatronRegistrationCreateResult> PatronRegistrationCreateV2(PatronRegistrationData _params);
         IRestResponse<PatronRenewBlocksResult> PatronRenewBlocksGet(int patronId, int? branchId = null);
         IRestResponse<PatronSavedSearchesGetResult> PatronSavedSearchesGet(string barcode, string password = "");
         IRestResponse<PatronSearchResult> PatronSearch(string query, int page = 1, int pageSize = 10, PatronSortKeys sortBy = PatronSortKeys.PATN, int? orgId = null);
