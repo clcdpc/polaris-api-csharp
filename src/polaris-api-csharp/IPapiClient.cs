@@ -108,8 +108,8 @@ namespace Clc.Polaris.Api
         IRestResponse<RemoteStorageItemsGetResult> RemoteStorageItemsGet(int branchId, string startDate, string endDate, int maxItems, int listType, int? startItemRecordId = null);
         IRestResponse<StringResult> SA_GetValueByOrg(string attribute, int? organizationId = null);
         IRestResponse<ShelfLocationsGetResult> ShelfLocationsGet(int? branchId = null);
-        IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int[] bibIds, bool includeItems);
-        IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int bibId, bool includeItems);
+        IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int[] bibIds, bool includeItems = false);
+        IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int bibId, bool includeItems = false);
         IRestResponse<PapiResponseCommon> UpdatePickupBranchID(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null);
         IRestResponse<PapiResponseCommon> UpdatePatronNotesData(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null);
     }

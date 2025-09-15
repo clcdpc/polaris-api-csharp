@@ -19,8 +19,8 @@ namespace Clc.Polaris.Api.Models
         public string BibliographicRecordXML { get; set; }
         public bool IsDisplayInPAC { get; set; }
         public DateTime CreationDate { get; set; }
-        public DateTime FirstAvailableDate { get; set; }
-        public DateTime ModificationDate { get; set; }
+        public DateTime? FirstAvailableDate { get; set; }
+        public DateTime? ModificationDate { get; set; }
     }
 
 }
