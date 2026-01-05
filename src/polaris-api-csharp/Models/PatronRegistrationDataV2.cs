@@ -27,7 +27,7 @@ namespace Clc.Polaris.Models
         public int? EReceiptOptionID { get; set; }
         public string Password { get; set; }
         public string Password2 { get; set; }
-        public string PatronCode { get; set; }
+        public int? PatronCode { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public DateTime? AddrCheckDate { get; set; }
         public bool? ExcludeFromAlmostOverdueAutoRenew { get; set; }
@@ -52,7 +52,7 @@ namespace Clc.Polaris.Models
         public int? GenderID { get; set; }
         public string UserName { get; set; }
         public string Barcode { get; set; }
-        public int? PatronBranchID { get; set; }
+        public int PatronBranchID { get; set; }
         public int? StatisticalClassID { get; set; }
         public bool? UseSingleName { get; set; }
 
