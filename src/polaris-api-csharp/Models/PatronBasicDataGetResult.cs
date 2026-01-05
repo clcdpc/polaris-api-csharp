@@ -85,6 +85,7 @@ namespace Clc.Polaris.Api.Models
         public int LanguageID { get; set; }
         public string FormerID { get; set; }
         public int StatisticalClassID { get; set; }
+        public PatronNotes? PatronNotes { get; set; }
         public PatronSystemBlock[] PatronSystemBlocks { get; set; }
 
         string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());

@@ -69,7 +69,7 @@ namespace Clc.Polaris.Api
         IRestResponse<PapiResponseCommon> PatronAccountPayAll(string barcode, double txnAmount, PaymentMethod paymentMethod, int? workstationId = 1, int? userId = 1, string note = "");
         IRestResponse<PapiResponseCommon> PatronAccountRefundCredit(string barcode, double txnAmount, int? workstationId = null, int? userId = null, string note = "");
         IRestResponse<PapiResponseCommon> PatronAccountVoid(string barcode, int paymentTxnId, int? workstationId = null, int? userId = null, string note = "");
-        IRestResponse<PatronBasicDataGetResult> PatronBasicDataGet(string barcode, string password = "", bool addresses = false);
+        IRestResponse<PatronBasicDataGetResult> PatronBasicDataGet(string barcode, string password = "", bool addresses = false, bool notes = false);
         IRestResponse<PatronCirculateBlocksResult> PatronCirculateBlocksGet(string barcode, string password = "");
         IRestResponse<PatronCodesGetResult> PatronCodesGet(int? branchId = null);
         IRestResponse<PatronHoldRequestsGetResult> PatronHoldRequestsGet(string barcode, PatronHoldStatus status = PatronHoldStatus.all, string password = "");

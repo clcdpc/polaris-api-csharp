@@ -77,6 +77,9 @@ namespace Clc.Polaris.Api
                 AccessID = settings.AccessId;
                 AccessKey = settings.AccessKey;
                 Hostname = settings.Hostname;
+                OrganizationId = settings.OrganizationId;
+                UserId = settings.UserId;
+                WorkstationId = settings.WorkstationId;
                 StaffOverrideAccount = settings.PolarisOverrideAccount;
             } 
         }

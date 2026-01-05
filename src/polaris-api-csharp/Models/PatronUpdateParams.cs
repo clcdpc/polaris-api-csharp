@@ -79,7 +79,7 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public string NewPassword { get; set; }
 
-        public DateTime? AddressCheckDate { get; set; }
+        public DateTime? AddrCheckDate { get; set; }
         public DateTime? ExpirationDate { get; set; }
 
         /// <summary>
