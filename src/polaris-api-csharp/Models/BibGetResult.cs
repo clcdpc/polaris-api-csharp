@@ -195,11 +195,7 @@ namespace Clc.Polaris.Api.Models
 
         private List<string> GetBibResultRow(int id)
         {
-            if (BibGetRows.Any(b => b.ElementID == id))
-            {
-                return BibGetRows.Where(b => b.ElementID == id).Select(b => b.Value).ToList();
-            }
-            return new List<string>();
+            return BibGetRows.Where(b => b.ElementID == id).Select(b => b.Value).ToList();
         }
     }
 
