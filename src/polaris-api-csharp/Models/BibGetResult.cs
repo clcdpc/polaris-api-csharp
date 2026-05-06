@@ -33,12 +33,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Number of items associated with this record system-wide.
         /// </summary>
-        public int? SystemItemsTotal => int.TryParse(GetBibResultRow(7).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? SystemItemsTotal => int.TryParse(GetBibResultRow(7).FirstOrDefault(), out int result) ? result : (int?)null;
 
         /// <summary>
         /// Current number of holds on this record.
         /// </summary>
-        public int? CurrentHolds => int.TryParse(GetBibResultRow(8).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? CurrentHolds => int.TryParse(GetBibResultRow(8).FirstOrDefault(), out int result) ? result : (int?)null;
 
         /// <summary>
         /// Summary(ies) of this record.
@@ -51,7 +51,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Control number of this record.
         /// </summary>
-        public int? ControlNumber => int.TryParse(GetBibResultRow(11).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? ControlNumber => int.TryParse(GetBibResultRow(11).FirstOrDefault(), out int result) ? result : (int?)null;
 
         /// <summary>
         /// Call number(s) of this record.
@@ -60,12 +60,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Number of local items available that are associated with this record.
         /// </summary>
-        public int? LocalItemsAvailable => int.TryParse(GetBibResultRow(15).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? LocalItemsAvailable => int.TryParse(GetBibResultRow(15).FirstOrDefault(), out int result) ? result : (int?)null;
 
         /// <summary>
         /// Number of available items associated with this record system-wide.
         /// </summary>
-        public int? SystemItemsAvailable => int.TryParse(GetBibResultRow(16).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? SystemItemsAvailable => int.TryParse(GetBibResultRow(16).FirstOrDefault(), out int result) ? result : (int?)null;
 
         /// <summary>
         /// Format of the record.
