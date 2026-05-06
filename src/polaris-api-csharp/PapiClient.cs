@@ -51,12 +51,12 @@ namespace Clc.Polaris.Api
         {
             get
             {
-                if (UseProtectedTokenCache && (_token == null || _token?.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
+                if (UseProtectedTokenCache && (_token == null || _token.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
                 {
                     ProtectedTokenCache.TryGetValue($"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}", out _token);
                 }
 
-                if ((_token == null || _token?.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
+                if ((_token == null || _token.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
                 {
                     var response = AuthenticateStaffUser(StaffOverrideAccount);
                     _token = response?.Data;
