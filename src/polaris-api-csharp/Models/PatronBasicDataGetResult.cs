@@ -99,8 +99,8 @@ namespace Clc.Polaris.Api.Models
                 switch (DeliveryOptionID)
                 {
                     case 1:
-                        if (!PatronAddresses.Any()) { return ""; }
-                        var address = PatronAddresses.First();
+                        if (PatronAddresses.Count == 0) { return ""; }
+                        var address = PatronAddresses[0];
                         var street = !string.IsNullOrWhiteSpace(address.StreetTwo) ? $"{address.StreetOne} {address.StreetTwo}" : address.StreetOne;
                         return $"{street} {address.City}, {address.State} {address.PostalCode}";
                     case 2:
