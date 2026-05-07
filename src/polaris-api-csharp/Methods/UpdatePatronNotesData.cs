@@ -3,6 +3,7 @@ using Clc.Polaris.Models;
 using Clc.Rest;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Clc.Polaris.Api
     {
         public IRestResponse<PapiResponseCommon> UpdatePatronNotesData(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{barcode}/notes?wsid={workstationId ?? WorkstationId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/notes?wsid={workstationId ?? WorkstationId}";
             var body = new UpdatePatronNotesData();
 
             if (!string.IsNullOrWhiteSpace(nonBlockingNote))

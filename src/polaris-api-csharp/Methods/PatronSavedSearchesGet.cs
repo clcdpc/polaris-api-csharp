@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using System.Net;
 using System.Net.Http;
 
 namespace Clc.Polaris.Api
@@ -14,7 +15,7 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PatronSavedSearchesGetResult> PatronSavedSearchesGet(string barcode, string password = "")
         {
-            var url = $"/public/v1/1033/100/1/patron/{barcode}/savedsearches";
+            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/savedsearches";
             var request = new PapiRestRequest(url) { Password = password };
             return Execute<PatronSavedSearchesGetResult>(request);
         }

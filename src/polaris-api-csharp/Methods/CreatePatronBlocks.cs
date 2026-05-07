@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net;
 using System.Text;
 using System.Xml.Linq;
 
@@ -14,7 +15,7 @@ namespace Clc.Polaris.Api
     {
         public IRestResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{barcode}/blocks?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/blocks?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
             var body = new CreatePatronBlocksRequest((int)blockType, blockValue);
             var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
 
