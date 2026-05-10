@@ -140,14 +140,13 @@ public class PapiClientTokenTests
 
     private static string CreateProtectedTokenJson(string accessToken, string accessSecret, DateTime expirationDate)
     {
-        return $$"""
-        {
-            "PAPIErrorCode": 0,
-            "AccessToken": "{{accessToken}}",
-            "AccessSecret": "{{accessSecret}}",
-            "AuthExpDate": "{{expirationDate:O}}"
-        }
-        """;
+        return
+            "{" +
+            $"\"PAPIErrorCode\":0," +
+            $"\"AccessToken\":\"{accessToken}\"," +
+            $"\"AccessSecret\":\"{accessSecret}\"," +
+            $"\"AuthExpDate\":\"{expirationDate:O}\"" +
+            "}";
     }
 
     private sealed class CapturingHttpMessageHandler : HttpMessageHandler
