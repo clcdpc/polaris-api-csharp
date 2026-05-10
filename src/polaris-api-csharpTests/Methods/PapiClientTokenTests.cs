@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Reflection;
 using Clc.Polaris.Api;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,8 +13,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass()]
+    [DoNotParallelize]
     public class PapiClientTokenTests
     {
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        ClearProtectedTokenCache();
+    }
+
     [TestMethod]
     public void Token_WhenTokenIsNullAndNoStaffOverrideAccount_ReturnsNullWithoutAuthenticating()
     {
@@ -120,7 +129,7 @@ namespace Clc.Polaris.Api.Tests
     {
         return new PapiClient(new HttpClient(handler), null)
         {
-            Hostname = "https://example.test",
+            Hostname = $"https://example-{Guid.NewGuid():N}.test",
             AccessID = "access-id",
             AccessKey = "access-key",
             UseProtectedTokenCache = false,
@@ -171,6 +180,13 @@ namespace Clc.Polaris.Api.Tests
                 Content = new StringContent(_responseJson, Encoding.UTF8, "application/json")
             });
         }
+    }
+
+    private static void ClearProtectedTokenCache()
+    {
+        var cacheProperty = typeof(PapiClient).GetProperty("ProtectedTokenCache", BindingFlags.NonPublic | BindingFlags.Static);
+        var cache = cacheProperty?.GetValue(null) as ConcurrentDictionary<string, ProtectedToken>;
+        cache?.Clear();
     }
 }
 }
