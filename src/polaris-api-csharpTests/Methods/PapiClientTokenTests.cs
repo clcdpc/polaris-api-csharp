@@ -8,11 +8,11 @@ using Clc.Polaris.Api;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests;
-
-[TestClass]
-public class PapiClientTokenTests
+namespace Clc.Polaris.Api.Tests
 {
+    [TestClass()]
+    public class PapiClientTokenTests
+    {
     [TestMethod]
     public void Token_WhenTokenIsNullAndNoStaffOverrideAccount_ReturnsNullWithoutAuthenticating()
     {
@@ -172,4 +172,5 @@ public class PapiClientTokenTests
             });
         }
     }
+}
 }
