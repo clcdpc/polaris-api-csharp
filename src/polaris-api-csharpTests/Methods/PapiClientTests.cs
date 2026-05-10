@@ -204,7 +204,7 @@ namespace Clc.Polaris.Api.Tests
         public void ItemStatusesGetAsyncTest()
         {
             var response = papi.ItemStatusesGet(7);
-            Assert.IsTrue(response.Data.ItemStatusesRows.Count() == response.Data.PAPIErrorCode); ;
+            Assert.IsTrue(response.Data.ItemStatusesRows.Count() == response.Data.PAPIErrorCode);
         }
 
         //[TestMethod()]
