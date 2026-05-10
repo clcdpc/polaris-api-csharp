@@ -33,12 +33,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Number of items associated with this record system-wide.
         /// </summary>
-        public int? SystemItemsTotal => int.TryParse(GetBibResultRow(7).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? SystemItemsTotal => GetBibResultRowInt(7);
 
         /// <summary>
         /// Current number of holds on this record.
         /// </summary>
-        public int? CurrentHolds => int.TryParse(GetBibResultRow(8).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? CurrentHolds => GetBibResultRowInt(8);
 
         /// <summary>
         /// Summary(ies) of this record.
@@ -51,7 +51,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Control number of this record.
         /// </summary>
-        public int? ControlNumber => int.TryParse(GetBibResultRow(11).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? ControlNumber => GetBibResultRowInt(11);
 
         /// <summary>
         /// Call number(s) of this record.
@@ -60,12 +60,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Number of local items available that are associated with this record.
         /// </summary>
-        public int? LocalItemsAvailable => int.TryParse(GetBibResultRow(15).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? LocalItemsAvailable => GetBibResultRowInt(15);
 
         /// <summary>
         /// Number of available items associated with this record system-wide.
         /// </summary>
-        public int? SystemItemsAvailable => int.TryParse(GetBibResultRow(16).FirstOrDefault() + "", out int dummy) ? dummy : new int?();
+        public int? SystemItemsAvailable => GetBibResultRowInt(16);
 
         /// <summary>
         /// Format of the record.
@@ -192,6 +192,13 @@ namespace Clc.Polaris.Api.Models
         /// Medium of the record.
         /// </summary>
         public string Medium => GetBibResultRow(46).FirstOrDefault();
+
+        private int? GetBibResultRowInt(int id)
+        {
+            return int.TryParse(GetBibResultRow(id).FirstOrDefault(), out var result)
+                ? result
+                : (int?)null;
+        }
 
         private List<string> GetBibResultRow(int id)
         {
