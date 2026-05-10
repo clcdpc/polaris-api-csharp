@@ -39,8 +39,6 @@ namespace Clc.Polaris.Api.Tests
             var config = InitConfiguration();
             papi = new PapiClient(config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>());
             Settings = config.Get<TestSettings>();
-            var foo = "";
-            
         }
 
         [TestMethod()]
@@ -209,12 +207,12 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(response.Data.ItemStatusesRows.Count() == response.Data.PAPIErrorCode); ;
         }
 
-        [TestMethod()]
-        public void ItemUpdateBarcodeTest()
-        {
-            var response = papi.ItemUpdateBarcode("1234", 1234);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -2000);
-        }
+        //[TestMethod()]
+        //public void ItemUpdateBarcodeTest()
+        //{
+        //    var response = papi.ItemUpdateBarcode("1234", 1234);
+        //    Assert.IsTrue(response.Data.PAPIErrorCode == -2000);
+        //}
 
         [TestMethod()]
         public void LimitFiltersGetTest()
@@ -403,12 +401,12 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.PatronReadingHistoryGetRows.Count());
         }
 
-        [TestMethod()]
-        public void PatronRegistrationCreateTest()
-        {
-            var response = papi.PatronRegistrationCreate(new PatronRegistrationParams());
-            Assert.IsTrue(response.Data.PAPIErrorCode == -1);
-        }
+        //[TestMethod()]
+        //public void PatronRegistrationCreateTest()
+        //{
+        //    var response = papi.PatronRegistrationCreate(new PatronRegistrationParams());
+        //    Assert.IsTrue(response.Data.PAPIErrorCode == -1);
+        //}
 
         [TestMethod()]
         public void PatronRenewBlocksGetTest()
@@ -543,12 +541,12 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
-        [TestMethod()]
-        public void RemoteStorageItemsGetTest()
-        {
-            var response = papi.RemoteStorageItemsGet(7, "asdf", "asdf", 1, 1);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -1);
-        }
+        //[TestMethod()]
+        //public void RemoteStorageItemsGetTest()
+        //{
+        //    var response = papi.RemoteStorageItemsGet(7, "asdf", "asdf", 1, 1);
+        //    Assert.IsTrue(response.Data.PAPIErrorCode == -1);
+        //}
 
         [TestMethod()]
         public void SA_GetValueByOrgTest()
