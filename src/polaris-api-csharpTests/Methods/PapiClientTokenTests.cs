@@ -35,20 +35,26 @@ namespace Clc.Polaris.Api.Tests
     }
 
     [TestMethod]
-    public void Token_WhenTokenIsNullAndStaffOverrideAccountExists_AuthenticatesAndReturnsToken()
+    public void Token_WhenTokenIsNullAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsCachedToken()
     {
-        var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("new-token", "new-secret", DateTime.UtcNow.AddHours(1)));
+        var handler = new CapturingHttpMessageHandler();
         var client = CreateClient(handler);
-        client.StaffOverrideAccount = CreateStaffUser();
+        var staff = CreateStaffUser();
+        client.StaffOverrideAccount = staff;
+        client.UseProtectedTokenCache = true;
+        SetCachedToken(client.Hostname, staff, new ProtectedToken
+        {
+            AccessToken = "cached-token",
+            AccessSecret = "cached-secret",
+            ExpirationDate = DateTime.Now.AddHours(1)
+        });
 
         var token = client.Token;
 
         Assert.IsNotNull(token);
-        Assert.AreEqual("new-token", token.AccessToken);
-        Assert.AreEqual("new-secret", token.AccessSecret);
-        Assert.AreEqual(1, handler.RequestCount);
-        Assert.IsNotNull(handler.LastRequest);
-        Assert.IsTrue(handler.LastRequest!.RequestUri!.ToString().Contains("/protected/v1/1033/100/1/authenticator/staff", StringComparison.Ordinal));
+        Assert.AreEqual("cached-token", token.AccessToken);
+        Assert.AreEqual("cached-secret", token.AccessSecret);
+        Assert.AreEqual(0, handler.RequestCount);
     }
 
     [TestMethod]
@@ -72,23 +78,31 @@ namespace Clc.Polaris.Api.Tests
     }
 
     [TestMethod]
-    public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExists_AuthenticatesAndReplacesToken()
+    public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_UsesCachedToken()
     {
-        var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("new-token", "new-secret", DateTime.UtcNow.AddHours(1)));
+        var handler = new CapturingHttpMessageHandler();
         var client = CreateClient(handler);
-        client.StaffOverrideAccount = CreateStaffUser();
+        var staff = CreateStaffUser();
+        client.StaffOverrideAccount = staff;
+        client.UseProtectedTokenCache = true;
         client.Token = new ProtectedToken
         {
             AccessToken = "expired-token",
             AccessSecret = "expired-secret",
             ExpirationDate = DateTime.Now.AddHours(-1)
         };
+        SetCachedToken(client.Hostname, staff, new ProtectedToken
+        {
+            AccessToken = "cached-token",
+            AccessSecret = "cached-secret",
+            ExpirationDate = DateTime.Now.AddHours(1)
+        });
 
         var token = client.Token;
 
         Assert.IsNotNull(token);
-        Assert.AreEqual("new-token", token.AccessToken);
-        Assert.AreEqual(1, handler.RequestCount);
+        Assert.AreEqual("cached-token", token.AccessToken);
+        Assert.AreEqual(0, handler.RequestCount);
     }
 
     [TestMethod]
@@ -193,6 +207,13 @@ namespace Clc.Polaris.Api.Tests
         var cacheProperty = typeof(PapiClient).GetProperty("ProtectedTokenCache", BindingFlags.NonPublic | BindingFlags.Static);
         var cache = cacheProperty?.GetValue(null) as ConcurrentDictionary<string, ProtectedToken>;
         cache?.Clear();
+    }
+
+    private static void SetCachedToken(string hostname, PolarisUser staffUser, ProtectedToken token)
+    {
+        var cacheProperty = typeof(PapiClient).GetProperty("ProtectedTokenCache", BindingFlags.NonPublic | BindingFlags.Static);
+        var cache = cacheProperty?.GetValue(null) as ConcurrentDictionary<string, ProtectedToken>;
+        cache?.TryAdd($"{hostname}{staffUser.Domain}{staffUser.Username}", token);
     }
 }
 }
