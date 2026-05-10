@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Clc.Polaris.Models;
+using System;
 using System.Collections.Generic;
 
 namespace Clc.Polaris.Api.Models
@@ -6,23 +7,8 @@ namespace Clc.Polaris.Api.Models
     /// <summary>
     /// The parameters required to make a PatronUpdate request.
     /// </summary>
-    public class PatronUpdateParams
+    public class PatronUpdateParams : PapiRequestBodyCommon
     {
-        /// <summary>
-        /// Transaction branch ID
-        /// </summary>
-        public int BranchId { get; set; } = 1;
-
-        /// <summary>
-        /// Transaction user ID
-        /// </summary>
-        public int UserId { get; set; } = 1;
-
-        /// <summary>
-        /// Transaction workstation ID
-        /// </summary>
-        public int LogonWorkstationId { get; set; } = 1;
-
         /// <summary>
         /// Enable or Disable the reading list feature for the patron.
         /// </summary>
@@ -112,5 +98,8 @@ namespace Clc.Polaris.Api.Models
         public string User5 { get; set; }
 
         public int? RequestPickupBranchID { get; set; }
+        public int? PatronCode { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public int? PatronBranchID { get; set; }
     }
 }

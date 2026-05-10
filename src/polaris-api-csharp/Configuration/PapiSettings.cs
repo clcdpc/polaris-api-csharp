@@ -12,9 +12,9 @@ namespace Clc.Polaris.Api.Configuration
         public string AccessId { get; set; }
         public string AccessKey { get; set; }
         public string Hostname { get; set; }
-        public int OrganizationId { get; set; }
-        public int UserId { get; set; }
-        public int WorkstationId { get; set; }
+        public int OrganizationId { get; set; } = 1;
+        public int UserId { get; set; } = 1;
+        public int WorkstationId { get; set; } = 1;
         public PolarisUser PolarisOverrideAccount { get; set; }
     }
     public interface IPapiSettings
