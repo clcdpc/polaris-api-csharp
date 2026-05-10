@@ -127,9 +127,15 @@ namespace Clc.Polaris.Api.Tests
 
     private static PapiClient CreateClient(CapturingHttpMessageHandler handler)
     {
-        return new PapiClient(new HttpClient(handler), null)
+        var hostname = $"https://example-{Guid.NewGuid():N}.test";
+        var httpClient = new HttpClient(handler)
         {
-            Hostname = $"https://example-{Guid.NewGuid():N}.test",
+            BaseAddress = new Uri($"{hostname}/")
+        };
+
+        return new PapiClient(httpClient, null)
+        {
+            Hostname = hostname,
             AccessID = "access-id",
             AccessKey = "access-key",
             UseProtectedTokenCache = false,
