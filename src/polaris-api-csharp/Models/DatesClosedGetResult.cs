@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api.Models
 
         public override string ToString()
         {
-            return string.Join(", ", DatesClosedRows.Select(d => d.ToString()));
+            return string.Join(", ", DatesClosedRows);
         }
     }
 
