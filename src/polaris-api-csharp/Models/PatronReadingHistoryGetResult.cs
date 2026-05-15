@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.Models
     {
         public PatronReadingHistoryGetRow[] PatronReadingHistoryGetRows { get; set; }
 
-        public override string ToString() => string.Join("\r\n", PatronReadingHistoryGetRows);
+        public override string ToString() => string.Join("\r\n", (IEnumerable<PatronReadingHistoryGetRow>)PatronReadingHistoryGetRows);
     }
 
     public class PatronReadingHistoryGetRow
