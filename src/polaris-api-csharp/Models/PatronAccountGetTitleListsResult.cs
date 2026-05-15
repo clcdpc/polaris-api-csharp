@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Models
     {
         public List<PatronAccountTitleListsRow> PatronAccountTitleListsRows { get; set; }
 
-        public override string ToString() => string.Join("\r\n", PatronAccountTitleListsRows?.Select(r => r));
+        public override string ToString() => string.Join("\r\n", PatronAccountTitleListsRows);
     }
 
     public class PatronAccountTitleListsRow

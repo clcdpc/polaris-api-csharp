@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
         public object ErrorMessage { get; set; }
         public PatronTitleListTitleRow[] PatronTitleListTitleRows { get; set; }
 
-        public override string ToString() => string.Join("\r\n", PatronTitleListTitleRows?.Select(r=>r));
+        public override string ToString() => string.Join("\r\n", (IEnumerable<PatronTitleListTitleRow>)PatronTitleListTitleRows);
     }
 
     public class PatronTitleListTitleRow

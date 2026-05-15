@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
         public IRestResponse<PapiResponseCommon> RecordSetContentPut(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null)
         {
             var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/recordsets/{recordSetId}?action={action}&userid={userId ?? UserId}&wsid={workstationId ?? WorkstationId}";
-            var body = new { records = string.Join(",", records.Select(r => r.ToString())) };
+            var body = new { records = string.Join(",", records) };
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
             return Execute<PapiResponseCommon>(request);
         }

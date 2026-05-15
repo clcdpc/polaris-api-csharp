@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api.Models
 
         public override string ToString()
         {
-            return string.Join(",", RecordSetRecordsGetRows.OrderBy(r => r.RecordID).Select(r => r.RecordID.ToString()));
+            return string.Join(",", RecordSetRecordsGetRows.OrderBy(r => r.RecordID).Select(r => r.RecordID));
         }
     }
 
