@@ -58,6 +58,7 @@ namespace Clc.Polaris.Api
         IRestResponse<MARCTypeOfMaterialsGetResult> MARCTypeOfMaterialsGet(int? branchId = null);
         IRestResponse<MaterialTypesGetResult> MaterialTypesGet(int? branchId = null);
         IRestResponse<NotificationUpdateResult> NotificationUpdate(NotificationUpdateParams updateParams);
+        IRestResponse<PapiResponseCommon> NotificationQueueGet(int orgId = 1);
         IRestResponse<OrganizationsGetResult> OrganizationsGet(OrganizationType type = OrganizationType.All);
         IRestResponse<PapiResponseCommon> PatronAccountCreateCredit(string barcode, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "");
         IRestResponse<PapiResponseCommon> PatronAccountCreateTitleList(string barcode, string listName, string password = "");
