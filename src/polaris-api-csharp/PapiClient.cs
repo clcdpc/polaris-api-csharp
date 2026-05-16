@@ -119,10 +119,26 @@ namespace Clc.Polaris.Api
             return papiRequest;
         }
 
+        private HMACSHA1 _hmac;
+        private string _hmacKey;
+        private readonly object _hmacLock = new object();
+
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)
         {
             var hashString = httpMethod + uri + date + password;
-            byte[] computedHash = new HMACSHA1(Encoding.UTF8.GetBytes(AccessKey)).ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            var hashBytes = Encoding.UTF8.GetBytes(hashString);
+            byte[] computedHash;
+
+            lock (_hmacLock)
+            {
+                if (_hmac == null || _hmacKey != AccessKey)
+                {
+                    _hmacKey = AccessKey;
+                    _hmac = new HMACSHA1(Encoding.UTF8.GetBytes(AccessKey ?? string.Empty));
+                }
+                computedHash = _hmac.ComputeHash(hashBytes);
+            }
+
             return Convert.ToBase64String(computedHash);
         }
     }
