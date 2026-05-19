@@ -736,5 +736,93 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/items/bibid/123"));
         }
+
+        [TestMethod()]
+        public void SynchTasksCheckoutTest()
+        {
+            var response = papi.SynchTasksCheckout(new SynchTasksCheckoutData
+            {
+                VendorID = "TestVendor",
+                VendorContractID = "123",
+                UniqueRecordID = "rec123",
+                PatronBarcode = Settings.PatronBarcode,
+                TransactionDateTime = "2026-05-19T11:00:00",
+                ItemExpireDateTime = "2026-06-19T11:00:00"
+            });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/tasks/checkout"));
+        }
+
+        [TestMethod()]
+        public void SynchTasksCheckinTest()
+        {
+            var response = papi.SynchTasksCheckin(new SynchTasksCheckinData
+            {
+                VendorID = "TestVendor",
+                VendorContractID = "123",
+                UniqueRecordID = "rec123",
+                PatronBarcode = Settings.PatronBarcode,
+                TransactionDateTime = "2026-05-19T11:00:00"
+            });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/tasks/checkin"));
+        }
+
+        [TestMethod()]
+        public void SynchTasksExpireCopyTest()
+        {
+            var response = papi.SynchTasksExpireCopy(new SynchTasksExpireCopyData
+            {
+                VendorID = "TestVendor",
+                VendorContractID = "123",
+                UniqueRecordID = "rec123",
+                PatronBarcode = Settings.PatronBarcode,
+                TransactionDateTime = "2026-05-19T11:00:00"
+            });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/tasks/expirecopy"));
+        }
+
+        [TestMethod()]
+        public void SynchTasksNotifyPatronTest()
+        {
+            var response = papi.SynchTasksNotifyPatron(new SynchTasksNotifyPatronData
+            {
+                VendorID = "TestVendor",
+                VendorContractID = "123",
+                PatronBarcode = Settings.PatronBarcode,
+                Message = "Test message"
+            });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/tasks/notifypatron"));
+        }
+
+        [TestMethod()]
+        public void SynchTasksNotifyPatronItemTest()
+        {
+            var response = papi.SynchTasksNotifyPatronItem(new SynchTasksNotifyPatronItemData
+            {
+                VendorID = "TestVendor",
+                VendorContractID = "123",
+                UniqueRecordID = "rec123",
+                PatronBarcode = Settings.PatronBarcode,
+                Message = "Test message"
+            });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/tasks/notifypatronitem"));
+        }
+
+        [TestMethod()]
+        public void SynchTasksPullMARCDataTest()
+        {
+            var response = papi.SynchTasksPullMARCData(new SynchTasksPullMARCData
+            {
+                VendorID = "TestVendor",
+                VendorContractID = "123",
+                UniqueRecordID = "rec123"
+            });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/tasks/pullMARCData"));
+        }
     }
 }

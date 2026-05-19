@@ -135,5 +135,11 @@ namespace Clc.Polaris.Api
         IRestResponse<GetSubscriptionsByIDResult> Synch_GetSubscriptionsByID(string bibids);
         IRestResponse<ItemGetResult> Synch_ItemByIDGet(int itemId);
         IRestResponse<ItemGetResult> Synch_ItemsByBibIDGet(int bibId, bool excludeecontent = false);
+        IRestResponse<SynchTasksCheckoutResult> SynchTasksCheckout(SynchTasksCheckoutData data, int? userId = null, int? workstationId = null);
+        IRestResponse<SynchTasksCheckinResult> SynchTasksCheckin(SynchTasksCheckinData data, int? userId = null, int? workstationId = null);
+        IRestResponse<SynchTasksExpireCopyResult> SynchTasksExpireCopy(SynchTasksExpireCopyData data, int? userId = null, int? workstationId = null);
+        IRestResponse<SynchTasksNotifyPatronResult> SynchTasksNotifyPatron(SynchTasksNotifyPatronData data, int? userId = null, int? workstationId = null);
+        IRestResponse<SynchTasksNotifyPatronItemResult> SynchTasksNotifyPatronItem(SynchTasksNotifyPatronItemData data, int? userId = null, int? workstationId = null);
+        IRestResponse<SynchTasksPullMARCResult> SynchTasksPullMARCData(SynchTasksPullMARCData data, int? userId = null, int? workstationId = null);
     }
 }
