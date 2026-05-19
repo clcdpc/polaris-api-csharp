@@ -616,5 +616,53 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("sysholdstatuses"));
         }
+
+        [TestMethod()]
+        public void Synch_AuthsByIDGetTest()
+        {
+            var response = papi.Synch_AuthsByIDGet(new[] { 1, 2 });
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/auths/MARCXML"));
+        }
+
+        [TestMethod()]
+        public void Synch_BibsPagedGetTest()
+        {
+            var response = papi.Synch_BibsPagedGet(lastId: 0, nrecs: 10, includeItems: true);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/bibs/MARCXML/paged"));
+        }
+
+        [TestMethod()]
+        public void Synch_BibReplacementIDGetTest()
+        {
+            var response = papi.Synch_BibReplacementIDGet("2026-05-19");
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/bibs/replacementids"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetAuthIDListTest()
+        {
+            var response = papi.Synch_GetAuthIDList(1, 10);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/auths/idlist"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetBibIDListTest()
+        {
+            var response = papi.Synch_GetBibIDList(1, 10);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/bibs/idlist"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetBibResourceCountsByIDTest()
+        {
+            var response = papi.Synch_GetBibResourceCountsByID("1,2,3");
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/bibs/resourcecounts"));
+        }
     }
 }

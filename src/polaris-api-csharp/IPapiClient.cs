@@ -119,5 +119,12 @@ namespace Clc.Polaris.Api
         IRestResponse<PatronStatisticalClassesGetResult> PatronStatisticalClassesGet(int? branchId = null);
         IRestResponse<SortOptionsGetResult> SortOptionsGet(int? branchId = null);
         IRestResponse<SysHoldStatusesGetResult> SysHoldStatusesGet(int? branchId = null);
+        IRestResponse<GetAuthsByIDResult> Synch_AuthsByIDGet(int[] authIds);
+        IRestResponse<GetAuthsByIDResult> Synch_AuthsByIDGet(int authId);
+        IRestResponse<GetBibsPagedResult> Synch_BibsPagedGet(int? lastId = null, int? nrecs = null, string startdatecreated = null, string enddatecreated = null, string startdatemodified = null, string enddatemodified = null, bool includeItems = false);
+        IRestResponse<BibReplacementIDGetResult> Synch_BibReplacementIDGet(string startdate);
+        IRestResponse<AuthIDListGetResult> Synch_GetAuthIDList(int startid, int? nrecs = null);
+        IRestResponse<BibIDListGetResult> Synch_GetBibIDList(int startid, int? nrecs = null);
+        IRestResponse<GetBibResourceCountsByIDResult> Synch_GetBibResourceCountsByID(string bibids);
     }
 }
