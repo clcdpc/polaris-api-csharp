@@ -1,4 +1,4 @@
-﻿using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Models;
 using Clc.Rest;
 using System;
@@ -113,5 +113,11 @@ namespace Clc.Polaris.Api
         IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int bibId, bool includeItems = false);
         IRestResponse<PapiResponseCommon> UpdatePickupBranchID(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null);
         IRestResponse<PapiResponseCommon> UpdatePatronNotesData(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null);
+        IRestResponse<PatronUdfConfigsGetResult> PatronUdfConfigsGet(int? branchId = null);
+        IRestResponse<PatronLanguagesGetResult> PatronLanguagesGet(int? branchId = null);
+        IRestResponse<PatronNotesGetResult> PatronNotesGet(string barcode, int? workstationId = null);
+        IRestResponse<PatronStatisticalClassesGetResult> PatronStatisticalClassesGet(int? branchId = null);
+        IRestResponse<SortOptionsGetResult> SortOptionsGet(int? branchId = null);
+        IRestResponse<SysHoldStatusesGetResult> SysHoldStatusesGet(int? branchId = null);
     }
 }

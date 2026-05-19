@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Clc.Polaris.Api;
 using System;
 using System.Collections.Generic;
@@ -567,6 +567,54 @@ namespace Clc.Polaris.Api.Tests
         {
             var response = papi.Synch_BibsByIdGet(bibId);
             Assert.IsTrue(response.Response.IsSuccessStatusCode);
+        }
+
+        [TestMethod()]
+        public void PatronUdfConfigsGetTest()
+        {
+            var response = papi.PatronUdfConfigsGet();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("patron/udfconfigs"));
+        }
+
+        [TestMethod()]
+        public void PatronLanguagesGetTest()
+        {
+            var response = papi.PatronLanguagesGet();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("patron/languages"));
+        }
+
+        [TestMethod()]
+        public void PatronNotesGetTest()
+        {
+            var response = papi.PatronNotesGet(Settings.PatronBarcode);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("notes"));
+        }
+
+        [TestMethod()]
+        public void PatronStatisticalClassesGetTest()
+        {
+            var response = papi.PatronStatisticalClassesGet();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("patron/statisticalclasses"));
+        }
+
+        [TestMethod()]
+        public void SortOptionsGetTest()
+        {
+            var response = papi.SortOptionsGet();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("sortoptions"));
+        }
+
+        [TestMethod()]
+        public void SysHoldStatusesGetTest()
+        {
+            var response = papi.SysHoldStatusesGet();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("sysholdstatuses"));
         }
     }
 }
