@@ -126,5 +126,14 @@ namespace Clc.Polaris.Api
         IRestResponse<AuthIDListGetResult> Synch_GetAuthIDList(int startid, int? nrecs = null);
         IRestResponse<BibIDListGetResult> Synch_GetBibIDList(int startid, int? nrecs = null);
         IRestResponse<GetBibResourceCountsByIDResult> Synch_GetBibResourceCountsByID(string bibids);
+        IRestResponse<ItemIDListGetResult> Synch_GetItemIDList(int startid, int? nrecs = null);
+        IRestResponse<AuthIDListGetResult> Synch_GetMaxAuthID();
+        IRestResponse<BibIDListGetResult> Synch_GetMaxBibID();
+        IRestResponse<ItemIDListGetResult> Synch_GetMaxItemID();
+        IRestResponse<GetSerialCompressedHoldingsByIDResult> Synch_GetSerialCompressedHoldingsByID(string ids);
+        IRestResponse<GetSerialCompressedHoldingsPagedResult> Synch_GetSerialCompressedHoldingsPaged(int lastbibid, int? lastorgid = null, int? nrecs = null, string startdatemodified = null, bool systemlevel = false);
+        IRestResponse<GetSubscriptionsByIDResult> Synch_GetSubscriptionsByID(string bibids);
+        IRestResponse<ItemGetResult> Synch_ItemByIDGet(int itemId);
+        IRestResponse<ItemGetResult> Synch_ItemsByBibIDGet(int bibId, bool excludeecontent = false);
     }
 }

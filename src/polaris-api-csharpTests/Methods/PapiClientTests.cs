@@ -664,5 +664,77 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/bibs/resourcecounts"));
         }
+
+        [TestMethod()]
+        public void Synch_GetItemIDListTest()
+        {
+            var response = papi.Synch_GetItemIDList(1, 10);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/items/idlist"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetMaxAuthIDTest()
+        {
+            var response = papi.Synch_GetMaxAuthID();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/auths/maxid"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetMaxBibIDTest()
+        {
+            var response = papi.Synch_GetMaxBibID();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/bibs/maxid"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetMaxItemIDTest()
+        {
+            var response = papi.Synch_GetMaxItemID();
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/items/maxid"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetSerialCompressedHoldingsByIDTest()
+        {
+            var response = papi.Synch_GetSerialCompressedHoldingsByID("3:174328");
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/serialholdings/textual/compressed"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetSerialCompressedHoldingsPagedTest()
+        {
+            var response = papi.Synch_GetSerialCompressedHoldingsPaged(lastbibid: 0, lastorgid: 0, nrecs: 10, systemlevel: false);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/serialholdings/textual/compressed/paged"));
+        }
+
+        [TestMethod()]
+        public void Synch_GetSubscriptionsByIDTest()
+        {
+            var response = papi.Synch_GetSubscriptionsByID("1,2,3");
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/subscriptions/SubscriptionXML"));
+        }
+
+        [TestMethod()]
+        public void Synch_ItemByIDGetTest()
+        {
+            var response = papi.Synch_ItemByIDGet(12345);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/item/12345"));
+        }
+
+        [TestMethod()]
+        public void Synch_ItemsByBibIDGetTest()
+        {
+            var response = papi.Synch_ItemsByBibIDGet(123, excludeecontent: true);
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("synch/items/bibid/123"));
+        }
     }
 }
