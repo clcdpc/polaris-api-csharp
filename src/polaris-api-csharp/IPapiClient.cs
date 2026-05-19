@@ -39,6 +39,8 @@ namespace Clc.Polaris.Api
         IRestResponse<ProtectedToken> AuthenticateStaffUser(PolarisUser staffUser);
         IRestResponse<BibGetResult> BibGet(int bibId, int? branchId = null);
         IRestResponse<BibSearchResult> BibSearch(BibSearchOptions options);
+        IRestResponse<BibSearchResult> BibKeywordSearch(string keyword, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP);
+        IRestResponse<BibSearchResult> BibBooleanSearch(string ccl, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP);
         IRestResponse<CollectionsGetResult> CollectionsGet(int? branchId = null);
         IRestResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null);
         IRestResponse<DatesClosedGetResult> DatesClosedGet(int organizationId);
@@ -141,5 +143,39 @@ namespace Clc.Polaris.Api
         IRestResponse<SynchTasksNotifyPatronResult> SynchTasksNotifyPatron(SynchTasksNotifyPatronData data, int? userId = null, int? workstationId = null);
         IRestResponse<SynchTasksNotifyPatronItemResult> SynchTasksNotifyPatronItem(SynchTasksNotifyPatronItemData data, int? userId = null, int? workstationId = null);
         IRestResponse<SynchTasksPullMARCResult> SynchTasksPullMARCData(SynchTasksPullMARCData data, int? userId = null, int? workstationId = null);
+
+        // --- NEWLY ADDED METHODS ---
+        IRestResponse<ILLRequestResult> ILLRequestCreate(ILLRequestCreateData data);
+        IRestResponse<ILLRequestCancelResult> ILLRequestCancel(string barcode, int requestId, int? userId = null, int? workstationId = null);
+        IRestResponse<ILLRequestCancelResult> ILLRequestCancelAll(string barcode, int? userId = null, int? workstationId = null);
+        IRestResponse<ItemCheckInResult> ItemCheckin(string barcode, ItemCheckInData data);
+        IRestResponse<ItemCheckoutResult> ItemCheckout(string barcode, ItemCheckoutData data);
+        IRestResponse<BibsPostResult> BibsImport(string marcxml, string importProfileName = null, int? workstationId = null);
+        IRestResponse<MultipartGetResult> MultipartGet(int bibId, int patronId, int? pickupLocId = null);
+        IRestResponse<PickupAreasGetResult> PickupAreasGet(int? orgId = null);
+        IRestResponse<SAMobilePhoneCarriersGetResult> SAMobilePhoneCarriersGet(int? orgId = null);
+        IRestResponse<PapiResponseCommon> RequestsUpdateStatus(int requestId, string action, int? itemId = null, int? denyReasonId = null);
+        IRestResponse<BibGetByTypeResult> BibGetByTypeV2(string key, string type, int? orgId = null);
+        IRestResponse<PatronUpdateResult> PatronUpdateV2(string barcode, PatronRegistrationData data, string password = "");
+        IRestResponse<JobsPurchaseOrdersPostResult> JobsPurchaseOrdersPost(JobsPurchaseOrdersPostData data, int? orgId = null);
+        IRestResponse<JobsPurchaseOrdersPreorderValidationResult> JobsPurchaseOrdersPreorderValidation(JobsPurchaseOrdersPutData data, int? orgId = null);
+        IRestResponse<JobsPurchaseOrdersStatusResult> JobsPurchaseOrdersStatusGet(Guid jobGuid, int? orgId = null);
+        IRestResponse<JobsPurchaseOrdersResultData> JobsPurchaseOrdersResultGet(Guid jobGuid, int? orgId = null);
+
+        // Synchronization Discovery Endpoints
+        IRestResponse<AuthIDListGetResult> Synch_GetDeletedAuths(string deletedate);
+        IRestResponse<AuthIDListGetResult> Synch_GetDeletedAuthsPaged(string deletedate, int lastid, int nrecs);
+        IRestResponse<AuthIDListGetResult> Synch_GetUpdatedAuths(string updatedate);
+        IRestResponse<AuthIDListGetResult> Synch_GetUpdatedAuthsPaged(string updatedate, int lastid, int nrecs);
+        IRestResponse<BibIDListGetResult> Synch_GetDeletedBibs(string deletedate);
+        IRestResponse<BibIDListGetResult> Synch_GetDeletedBibsPaged(string deletedate, int lastid, int nrecs);
+        IRestResponse<BibIDListGetResult> Synch_GetUpdatedBibs(string updatedate);
+        IRestResponse<BibIDListGetResult> Synch_GetUpdatedBibsPaged(string updatedate, int lastid, int nrecs);
+        IRestResponse<ItemIDListGetResult> Synch_GetDeletedItems(string deletedate);
+        IRestResponse<ItemIDListGetResult> Synch_GetDeletedItemsPaged(string deletedate, int lastid, int nrecs);
+        IRestResponse<ItemIDListGetResult> Synch_GetUpdatedItems(string updatedate, string enddate = null);
+        IRestResponse<ItemIDListGetResult> Synch_GetUpdatedItemsPaged(string updatedate, int lastid, int nrecs);
+        IRestResponse<GetBarcodeAndPatronIDResult> Synch_GetDeletedPatrons(string deletedate);
+        IRestResponse<GetBarcodeAndPatronIDResult> Synch_GetDeletedPatronsPaged(string deletedate, int lastid, int nrecs);
     }
 }
