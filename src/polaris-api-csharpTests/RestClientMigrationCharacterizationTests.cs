@@ -213,7 +213,8 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/patron/AB+C%2f%2b%23%3f%3d");
+            var encodedBarcode = WebUtility.UrlEncode("AB C/+#?=");
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, $"/public/v1/1033/100/1/patron/{encodedBarcode}");
             StringAssert.Contains(handler.LastRequest.RequestUri.Query, "ignoresa=True");
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
