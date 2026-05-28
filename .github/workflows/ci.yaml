@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_VERSION: 8.0.x
+  CONFIGURATION: Release
+  SOLUTION: src/polaris-api-csharp.sln
+  PACKAGE_PROJECT: src/polaris-api-csharp/Clc.Polaris.Api.csproj
+  TEST_PROJECT: src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj
+  TEST_RESULTS_DIR: TestResults
+  PACKAGE_OUTPUT_DIR: artifacts/packages
+
+jobs:
+  build-test-pack:
+    name: build, test, pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore "$SOLUTION"
+
+      - name: Build
+        run: dotnet build "$SOLUTION" --configuration "$CONFIGURATION" --no-restore -warnaserror
+
+      - name: Test
+        run: |
+          dotnet test "$TEST_PROJECT" \
+            --configuration "$CONFIGURATION" \
+            --no-build \
+            --filter "TestCategory!=Integration" \
+            --logger "trx;LogFileName=unit-tests.trx" \
+            --results-directory "$TEST_RESULTS_DIR"
+
+      - name: Check for blocked sync-over-async patterns
+        run: |
+          if git grep -n -E '\.Result|\.Wait\(|GetAwaiter\(\)\.GetResult\(|ReadContentSynchronously|ReadBodySynchronously|Execute<T>' -- 'src/polaris-api-csharp/**/*.cs'; then
+            echo "Blocked sync-over-async or removed execution pattern found in src/polaris-api-csharp."
+            exit 1
+          fi
+
+          echo "No blocked sync-over-async or removed execution patterns found in src/polaris-api-csharp."
+
+      - name: Pack
+        run: |
+          dotnet pack "$PACKAGE_PROJECT" \
+            --configuration "$CONFIGURATION" \
+            --no-build \
+            --output "$PACKAGE_OUTPUT_DIR"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ env.TEST_RESULTS_DIR }}/*.trx
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          if-no-files-found: error
+          path: |
+            ${{ env.PACKAGE_OUTPUT_DIR }}/*.nupkg
+            ${{ env.PACKAGE_OUTPUT_DIR }}/*.snupkg
