@@ -201,6 +201,10 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+            Assert.IsNotNull(handler.LastRequestContent);
+            StringAssert.Contains(handler.LastRequestContent, "main");
+            StringAssert.Contains(handler.LastRequestContent, "staff");
+            StringAssert.Contains(handler.LastRequestContent, "secret");
         }
 
         [TestMethod]
@@ -219,6 +223,8 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+            Assert.IsNotNull(handler.LastRequestContent);
+            StringAssert.Contains(handler.LastRequestContent, "patron@example.test");
         }
 
         private static PapiClient CreateClient(HttpMessageHandler? handler = null)
@@ -248,19 +254,24 @@ namespace Clc.Polaris.Api.Tests
             private readonly string _responseJson;
 
             public HttpRequestMessage? LastRequest { get; private set; }
+            public string? LastRequestContent { get; private set; }
 
             public CapturingHttpMessageHandler(string responseJson)
             {
                 _responseJson = responseJson;
             }
 
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 LastRequest = request;
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                LastRequestContent = request.Content == null
+                    ? null
+                    : await request.Content.ReadAsStringAsync(cancellationToken);
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(_responseJson, Encoding.UTF8, "application/json")
-                });
+                };
             }
         }
     }
