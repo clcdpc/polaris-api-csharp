@@ -9,11 +9,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="Exists('appsettings.Test.json')">
     <None Remove="appsettings.Test.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="appsettings.Test.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

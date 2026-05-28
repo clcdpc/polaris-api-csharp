@@ -25,9 +25,10 @@ namespace Clc.Polaris.Api.Tests
         protected static IConfiguration InitConfiguration()
         {
             var config = new ConfigurationBuilder()
-               .AddJsonFile("appsettings.Test.json")
+                .AddJsonFile("appsettings.Test.json")
                 .AddEnvironmentVariables()
                 .Build();
+
             return config;
         }
 
@@ -37,8 +38,14 @@ namespace Clc.Polaris.Api.Tests
         public PapiClientTests()
         {
             var config = InitConfiguration();
-            papi = new PapiClient(config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>());
-            Settings = config.Get<TestSettings>();
+
+            var papiSettings = config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>()
+                ?? throw new InvalidOperationException("Missing PapiSettings configuration.");
+
+            papi = new PapiClient(papiSettings);
+
+            Settings = config.Get<TestSettings>()
+                ?? throw new InvalidOperationException("Missing test settings configuration.");
         }
 
         [TestMethod()]
