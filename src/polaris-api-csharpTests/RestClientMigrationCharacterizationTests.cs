@@ -38,7 +38,7 @@ namespace Clc.Polaris.Api.Tests
                 Path = "/protected/foo",
                 Body = new { Value = "v" },
             };
-            existing.Parameters.Add("limit", 5);
+            existing.Parameters.Add("limit", "5");
             existing.Headers.Add("X-Test", "header");
 
             var copied = new PapiRestRequest(existing);
@@ -159,19 +159,19 @@ namespace Clc.Polaris.Api.Tests
             {
                 Branch = 1,
                 SearchType = BibSearchTypes.keyword,
-                Qualifier = SearchQualifiers.ALL,
+                Qualifier = SearchQualifiers.KW,
                 Term = "harry potter & stone",
                 SortOption = SearchSortOptions.MP,
                 Page = 2,
                 PageSize = 15,
-                Limit = 3
+                Limit = "3"
             };
 
             var response = client.BibSearch(options);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/search/bibs/keyword/ALL");
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             StringAssert.Contains(handler.LastRequest.RequestUri.Query, "q=harry+potter+%26+stone");
             StringAssert.Contains(handler.LastRequest.RequestUri.Query, "sort=MP");
             StringAssert.Contains(handler.LastRequest.RequestUri.Query, "page=2");
