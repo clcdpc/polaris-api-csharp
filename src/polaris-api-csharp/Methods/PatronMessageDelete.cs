@@ -6,7 +6,6 @@ using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System.Net;
-using System.Net.Http;
 
 namespace Clc.Polaris.Api
 {
@@ -17,7 +16,7 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PapiResponseCommon>> PatronMessageDeleteAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/messages/{messageType}/{messageId}";
-            var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
+            var request = PapiRestRequest.Delete(url, password: password);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }

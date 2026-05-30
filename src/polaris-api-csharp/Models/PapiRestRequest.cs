@@ -1,10 +1,6 @@
 ﻿using Clc.Rest.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -23,6 +19,21 @@ namespace Clc.Polaris.Api.Models
         {
 
         }
+
+        public static PapiRestRequest Get(string path, string password = "", object body = null)
+            => new PapiRestRequest(HttpMethod.Get, path, password, body);
+
+        public static PapiRestRequest Delete(string path, string password = "", object body = null)
+            => new PapiRestRequest(HttpMethod.Delete, path, password, body);
+
+        public static PapiRestRequest Post(string path, object body = null, string password = "")
+            => new PapiRestRequest(HttpMethod.Post, path, password, body);
+
+        public static PapiRestRequest Put(string path, object body = null, string password = "")
+            => new PapiRestRequest(HttpMethod.Put, path, password, body);
+
+        public static PapiRestRequest Create(HttpMethod method, string path, object body = null, string password = "")
+            => new PapiRestRequest(method, path, password, body);
 
         public PapiRestRequest(HttpMethod method, string url, string password = "", object body = null) : base()
         {

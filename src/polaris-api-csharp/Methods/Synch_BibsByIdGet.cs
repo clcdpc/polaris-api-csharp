@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 
 namespace Clc.Polaris.Api
@@ -15,7 +14,7 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int[] bibIds, bool includeItems = false, CancellationToken cancellationToken = default)
         {
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/synch/bibs/MARCxml";
-            var request = new PapiRestRequest(url);
+            var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("bibids", string.Join(",", bibIds));
             if (includeItems)
             {
