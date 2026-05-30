@@ -104,7 +104,7 @@ namespace Clc.Polaris.Api
                 if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride && Token != null)
                 {
                     password = Token.AccessSecret;
-                    papiRequest.Headers.Add("X-PAPI-AccessToken", Token.AccessToken);
+                    SetRequestHeader(papiRequest, "X-PAPI-AccessToken", Token.AccessToken);
                 }
 
                 if (papiRequest.IsProtectedMethod && string.IsNullOrWhiteSpace(password) && _token != null)
@@ -114,11 +114,22 @@ namespace Clc.Polaris.Api
 
                 var date = DateTime.Now.ToUniversalTime().ToString("R");
                 var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildUrlForPapiHash(papiRequest), password);
-                papiRequest.Headers.Add("PolarisDate", date);
-                papiRequest.Headers.Add("Authorization", string.Format("PWS {0}:{1}", AccessID, hash));
+                SetRequestHeader(papiRequest, "PolarisDate", date);
+                SetRequestHeader(papiRequest, "Authorization", string.Format("PWS {0}:{1}", AccessID, hash));
             }
 
             return papiRequest;
+        }
+
+        private static void SetRequestHeader(RestRequest request, string headerName, string value)
+        {
+            if (request.Headers.ContainsKey(headerName))
+            {
+                request.Headers[headerName] = value;
+                return;
+            }
+
+            request.Headers.Add(headerName, value);
         }
 
         private string BuildUrlForPapiHash(RestRequest request)
