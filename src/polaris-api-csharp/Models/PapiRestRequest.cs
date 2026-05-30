@@ -41,7 +41,7 @@ namespace Clc.Polaris.Api.Models
             Method = request.Method;
             Path = request.Path;
             Body = request.Body;
-            Parameters = request.Parameters;
+            QueryParameters = request.QueryParameters;
             Headers = request.Headers;
         }
 

@@ -91,6 +91,11 @@ namespace Clc.Polaris.Api
         public override string BaseUrl { get => Hostname; set => Hostname = value; }
         public override string PathPrefix { get; set; } = "PAPIService/REST";
 
+        private IRestResponse<T> Execute<T>(RestRequest request)
+        {
+            return ExecuteAsync<T>(request).GetAwaiter().GetResult();
+        }
+
         public override RestRequest PreformatRestRequest(RestRequest request)
         {
             var papiRequest = request is PapiRestRequest ? request as PapiRestRequest : new PapiRestRequest(request);
