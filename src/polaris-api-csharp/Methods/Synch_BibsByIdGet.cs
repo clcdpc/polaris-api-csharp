@@ -13,12 +13,13 @@ namespace Clc.Polaris.Api
     {
         public IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int[] bibIds, bool includeItems = false)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/synch/bibs/MARCxml?bibids={string.Join(",", bibIds)}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/synch/bibs/MARCxml";
+            var request = new PapiRestRequest(url);
+            request.QueryParameters.Add("bibids", string.Join(",", bibIds));
             if (includeItems)
             {
-                url += $"&includeItems=1";
+                request.QueryParameters.Add("includeItems", 1);
             }
-            var request = new PapiRestRequest(url);
             return Execute<Sync_BibsByIdGetResult>(request);
         }
 

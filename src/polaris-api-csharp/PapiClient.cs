@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Linq;
 
 namespace Clc.Polaris.Api
 {
@@ -112,7 +113,7 @@ namespace Clc.Polaris.Api
                 }
 
                 var date = DateTime.Now.ToUniversalTime().ToString("R");
-                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildUrl(papiRequest), password);
+                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildUrlWithQueryParameters(papiRequest), password);
                 papiRequest.Headers.Add("PolarisDate", date);
                 papiRequest.Headers.Add("Authorization", string.Format("PWS {0}:{1}", AccessID, hash));
             }
@@ -128,6 +129,26 @@ namespace Clc.Polaris.Api
         private IRestResponse<T> Post<T>(string url, object body = null)
         {
             return Execute<T>(new PapiRestRequest(HttpMethod.Post, url) { Body = body });
+        }
+
+        private string BuildUrlWithQueryParameters(RestRequest request)
+        {
+            var url = BuildUrl(request);
+            if (request.QueryParameters == null || !request.QueryParameters.Any())
+            {
+                return url;
+            }
+
+            var queryString = string.Join("&", request.QueryParameters
+                .Select(parameter => new { parameter.Key, Value = parameter.Value?.ToString() })
+                .Where(parameter => !string.IsNullOrEmpty(parameter.Value))
+                .Select(parameter => $"{Uri.EscapeDataString(parameter.Key)}={Uri.EscapeDataString(parameter.Value)}"));
+            if (string.IsNullOrEmpty(queryString))
+            {
+                return url;
+            }
+
+            return $"{url}{(url.Contains("?") ? "&" : "?")}{queryString}";
         }
 
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)

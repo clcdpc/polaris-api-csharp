@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -133,6 +134,23 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(formatted.Headers.ContainsKey("Authorization"));
         }
 
+
+        [TestMethod]
+        public void PreformatRestRequest_HashesQueryParameters_WhenPresent()
+        {
+            var client = CreateClient();
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search");
+            request.QueryParameters.Add("q", "a b&c");
+            request.QueryParameters.Add("page", 2);
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"];
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search?q=a%20b%26c&page=2";
+            var expectedHash = Convert.ToBase64String(HMACSHA1.HashData(Encoding.UTF8.GetBytes("access-key"), Encoding.UTF8.GetBytes($"GET{expectedUri}{date}")));
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+        }
+
         [TestMethod]
         public void ApiKeyValidate_RequestShape_IsStable()
         {
@@ -219,12 +237,39 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
             var encodedBarcode = WebUtility.UrlEncode("AB C/+#?=");
             StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, $"/public/v1/1033/100/1/patron/{encodedBarcode}");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "ignoresa=True");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "ignoresa", "True");
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
             Assert.IsNotNull(handler.LastRequestContent);
             StringAssert.Contains(handler.LastRequestContent, "patron@example.test");
+        }
+
+
+        [TestMethod]
+        public void PatronSearch_RequestShape_UsesQueryParameters()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "token-segment",
+                AccessSecret = "secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+
+            var response = client.PatronSearch("name: O'Neil & family", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 77);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/77/token-segment/search/patrons/Boolean");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "q", "name: O'Neil & family");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "patronsperpage", "25");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "page", "3");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "sort", "PATNL");
+            Assert.IsNull(handler.LastRequest.Content);
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
         }
 
         private static PapiClient CreateClient(HttpMessageHandler? handler = null)
@@ -236,6 +281,24 @@ namespace Clc.Polaris.Api.Tests
                 AllowStaffOverrideRequests = false,
                 UseProtectedTokenCache = false
             };
+        }
+
+
+        private static void AssertQueryParameter(Uri uri, string name, string expectedValue)
+        {
+            var parameters = ParseQuery(uri.Query);
+            Assert.IsTrue(parameters.TryGetValue(name, out var actualValue), $"Missing query parameter '{name}' in '{uri.Query}'.");
+            Assert.AreEqual(expectedValue, actualValue);
+        }
+
+        private static Dictionary<string, string> ParseQuery(string query)
+        {
+            return query.TrimStart('?')
+                .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => part.Split('=', 2))
+                .ToDictionary(
+                    pair => Uri.UnescapeDataString(pair[0]).Replace("+", " "),
+                    pair => pair.Length > 1 ? Uri.UnescapeDataString(pair[1]).Replace("+", " ") : string.Empty);
         }
 
         private sealed class TestPapiSettings : IPapiSettings

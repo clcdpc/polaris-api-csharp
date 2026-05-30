@@ -17,9 +17,11 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PapiResponseCommon> PatronAccountDepositCredit(string barcode, double txnAmount, int? workstationId = null, int? userId = null, string note = "")
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/lumpsumdepositcredit?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/lumpsumdepositcredit";
             var body = new PatronAccountDepositCreditData { TxnAmount = txnAmount, FreeTextNote = note };
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
             return Execute<PapiResponseCommon>(request);
         }
     }
