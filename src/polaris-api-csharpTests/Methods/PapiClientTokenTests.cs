@@ -159,6 +159,27 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("existing-token", client.Token.AccessToken);
             Assert.AreEqual(1, handler.RequestCount);
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(HttpMethod.Post, handler.LastRequest.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+            Assert.IsFalse(handler.LastRequest.Headers.Contains("X-PAPI-AccessToken"));
+        }
+
+        [TestMethod]
+        public async Task AuthenticateStaffUserAsync_WithStaffOverrideAccountAndNoToken_DoesNotRecursivelyAcquireProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+
+            var response = await client.AuthenticateStaffUserAsync(CreateStaffUser());
+
+            Assert.IsNotNull(response.Data);
+            Assert.AreEqual("protected-token", response.Data.AccessToken);
+            Assert.IsNull(client.Token);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
         }
 
         [TestMethod]
@@ -210,6 +231,10 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(1, handler.ProtectedRequestCount);
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("protected-token", client.Token.AccessToken);
+            var paths = handler.RequestPaths;
+            Assert.AreEqual(2, paths.Length);
+            StringAssert.Contains(paths[0], "/protected/v1/1033/100/1/authenticator/staff");
+            StringAssert.Contains(paths[1], "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
             Assert.IsTrue(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out var cachedToken));
             Assert.IsNotNull(cachedToken);
             Assert.AreEqual("protected-token", cachedToken.AccessToken);
@@ -398,9 +423,11 @@ namespace Clc.Polaris.Api.Tests
             private readonly string _authenticationResponseJson;
             private int _authenticationRequestCount;
             private int _protectedRequestCount;
+            private readonly ConcurrentQueue<string> _requestPaths = new ConcurrentQueue<string>();
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
             public int ProtectedRequestCount => _protectedRequestCount;
+            public string[] RequestPaths => _requestPaths.ToArray();
 
             public ProtectedTokenHttpMessageHandler(HttpStatusCode authenticationStatusCode = HttpStatusCode.OK, string? authenticationResponseJson = null)
             {
@@ -410,6 +437,8 @@ namespace Clc.Polaris.Api.Tests
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
+                _requestPaths.Enqueue(request.RequestUri!.AbsolutePath);
+
                 if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff"))
                 {
                     Interlocked.Increment(ref _authenticationRequestCount);
