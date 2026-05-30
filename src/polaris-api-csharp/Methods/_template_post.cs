@@ -10,12 +10,12 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<PapiResponseCommon> PapiMethod(string barcode, string password = "")
+        public async Task<IRestResponse<PapiResponseCommon>> PapiMethodAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/foo";
             var body = new object();
             var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

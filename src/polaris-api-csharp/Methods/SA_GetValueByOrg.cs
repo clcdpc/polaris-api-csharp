@@ -17,13 +17,14 @@ namespace Clc.Polaris.Api
         /// <param name="orgId"></param>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        
 
-        public IRestResponse<StringResult> SA_GetValueByOrg(string attribute, int? organizationId = null)
+
+        public async Task<IRestResponse<StringResult>> SA_GetValueByOrgAsync(string attribute, int? organizationId = null, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
+            var token = await GetTokenAsync(cancellationToken).ConfigureAwait(false);
+            var url = $"/protected/v1/1033/100/1/{token.AccessToken}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
             var request = new PapiRestRequest(url);
-            return Execute<StringResult>(request);
+            return await ExecutePapiAsync<StringResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -10,12 +10,12 @@ namespace Clc.Polaris.Api
 {
 	public partial class PapiClient
     {
-        public IRestResponse<HoldRequestActivationResult> HoldRequestReactivate(string barcode, string password, int requestId, DateTime activationDate, int? userId = null)
+        public async Task<IRestResponse<HoldRequestActivationResult>> HoldRequestReactivateAsync(string barcode, string password, int requestId, DateTime activationDate, int? userId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/active";
             var body = new { HoldRequestActivationData = new { UserId = userId ?? UserId, activationDate } };
             var request = new PapiRestRequest(HttpMethod.Put, url, password, body);
-            return Execute<HoldRequestActivationResult>(request);
+            return await ExecutePapiAsync<HoldRequestActivationResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

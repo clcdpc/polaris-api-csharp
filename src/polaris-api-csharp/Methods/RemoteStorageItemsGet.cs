@@ -10,11 +10,12 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<RemoteStorageItemsGetResult> RemoteStorageItemsGet(int branchId, string startDate, string endDate, int maxItems, int listType, int? startItemRecordId = null)
+
+        public async Task<IRestResponse<RemoteStorageItemsGetResult>> RemoteStorageItemsGetAsync(int branchId, string startDate, string endDate, int maxItems, int listType, int? startItemRecordId = null, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/cataloging/remotestorage/items";
+            var token = await GetTokenAsync(cancellationToken).ConfigureAwait(false);
+            var url = $"/protected/v1/1033/100/1/{token.AccessToken}/cataloging/remotestorage/items";
             var request = new PapiRestRequest(url);
             request.QueryParameters.Add("branch", branchId);
             request.QueryParameters.Add("startdate", startDate);
@@ -22,7 +23,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("maxitems", maxItems);
             request.QueryParameters.Add("listtype", (int)listType);
             if (startItemRecordId.HasValue) { request.QueryParameters.Add("startitemrecordid", startItemRecordId.Value); }
-            return Execute<RemoteStorageItemsGetResult>(request);
+            return await ExecutePapiAsync<RemoteStorageItemsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

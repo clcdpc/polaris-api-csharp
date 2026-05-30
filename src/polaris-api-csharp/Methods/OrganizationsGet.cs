@@ -11,11 +11,11 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<OrganizationsGetResult> OrganizationsGet(OrganizationType type = OrganizationType.All)
+        public async Task<IRestResponse<OrganizationsGetResult>> OrganizationsGetAsync(OrganizationType type = OrganizationType.All, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/organizations/{type}";
             var request = new PapiRestRequest(url) { BlockStaffOverride = true };
-            return Execute<OrganizationsGetResult>(request);
+            return await ExecutePapiAsync<OrganizationsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

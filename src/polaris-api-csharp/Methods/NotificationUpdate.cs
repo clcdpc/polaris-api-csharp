@@ -12,11 +12,12 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<NotificationUpdateResult> NotificationUpdate(NotificationUpdateParams updateParams)
-        {            
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/notification/{updateParams.NotificationTypeId}";
+        public async Task<IRestResponse<NotificationUpdateResult>> NotificationUpdateAsync(NotificationUpdateParams updateParams, CancellationToken cancellationToken = default)
+        {
+            var token = await GetTokenAsync(cancellationToken).ConfigureAwait(false);
+            var url = $"/protected/v1/1033/100/1/{token.AccessToken}/notification/{updateParams.NotificationTypeId}";
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = updateParams };
-            return Execute<NotificationUpdateResult>(request);
+            return await ExecutePapiAsync<NotificationUpdateResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

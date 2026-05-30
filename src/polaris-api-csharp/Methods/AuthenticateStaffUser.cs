@@ -13,14 +13,14 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<ProtectedToken> AuthenticateStaffUser(PolarisUser staffUser)
+        public async Task<IRestResponse<ProtectedToken>> AuthenticateStaffUserAsync(PolarisUser staffUser, CancellationToken cancellationToken = default)
         {
             var url = "/protected/v1/1033/100/1/authenticator/staff";
             var request = new PapiRestRequest(HttpMethod.Post, url) { Body = staffUser };
-            return Post<ProtectedToken>(url, body: staffUser);
-            //return Execute<ProtectedToken>(request);
+            return await PostAsync<ProtectedToken>(url, body: staffUser, cancellationToken).ConfigureAwait(false);
+            //return await ExecutePapiAsync<ProtectedToken>(request, cancellationToken).ConfigureAwait(false);
         }
 
-        
+
     }
 }

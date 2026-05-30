@@ -11,17 +11,18 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<RecordSetRecordsGetResult> RecordSetRecordsGet(int recordSetId, int userId = 1, int workstationId = 1, int startIndex = 0, int numRecords = 1000)
+
+        public async Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int userId = 1, int workstationId = 1, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/recordsets/{recordSetId}/records";
+            var token = await GetTokenAsync(cancellationToken).ConfigureAwait(false);
+            var url = $"/protected/v1/1033/100/1/{token.AccessToken}/recordsets/{recordSetId}/records";
             var request = new PapiRestRequest(url);
             request.QueryParameters.Add("startIndex", startIndex);
             request.QueryParameters.Add("numRecords", numRecords);
             request.QueryParameters.Add("userid", userId);
             request.QueryParameters.Add("wsid", workstationId);
-            return Execute<RecordSetRecordsGetResult>(request);
+            return await ExecutePapiAsync<RecordSetRecordsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

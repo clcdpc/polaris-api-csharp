@@ -11,18 +11,19 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int[] bibIds, bool includeItems = false)
+        public async Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int[] bibIds, bool includeItems = false, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/synch/bibs/MARCxml";
+            var token = await GetTokenAsync(cancellationToken).ConfigureAwait(false);
+            var url = $"/protected/v1/1033/100/1/{token.AccessToken}/synch/bibs/MARCxml";
             var request = new PapiRestRequest(url);
             request.QueryParameters.Add("bibids", string.Join(",", bibIds));
             if (includeItems)
             {
                 request.QueryParameters.Add("includeItems", 1);
             }
-            return Execute<Sync_BibsByIdGetResult>(request);
+            return await ExecutePapiAsync<Sync_BibsByIdGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
-        public IRestResponse<Sync_BibsByIdGetResult> Synch_BibsByIdGet(int bibId, bool includeItems = false) => Synch_BibsByIdGet(new int[] { bibId }, includeItems);
+        public async Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int bibId, bool includeItems = false, CancellationToken cancellationToken = default) => await Synch_BibsByIdGetAsync(new int[] { bibId }, includeItems, cancellationToken).ConfigureAwait(false);
     }
 }

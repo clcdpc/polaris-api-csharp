@@ -7,13 +7,13 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<PatronValidateResult> PatronValidate(string barcode, string password = "")
+
+        public async Task<IRestResponse<PatronValidateResult>> PatronValidateAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}";
             var request = new PapiRestRequest(url) { Password = password };
-            return Execute<PatronValidateResult>(request);
+            return await ExecutePapiAsync<PatronValidateResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

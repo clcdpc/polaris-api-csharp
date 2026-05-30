@@ -10,9 +10,9 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<BibHoldingsGetResult> HeadingsSearch(int bibId)
+
+        public Task<IRestResponse<BibHoldingsGetResult>> HeadingsSearchAsync(int bibId, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException("need to do this at some point");
         }

@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api
     public partial class PapiClient
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="barcode"></param>
         /// <param name="fromRecordStoreId"></param>
@@ -21,12 +21,12 @@ namespace Clc.Polaris.Api
         /// <param name="toRecordStoreId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public IRestResponse<PapiResponseCommon> PatronTitleListCopyTitle(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "")
+        public async Task<IRestResponse<PapiResponseCommon>> PatronTitleListCopyTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistcopytitle/";
             var body = new PatronTitleListCopyTitleData { FromRecordStoreId = fromRecordStoreId, FromPosition = fromPosition, ToRecordStoreId = toRecordStoreId };
             var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

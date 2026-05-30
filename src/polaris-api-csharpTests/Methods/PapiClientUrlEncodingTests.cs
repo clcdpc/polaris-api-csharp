@@ -17,10 +17,12 @@ namespace Clc.Polaris.Api.Tests
         private sealed class CaptureHttpMessageHandler : HttpMessageHandler
         {
             public HttpRequestMessage? LastRequest { get; private set; }
+            public CancellationToken LastCancellationToken { get; private set; }
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 LastRequest = request;
+                LastCancellationToken = cancellationToken;
                 var response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent("{\"PAPIErrorCode\":0}")
@@ -47,13 +49,13 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronValidate_NormalBarcode_PreservesBarcodePath()
+        public async Task PatronValidate_NormalBarcode_PreservesBarcodePath()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "21945001234567";
 
-            client.PatronValidate(barcode, "pin");
+            await client.PatronValidateAsync(barcode, "pin");
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}";
             Assert.IsNotNull(handler.LastRequest);
@@ -61,13 +63,13 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronValidate_SpecialCharacters_EncodesBarcodePathSegment()
+        public async Task PatronValidate_SpecialCharacters_EncodesBarcodePathSegment()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "AB C/+#?=";
 
-            client.PatronValidate(barcode, "pin");
+            await client.PatronValidateAsync(barcode, "pin");
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}";
             Assert.IsNotNull(handler.LastRequest);
@@ -75,14 +77,26 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronUpdateUserName_EncodesBarcodeAndNewUsername()
+        public async Task PatronValidate_PassesCancellationTokenToRestClient()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+            using var cts = new CancellationTokenSource();
+
+            await client.PatronValidateAsync("21945001234567", "pin", cts.Token);
+
+            Assert.IsTrue(handler.LastCancellationToken.CanBeCanceled);
+        }
+
+        [TestMethod]
+        public async Task PatronUpdateUserName_EncodesBarcodeAndNewUsername()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "AB C/+#?=";
             var newUsername = "new user+/name?=";
 
-            client.PatronUpdateUserName(barcode, newUsername, "pin");
+            await client.PatronUpdateUserNameAsync(barcode, newUsername, "pin");
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/username/{WebUtility.UrlEncode(newUsername)}";
             Assert.IsNotNull(handler.LastRequest);
@@ -90,13 +104,13 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void HoldRequestCancel_EncodesBarcode_PreservesWsidAndUseridQueryStringValues()
+        public async Task HoldRequestCancel_EncodesBarcode_PreservesWsidAndUseridQueryStringValues()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "AB C/+#?=";
 
-            client.HoldRequestCancel(barcode, 9876, "pin", userId: 888, workstationId: 999);
+            await client.HoldRequestCancelAsync(barcode, 9876, "pin", userId: 888, workstationId: 999);
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/9876/cancelled";
             var expectedQuery = "?wsid=999&userid=888";
@@ -107,7 +121,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void CreatePatronBlocks_EncodesBarcodeInProtectedRoute_PreservesTokenPath()
+        public async Task CreatePatronBlocks_EncodesBarcodeInProtectedRoute_PreservesTokenPath()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
@@ -119,7 +133,7 @@ namespace Clc.Polaris.Api.Tests
                 ExpirationDate = DateTime.UtcNow.AddHours(1)
             };
 
-            client.CreatePatronBlocks(barcode, BlockType.FreeText, "note", userId: 888, workstationId: 999);
+            await client.CreatePatronBlocksAsync(barcode, BlockType.FreeText, "note", userId: 888, workstationId: 999);
 
             var expectedPath = $"/PAPIService/REST/protected/v1/1033/100/1/token-segment/patron/{WebUtility.UrlEncode(barcode)}/blocks";
             var expectedQuery = "?wsid=999&userid=888";
@@ -130,7 +144,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void Patron_GetBarcodeFromId_FormatsUrlCorrectly()
+        public async Task Patron_GetBarcodeFromId_FormatsUrlCorrectly()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
@@ -142,7 +156,7 @@ namespace Clc.Polaris.Api.Tests
                 ExpirationDate = DateTime.UtcNow.AddHours(1)
             };
 
-            client.Patron_GetBarcodeFromId(patronId);
+            await client.Patron_GetBarcodeFromIdAsync(patronId);
 
             var expectedPath = "/PAPIService/REST/protected/v1/1033/100/1/token-segment/patron/barcode";
             var expectedQuery = $"?patronid={patronId}";
@@ -153,7 +167,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void UpdatePickupBranchID_EncodesBarcodeAndConstructsQuery()
+        public async Task UpdatePickupBranchID_EncodesBarcodeAndConstructsQuery()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
@@ -161,7 +175,7 @@ namespace Clc.Polaris.Api.Tests
             var requestId = 1234;
             var pickupBranchId = 5678;
 
-            client.UpdatePickupBranchID(barcode, requestId, pickupBranchId, "pin", userId: 888, workstationId: 999);
+            await client.UpdatePickupBranchIDAsync(barcode, requestId, pickupBranchId, "pin", userId: 888, workstationId: 999);
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/pickupbranch";
             var expectedQuery = $"?userid=888&wsid=999&pickupbranchid={pickupBranchId}";
@@ -173,7 +187,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void NotificationQueueGet_RequestsCorrectUrl()
+        public async Task NotificationQueueGet_RequestsCorrectUrl()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
@@ -184,7 +198,7 @@ namespace Clc.Polaris.Api.Tests
                 ExpirationDate = DateTime.UtcNow.AddHours(1)
             };
 
-            client.NotificationQueueGet(1);
+            await client.NotificationQueueGetAsync(1);
 
             var expectedPath = $"/PAPIService/REST/protected/v1/1033/24/1/token-segment/notification/";
             Assert.IsNotNull(handler.LastRequest);

@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<BibSearchResult> BibSearch(BibSearchOptions options)
+        public async Task<IRestResponse<BibSearchResult>> BibSearchAsync(BibSearchOptions options, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/{options.Branch}/search/bibs/{options.SearchType}";
             if (options.SearchType == BibSearchTypes.keyword) { url += $"/{options.Qualifier}"; }
@@ -24,17 +24,17 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("bibsperpage", options.PageSize);
             request.QueryParameters.Add("limit", options.Limit ?? string.Empty);
 
-            return Execute<BibSearchResult>(request);
+            return await ExecutePapiAsync<BibSearchResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
-        public IRestResponse<BibSearchResult> BibKeywordSearch(string keyword, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP)
+        public async Task<IRestResponse<BibSearchResult>> BibKeywordSearchAsync(string keyword, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default)
         {
-            return BibSearch(new BibSearchOptions { Term = keyword, Branch = branchId ?? OrganizationId, Page = page, PageSize = pageSize, SortOption = sortBy });
+            return await BibSearchAsync(new BibSearchOptions { Term = keyword, Branch = branchId ?? OrganizationId, Page = page, PageSize = pageSize, SortOption = sortBy }, cancellationToken).ConfigureAwait(false);
         }
 
-        public IRestResponse<BibSearchResult> BibBooleanSearch(string ccl, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP)
+        public async Task<IRestResponse<BibSearchResult>> BibBooleanSearchAsync(string ccl, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default)
         {
-            return BibSearch(new BibSearchOptions { SearchType = BibSearchTypes.boolean, Term = ccl, Branch = branchId ?? OrganizationId, Page = page, PageSize = pageSize, SortOption = sortBy });
+            return await BibSearchAsync(new BibSearchOptions { SearchType = BibSearchTypes.boolean, Term = ccl, Branch = branchId ?? OrganizationId, Page = page, PageSize = pageSize, SortOption = sortBy }, cancellationToken).ConfigureAwait(false);
         }
     }
 }

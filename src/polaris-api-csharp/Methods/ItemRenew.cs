@@ -9,13 +9,13 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<ItemRenewResultWrapper> ItemRenew(string barcode, int itemId, string password = "", ItemRenewOptions renewOptions = null)
+        public async Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAsync(string barcode, int itemId, string password = "", ItemRenewOptions renewOptions = null, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/itemsout/{itemId}";
             var request = new PapiRestRequest(HttpMethod.Put, url) { Password = password, Body = renewOptions ?? new ItemRenewOptions() };
-            return Execute<ItemRenewResultWrapper>(request);
+            return await ExecutePapiAsync<ItemRenewResultWrapper>(request, cancellationToken).ConfigureAwait(false);
         }
-        public IRestResponse<ItemRenewResultWrapper> ItemRenewAllForPatron(string barcode, string password = "", ItemRenewOptions renewOptions = null)
-            => ItemRenew(barcode, 0, password, renewOptions);
+        public async Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAllForPatronAsync(string barcode, string password = "", ItemRenewOptions renewOptions = null, CancellationToken cancellationToken = default)
+            => await ItemRenewAsync(barcode, 0, password, renewOptions, cancellationToken).ConfigureAwait(false);
     }
 }

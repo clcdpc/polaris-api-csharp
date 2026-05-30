@@ -12,13 +12,13 @@ namespace Clc.Polaris.Api
 {
 	public partial class PapiClient
     {
-        
 
-        public IRestResponse<PatronCirculateBlocksResult> PatronCirculateBlocksGet(string barcode, string password = "")
+
+        public async Task<IRestResponse<PatronCirculateBlocksResult>> PatronCirculateBlocksGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/circulationblocks";
             var request = new PapiRestRequest(url) { Password = password };
-            return Execute<PatronCirculateBlocksResult>(request);
+            return await ExecutePapiAsync<PatronCirculateBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

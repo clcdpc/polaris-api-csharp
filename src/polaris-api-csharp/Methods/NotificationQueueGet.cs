@@ -9,12 +9,13 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<PapiResponseCommon> NotificationQueueGet(int orgId = 1)
+        public async Task<IRestResponse<PapiResponseCommon>> NotificationQueueGetAsync(int orgId = 1, CancellationToken cancellationToken = default)
         {
             //"protected/{Version}/{LangID}/{AppID}/{OrgID}/{AccessToken}/notification
-            var url = $"/protected/v1/1033/24/{orgId}/{Token.AccessToken}/notification/";
+            var token = await GetTokenAsync(cancellationToken).ConfigureAwait(false);
+            var url = $"/protected/v1/1033/24/{orgId}/{token.AccessToken}/notification/";
             var request = new PapiRestRequest(url);
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

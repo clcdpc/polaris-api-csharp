@@ -10,13 +10,13 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<MARCTypeOfMaterialsGetResult> MARCTypeOfMaterialsGet(int? branchId = null)
+
+        public async Task<IRestResponse<MARCTypeOfMaterialsGetResult>> MARCTypeOfMaterialsGetAsync(int? branchId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/{branchId ?? OrganizationId}/marctypeofmaterials";
             var request = new PapiRestRequest(url) { BlockStaffOverride = true };
-            return Execute<MARCTypeOfMaterialsGetResult>(request);
+            return await ExecutePapiAsync<MARCTypeOfMaterialsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

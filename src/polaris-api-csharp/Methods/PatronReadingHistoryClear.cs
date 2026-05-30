@@ -11,16 +11,16 @@ using System.Linq;
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
-    {        
-        public IRestResponse<PapiResponseCommon> PatronReadingHistoryClear(string barcode, params int[] ids)
-            => PatronReadingHistoryClear(barcode, null, ids);
+    {
+        public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default)
+            => await PatronReadingHistoryClearAsync(barcode, null, ids, cancellationToken).ConfigureAwait(false);
 
-        public IRestResponse<PapiResponseCommon> PatronReadingHistoryClear(string barcode, string password, params int[] ids)
+        public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string password, IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/readinghistory";
             var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
             if (ids.Any()) { request.QueryParameters.Add("ids", string.Join(",", ids)); }
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }
