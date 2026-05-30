@@ -51,6 +51,41 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public void PapiRestRequest_Factories_CreateExpectedRequests()
+        {
+            var getBody = new { Name = "Get" };
+            var get = PapiRestRequest.Get("/public/get", password: "pin", body: getBody);
+            Assert.AreEqual(HttpMethod.Get, get.Method);
+            Assert.AreEqual("/public/get", get.Path);
+            Assert.AreEqual("pin", get.Password);
+            Assert.AreSame(getBody, get.Body);
+
+            var postBody = new { Name = "Post" };
+            var post = PapiRestRequest.Post("/public/post", body: postBody);
+            Assert.AreEqual(HttpMethod.Post, post.Method);
+            Assert.AreEqual("/public/post", post.Path);
+            Assert.AreSame(postBody, post.Body);
+
+            var putBody = new { Name = "Put" };
+            var put = PapiRestRequest.Put("/public/put", body: putBody, password: "put-pin");
+            Assert.AreEqual(HttpMethod.Put, put.Method);
+            Assert.AreEqual("/public/put", put.Path);
+            Assert.AreEqual("put-pin", put.Password);
+            Assert.AreSame(putBody, put.Body);
+
+            var delete = PapiRestRequest.Delete("/public/delete");
+            Assert.AreEqual(HttpMethod.Delete, delete.Method);
+            Assert.AreEqual("/public/delete", delete.Path);
+
+            var createBody = new { Name = "Create" };
+            var create = PapiRestRequest.Create(HttpMethod.Patch, "/public/create", body: createBody, password: "create-pin");
+            Assert.AreEqual(HttpMethod.Patch, create.Method);
+            Assert.AreEqual("/public/create", create.Path);
+            Assert.AreEqual("create-pin", create.Password);
+            Assert.AreSame(createBody, create.Body);
+        }
+
+        [TestMethod]
         public void PapiRestRequest_PathClassification_IsStable()
         {
             var publicRequest = new PapiRestRequest("/public/foo");

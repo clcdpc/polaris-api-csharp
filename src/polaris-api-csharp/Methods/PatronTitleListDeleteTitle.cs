@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 
 namespace Clc.Polaris.Api
@@ -27,7 +26,7 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PapiResponseCommon>> PatronTitleListDeleteTitleAsync(string barcode, int listId, int position, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistdeletetitle";
-            var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
+            var request = PapiRestRequest.Delete(url, password: password);
             request.QueryParameters.Add("list", listId);
             request.QueryParameters.Add("position", position);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);

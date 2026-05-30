@@ -16,7 +16,8 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PickupBranchesGetResult>> PickupBranchesGetAsync(int? organizationId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/{organizationId ?? OrganizationId}/pickupbranches";
-            var request = new PapiRestRequest(url) { BlockStaffOverride = true };
+            var request = PapiRestRequest.Get(url);
+            request.BlockStaffOverride = true;
             return await ExecutePapiAsync<PickupBranchesGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 
 namespace Clc.Polaris.Api
@@ -18,7 +17,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/recordsets/{recordSetId}";
             var body = new { records = string.Join(",", records) };
-            var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
+            var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("action", action);
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);

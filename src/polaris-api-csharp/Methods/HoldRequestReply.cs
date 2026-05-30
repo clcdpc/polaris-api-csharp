@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System.Net.Http;
 
 namespace Clc.Polaris.Api
 {
@@ -23,7 +22,7 @@ namespace Clc.Polaris.Api
                 State = (int)state
             };
 
-            var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
+            var request = PapiRestRequest.Put(url, body: body);
             return await ExecutePapiAsync<HoldRequestReplyResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
