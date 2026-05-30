@@ -15,9 +15,11 @@ namespace Clc.Polaris.Api
     {
         public IRestResponse<CreatePatronBlocksResult> CreatePatronBlocks(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/blocks?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/blocks";
             var body = new CreatePatronBlocksRequest((int)blockType, blockValue);
             var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
 
             return Execute<CreatePatronBlocksResult>(request);
         }

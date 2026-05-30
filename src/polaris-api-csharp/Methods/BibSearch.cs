@@ -16,9 +16,13 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/{options.Branch}/search/bibs/{options.SearchType}";
             if (options.SearchType == BibSearchTypes.keyword) { url += $"/{options.Qualifier}"; }
-            url += $"?q={WebUtility.UrlEncode(options.Term)}&sort={options.SortOption}&page={options.Page}&bibsperpage={options.PageSize}&limit={options.Limit}";
 
             var request = new PapiRestRequest(url) { BlockStaffOverride = true };
+            request.QueryParameters.Add("q", options.Term ?? string.Empty);
+            request.QueryParameters.Add("sort", options.SortOption);
+            request.QueryParameters.Add("page", options.Page);
+            request.QueryParameters.Add("bibsperpage", options.PageSize);
+            request.QueryParameters.Add("limit", options.Limit ?? string.Empty);
 
             return Execute<BibSearchResult>(request);
         }
