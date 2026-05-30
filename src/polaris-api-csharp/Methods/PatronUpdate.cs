@@ -2,6 +2,7 @@
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,12 @@ namespace Clc.Polaris.Api
     {
         
 
-        public IRestResponse<PatronUpdateResult> PatronUpdate(string barcode, PatronUpdateParams updateParams, string password = "", bool ignoresa = true)
+        public async Task<IRestResponse<PatronUpdateResult>> PatronUpdateAsync(string barcode, PatronUpdateParams updateParams, string password = "", bool ignoresa = true, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}";
             var request = new PapiRestRequest(HttpMethod.Put, url) { Password = password, Body = updateParams };
             request.QueryParameters.Add("ignoresa", ignoresa);
-            return Execute<PatronUpdateResult>(request);
+            return await ExecutePapiAsync<PatronUpdateResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

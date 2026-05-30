@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
@@ -13,12 +14,12 @@ namespace Clc.Polaris.Api
     {
         
 
-        public IRestResponse<PatronMessagesGetResult> PatronMessagesGet(string barcode, bool unreadOnly = false, string password = "")
+        public async Task<IRestResponse<PatronMessagesGetResult>> PatronMessagesGetAsync(string barcode, bool unreadOnly = false, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/messages";
             var request = new PapiRestRequest(url) { Password = password };
             request.QueryParameters.Add("unreadonly", unreadOnly ? 1 : 0);
-            return Execute<PatronMessagesGetResult>(request);
+            return await ExecutePapiAsync<PatronMessagesGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

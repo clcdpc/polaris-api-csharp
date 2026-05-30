@@ -18,10 +18,12 @@ namespace Clc.Polaris.Api.Tests
         {
             public HttpRequestMessage? LastRequest { get; private set; }
             public string? RequestContent { get; private set; }
+            public CancellationToken LastCancellationToken { get; private set; }
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 LastRequest = request;
+                LastCancellationToken = cancellationToken;
                 if (request.Content != null)
                 {
                     RequestContent = await request.Content.ReadAsStringAsync(cancellationToken);
@@ -52,14 +54,14 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void AuthenticatePatron_SendsPostRequestWithJsonBody()
+        public async Task AuthenticatePatron_SendsPostRequestWithJsonBody()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "21945001234567";
             var password = "mypassword";
 
-            var response = client.AuthenticatePatron(barcode, password);
+            var response = await client.AuthenticatePatronAsync(barcode, password);
 
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Post, handler.LastRequest.Method);
@@ -74,6 +76,18 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual("mock-token", response.Data.AccessToken);
             Assert.AreEqual("mock-secret", response.Data.AccessSecret);
             Assert.AreEqual(123, response.Data.PatronID);
+        }
+
+        [TestMethod]
+        public async Task ApiKeyValidateAsync_PassesCancellationTokenToHttpHandler()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+            using var cts = new CancellationTokenSource();
+
+            await client.ApiKeyValidateAsync(cts.Token);
+
+            Assert.IsTrue(handler.LastCancellationToken.CanBeCanceled);
         }
     }
 }

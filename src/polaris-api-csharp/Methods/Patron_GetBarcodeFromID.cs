@@ -2,6 +2,7 @@
 using Clc.Polaris.Api.Models;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 namespace Clc.Polaris.Api
 {
@@ -9,12 +10,13 @@ namespace Clc.Polaris.Api
     {
         
 
-        public IRestResponse<GetBarcodeAndPatronIDResult> Patron_GetBarcodeFromId(int patronId)
+        public async Task<IRestResponse<GetBarcodeAndPatronIDResult>> Patron_GetBarcodeFromIdAsync(int patronId, CancellationToken cancellationToken = default)
         {
+            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
             var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/barcode";
             var request = new PapiRestRequest(url);
             request.QueryParameters.Add("patronid", patronId);
-            return Execute<GetBarcodeAndPatronIDResult>(request);
+            return await ExecutePapiAsync<GetBarcodeAndPatronIDResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

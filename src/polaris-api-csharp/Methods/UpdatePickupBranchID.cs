@@ -1,6 +1,7 @@
 ﻿using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +15,14 @@ namespace Clc.Polaris.Api
     {
         
 
-        public IRestResponse<PapiResponseCommon> UpdatePickupBranchID(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null)
+        public async Task<IRestResponse<PapiResponseCommon>> UpdatePickupBranchIDAsync(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/pickupbranch";
             var request = new PapiRestRequest(HttpMethod.Put, url) { Password = password };
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             request.QueryParameters.Add("pickupbranchid", pickupBranchId);
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

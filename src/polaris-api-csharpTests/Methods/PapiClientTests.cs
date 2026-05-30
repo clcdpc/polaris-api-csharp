@@ -49,33 +49,33 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        public void ApiKeyValidateTest()
+        public async Task ApiKeyValidateTest()
         {
-            var response = papi.ApiKeyValidate();
+            var response = await papi.ApiKeyValidateAsync();
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
         }
 
         [TestMethod()]
-        public void ApiVersionGetTest()
+        public async Task ApiVersionGetTest()
         {
-            var response = papi.ApiVersionGet();
+            var response = await papi.ApiVersionGetAsync();
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.ToString()));
         }
 
         [TestMethod()]
-        public void AuthenticateStaffUserTest()
+        public async Task AuthenticateStaffUserTest()
         {
-            var response = papi.AuthenticateStaffUser(papi.StaffOverrideAccount);
+            var response = await papi.AuthenticateStaffUserAsync(papi.StaffOverrideAccount);
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessToken));
         }
 
         [TestMethod()]
-        public void BibGetTest()
+        public async Task BibGetTest()
         {
-            var response = papi.BibGet(478907);
+            var response = await papi.BibGetAsync(478907);
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("100/1/bib"));
@@ -83,496 +83,496 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        public void BibGetTest_PassBranchId()
+        public async Task BibGetTest_PassBranchId()
         {
-            var response = papi.BibGet(bibId, 7);
+            var response = await papi.BibGetAsync(bibId, 7);
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("100/7/bib"));
         }
 
         [TestMethod()]
-        public void BibSearchTest()
+        public async Task BibSearchTest()
         {
-            var response = papi.BibSearch(new BibSearchOptions { Term = "dogs", PageSize = 10 });
+            var response = await papi.BibSearchAsync(new BibSearchOptions { Term = "dogs", PageSize = 10 });
             Assert.IsTrue(response.Data.PAPIErrorCode == 10);
             Assert.IsTrue(response.Data.WordList == "dogs ");
             Assert.IsTrue(response.Data.TotalRecordsFound > 10000);
         }
 
         [TestMethod()]
-        public void CollectionsGetTest()
+        public async Task CollectionsGetTest()
         {
-            var response = papi.CollectionsGet();
+            var response = await papi.CollectionsGetAsync();
             Assert.IsTrue(response.Data.PAPIErrorCode > 300);
             Assert.IsTrue(response.Data.CollectionsRows.Count > 300);
             Assert.AreEqual(response.Data.PAPIErrorCode, response.Data.CollectionsRows.Count);
         }
 
         [TestMethod()]
-        public void CreatePatronBlocksTest_FreeTextBlock()
+        public async Task CreatePatronBlocksTest_FreeTextBlock()
         {
-            var response = papi.CreatePatronBlocks(Settings.PatronBarcode, BlockType.FreeText, Settings.FreeTextBlock);
+            var response = await papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.FreeText, Settings.FreeTextBlock);
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
 
         [TestMethod()]
-        public void CreatePatronBlocksTest_SystemBlock()
+        public async Task CreatePatronBlocksTest_SystemBlock()
         {
-            var response = papi.CreatePatronBlocks(Settings.PatronBarcode, BlockType.System, "128");
+            var response = await papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.System, "128");
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
 
         [TestMethod()]
-        public void CreatePatronBlocksTest_LibraryAssignedBlock()
+        public async Task CreatePatronBlocksTest_LibraryAssignedBlock()
         {
-            var response = papi.CreatePatronBlocks(Settings.PatronBarcode, BlockType.LibraryAssigned, "1");
+            var response = await papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.LibraryAssigned, "1");
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
 
         [TestMethod()]
-        public void DatesClosedGetTest()
+        public async Task DatesClosedGetTest()
         {
-            var response = papi.DatesClosedGet(7);
+            var response = await papi.DatesClosedGetAsync(7);
             Assert.IsTrue(response.Data.DatesClosedRows.Any());
         }
 
         [TestMethod()]
-        public void HeadingsSearchTest()
+        public async Task HeadingsSearchTest()
         {
-            Assert.ThrowsException<NotImplementedException>(() => papi.HeadingsSearch(bibId));
+            Assert.ThrowsException<NotImplementedException>(() => papi.HeadingsSearchAsync(bibId));
         }
 
         [TestMethod()]
-        public void HoldingsGetTest()
+        public async Task HoldingsGetTest()
         {
-            var response = papi.HoldingsGet(bibId);
+            var response = await papi.HoldingsGetAsync(bibId);
             Assert.IsTrue(response.Data.BibHoldingsGetRows.Any());
         }
 
         [TestMethod()]
-        public void HoldRequestCancelTest()
+        public async Task HoldRequestCancelTest()
         {
-            var response = papi.HoldRequestCancel(Settings.PatronBarcode, 1234, Settings.PatronPin);
+            var response = await papi.HoldRequestCancelAsync(Settings.PatronBarcode, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4201);
         }
 
         [TestMethod()]
-        public void HoldRequestCreateTest()
+        public async Task HoldRequestCreateTest()
         {
-            var response = papi.HoldRequestCreate(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7));
+            var response = await papi.HoldRequestCreateAsync(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7));
             Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
         }
 
         [TestMethod()]
-        public void HoldRequestCreateTest2()
+        public async Task HoldRequestCreateTest2()
         {
-            var response = ((PapiClient)papi).HoldRequestCreate(Settings.PatronId, 1234, 7);
+            var response = await ((PapiClient)papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
         }
 
         [TestMethod()]
-        public void HoldRequestGetListTest()
+        public async Task HoldRequestGetListTest()
         {
-            var response = papi.HoldRequestGetList(7);
+            var response = await papi.HoldRequestGetListAsync(7);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void HoldRequestReactivateTest()
+        public async Task HoldRequestReactivateTest()
         {
-            var response = papi.HoldRequestReactivate(Settings.PatronBarcode, Settings.PatronPin, 1234, DateTime.Now);
+            var response = await papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, 1234, DateTime.Now);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4201);
         }
 
         [TestMethod()]
-        public void HoldRequestReplyTest()
+        public async Task HoldRequestReplyTest()
         {
             var hold = new HoldRequestCreateResult { RequestGuid = new Guid() };
-            var response = papi.HoldRequestReply(hold, 7, HoldRequestReplyAnswer.Yes, HoldRequestReplyState.AcceptEvenWithExistingHolds);
+            var response = await papi.HoldRequestReplyAsync(hold, 7, HoldRequestReplyAnswer.Yes, HoldRequestReplyState.AcceptEvenWithExistingHolds);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4101);
         }
 
         [TestMethod()]
-        public void HoldRequestSuspendTest()
+        public async Task HoldRequestSuspendTest()
         {
-            var response = papi.HoldRequestSuspend(Settings.PatronBarcode, 1234, DateTime.Now, Settings.PatronPin);
+            var response = await papi.HoldRequestSuspendAsync(Settings.PatronBarcode, 1234, DateTime.Now, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4201);
         }
 
         [TestMethod()]
-        public void ItemRenewTest()
+        public async Task ItemRenewTest()
         {
-            var response = papi.ItemRenew(Settings.PatronBarcode, 1234, Settings.PatronPin);
+            var response = await papi.ItemRenewAsync(Settings.PatronBarcode, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -6001);
         }
 
         [TestMethod()]
-        public void ItemStatusesGetAsyncTest()
+        public async Task ItemStatusesGetAsyncTest()
         {
-            var response = papi.ItemStatusesGet(7);
+            var response = await papi.ItemStatusesGetAsync(7);
             Assert.IsTrue(response.Data.ItemStatusesRows.Count() == response.Data.PAPIErrorCode);
         }
 
         //[TestMethod()]
         //public void ItemUpdateBarcodeTest()
         //{
-        //    var response = papi.ItemUpdateBarcode("1234", 1234);
+        //    var response = await papi.ItemUpdateBarcodeAsync("1234", 1234);
         //    Assert.IsTrue(response.Data.PAPIErrorCode == -2000);
         //}
 
         [TestMethod()]
-        public void LimitFiltersGetTest()
+        public async Task LimitFiltersGetTest()
         {
-            var response = papi.LimitFiltersGet().Data;
+            var response = (await papi.LimitFiltersGetAsync()).Data;
             Assert.IsTrue(response.LimitFiltersRows.Count() == response.PAPIErrorCode);
         }
 
         [TestMethod()]
-        public void MARCTypeOfMaterialsGetAsyncTest()
+        public async Task MARCTypeOfMaterialsGetAsyncTest()
         {
-            var response = papi.MARCTypeOfMaterialsGet().Data;
+            var response = (await papi.MARCTypeOfMaterialsGetAsync()).Data;
             Assert.IsTrue(response.MARCTypeOfMaterialsRows.Count() == response.PAPIErrorCode);
         }
 
         [TestMethod()]
-        public void NotificationUpdateTest()
+        public async Task NotificationUpdateTest()
         {
-            var response = papi.NotificationUpdate(new NotificationUpdateParams { PatronId = Settings.PatronId, DeliveryString = "test@test.test", ReportingOrgID = 7, NotificationDeliveryDate = DateTime.Now, DeliveryOptionId = 2, Details = "test", NotificationStatusId = NotificationStatus.EmailCompleted, NotificationTypeId = 1 }).Data;
+            var response = (await papi.NotificationUpdateAsync(new NotificationUpdateParams { PatronId = Settings.PatronId, DeliveryString = "test@test.test", ReportingOrgID = 7, NotificationDeliveryDate = DateTime.Now, DeliveryOptionId = 2, Details = "test", NotificationStatusId = NotificationStatus.EmailCompleted, NotificationTypeId = 1 })).Data;
             Assert.IsTrue(response.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void OrganizationsGetTest()
+        public async Task OrganizationsGetTest()
         {
-            var response = papi.OrganizationsGet();
+            var response = await papi.OrganizationsGetAsync();
             Assert.IsTrue(response.Data.OrganizationsGetRows.Count() == response.Data.PAPIErrorCode);
         }
 
         [TestMethod()]
-        public void Patron_GetBarcodeFromIdTest()
+        public async Task Patron_GetBarcodeFromIdTest()
         {
-            var response = papi.Patron_GetBarcodeFromId(Settings.PatronId);
+            var response = await papi.Patron_GetBarcodeFromIdAsync(Settings.PatronId);
             Assert.IsTrue(response.Data.Barcode == Settings.PatronBarcode);
         }
 
         [TestMethod()]
-        public void PatronAccountCreateCreditTest()
+        public async Task PatronAccountCreateCreditTest()
         {
-            var response = papi.PatronAccountCreateCredit(Settings.PatronBarcode, .01, PaymentMethod.Cash);
+            var response = await papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void TestTitleListCreate_Get_Delete()
+        public async Task TestTitleListCreate_Get_Delete()
         {
-            var createResponse = papi.PatronAccountCreateTitleList(Settings.PatronBarcode, Settings.PatronListName, Settings.PatronPin);
+            var createResponse = await papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, Settings.PatronListName, Settings.PatronPin);
             Assert.IsTrue(createResponse.Data.PAPIErrorCode == 0 || createResponse.Data.PAPIErrorCode == -1);
 
-            var getResponse = papi.PatronAccountGetTitleLists(Settings.PatronBarcode, Settings.PatronPin);
+            var getResponse = await papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
             var list = getResponse.Data.PatronAccountTitleListsRows.Single(l => l.RecordStoreName == Settings.PatronListName);
-            var deleteResponse = papi.PatronAccountDeleteTitleList(Settings.PatronBarcode, list.RecordStoreId, Settings.PatronPin);
+            var deleteResponse = await papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, list.RecordStoreId, Settings.PatronPin);
             Assert.IsTrue(deleteResponse.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronAccountDepositCreditTest()
+        public async Task PatronAccountDepositCreditTest()
         {
-            var response = papi.PatronAccountDepositCredit(Settings.PatronBarcode, .01, note: "integration testing");
+            var response = await papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, note: "integration testing");
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronAccountGetTest()
+        public async Task PatronAccountGetTest()
         {
-            var response = papi.PatronAccountGet(Settings.PatronBarcode, Settings.PatronPin);
+            var response = await papi.PatronAccountGetAsync(Settings.PatronBarcode, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
             Assert.IsTrue(response.Data.PatronAccountGetRows.Any());
         }
 
         [TestMethod()]
-        public void PatronAccountPayTest()
+        public async Task PatronAccountPayTest()
         {
-            var response = papi.PatronAccountPay(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: "integration testing").Data;
+            var response = (await papi.PatronAccountPayAsync(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: "integration testing")).Data;
             Assert.IsTrue(response.PAPIErrorCode == -3600);
         }
 
         [TestMethod()]
-        public void PatronAccountPayAllTest()
+        public async Task PatronAccountPayAllTest()
         {
-            var response = papi.PatronAccountPayAll(Settings.PatronBarcode, 999999.99, PaymentMethod.Cash, note: "integration testing");
+            var response = await papi.PatronAccountPayAllAsync(Settings.PatronBarcode, 999999.99, PaymentMethod.Cash, note: "integration testing");
             Assert.IsTrue(response.Data.PAPIErrorCode == -3610);
         }
 
         [TestMethod()]
-        public void PatronAccountRefundCreditTest()
+        public async Task PatronAccountRefundCreditTest()
         {
-            var response = papi.PatronAccountRefundCredit(Settings.PatronBarcode, 999999.99, note: "integration testing");
+            var response = await papi.PatronAccountRefundCreditAsync(Settings.PatronBarcode, 999999.99, note: "integration testing");
             Assert.IsTrue(response.Data.PAPIErrorCode == -3606);
         }
 
         [TestMethod()]
-        public void PatronAccountVoidTest()
+        public async Task PatronAccountVoidTest()
         {
-            var response = papi.PatronAccountVoid(Settings.PatronBarcode, 1234, note: "integration testing");
+            var response = await papi.PatronAccountVoidAsync(Settings.PatronBarcode, 1234, note: "integration testing");
             Assert.IsTrue(response.Data.PAPIErrorCode == -3606);
         }
 
         [TestMethod()]
-        public void PatronBasicDataGetTest()
+        public async Task PatronBasicDataGetTest()
         {
-            var response = papi.PatronBasicDataGet(Settings.PatronBarcode, Settings.PatronPin, true);
+            var response = await papi.PatronBasicDataGetAsync(Settings.PatronBarcode, Settings.PatronPin, true);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
             Assert.IsTrue(response.Data.PatronBasicData.PatronID == Settings.PatronId);
             Assert.IsTrue(response.Data.PatronBasicData.PatronAddresses.Any());
         }
 
         [TestMethod()]
-        public void PatronCirculateBlocksGetTest()
+        public async Task PatronCirculateBlocksGetTest()
         {
-            var response = papi.PatronCirculateBlocksGet(Settings.PatronBarcode, Settings.PatronPin);
+            var response = await papi.PatronCirculateBlocksGetAsync(Settings.PatronBarcode, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronCodesGetTest()
+        public async Task PatronCodesGetTest()
         {
-            var response = papi.PatronCodesGet();
+            var response = await papi.PatronCodesGetAsync();
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
             Assert.IsTrue(response.Data.PatronCodesRows.Any());
         }
 
         [TestMethod()]
-        public void PatronHoldRequestsGetTest()
+        public async Task PatronHoldRequestsGetTest()
         {
-            var response = papi.PatronHoldRequestsGet(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin);
+            var response = await papi.PatronHoldRequestsGetAsync(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
             Assert.IsTrue(response.Data.PatronHoldRequestsGetRows.Any());
         }
 
         [TestMethod()]
-        public void PatronILLRequestsGetTest()
+        public async Task PatronILLRequestsGetTest()
         {
-            var response = papi.PatronILLRequestsGet(Settings.PatronBarcode, password: Settings.PatronPin);
+            var response = await papi.PatronILLRequestsGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
             //Assert.IsTrue(response.Data.PatronILLRequestsGetRows.Any());
         }
 
         [TestMethod()]
-        public void PatronItemsOutGetTest()
+        public async Task PatronItemsOutGetTest()
         {
-            var response = papi.PatronItemsOutGet(Settings.PatronBarcode, password: Settings.PatronPin);
+            var response = await papi.PatronItemsOutGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
             //Assert.IsTrue(response.Data.PatronItemsOutGetRows.Any());
         }
 
         [TestMethod()]
-        public void PatronMessageDeleteTest()
+        public async Task PatronMessageDeleteTest()
         {
-            var response = papi.PatronMessageDelete(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
+            var response = await papi.PatronMessageDeleteAsync(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronMessagesGetTest()
+        public async Task PatronMessagesGetTest()
         {
-            var response = papi.PatronMessagesGet(Settings.PatronBarcode, password: Settings.PatronPin);
+            var response = await papi.PatronMessagesGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronMessageUpdateStatusTest()
+        public async Task PatronMessageUpdateStatusTest()
         {
-            var response = papi.PatronMessageUpdateStatus(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
+            var response = await papi.PatronMessageUpdateStatusAsync(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronPreferencesGetTest()
+        public async Task PatronPreferencesGetTest()
         {
-            var response = papi.PatronPreferencesGet(Settings.PatronBarcode, Settings.PatronPin);
+            var response = await papi.PatronPreferencesGetAsync(Settings.PatronBarcode, Settings.PatronPin);
             Assert.IsTrue(response.Data.PatronPreferences.PatronID == Settings.PatronId);
         }
 
         [TestMethod()]
-        public void PatronReadingHistoryClearTest()
+        public async Task PatronReadingHistoryClearTest()
         {
-            var response = papi.PatronReadingHistoryClear(Settings.PatronBarcode, 1234);
+            var response = await papi.PatronReadingHistoryClearAsync(Settings.PatronBarcode, new[] { 1234 });
             Assert.IsTrue(response.Data.PAPIErrorCode == -10);
         }
 
         [TestMethod()]
-        public void PatronReadingHistoryGetTest()
+        public async Task PatronReadingHistoryGetTest()
         {
-            var response = papi.PatronReadingHistoryGet(Settings.PatronBarcode, password: Settings.PatronPin);
+            var response = await papi.PatronReadingHistoryGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.PatronReadingHistoryGetRows.Count());
         }
 
         //[TestMethod()]
         //public void PatronRegistrationCreateTest()
         //{
-        //    var response = papi.PatronRegistrationCreate(new PatronRegistrationParams());
+        //    var response = await papi.PatronRegistrationCreateAsync(new PatronRegistrationParams());
         //    Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         //}
 
         [TestMethod()]
-        public void PatronRenewBlocksGetTest()
+        public async Task PatronRenewBlocksGetTest()
         {
-            var response = papi.PatronRenewBlocksGet(Settings.PatronId);
+            var response = await papi.PatronRenewBlocksGetAsync(Settings.PatronId);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronSavedSearchesGetTest()
+        public async Task PatronSavedSearchesGetTest()
         {
-            var response = papi.PatronSavedSearchesGet(Settings.PatronBarcode, Settings.PatronPin);
+            var response = await papi.PatronSavedSearchesGetAsync(Settings.PatronBarcode, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronSearchTest()
+        public async Task PatronSearchTest()
         {
-            var response = papi.PatronSearch($"PRID={Settings.PatronId}");
+            var response = await papi.PatronSearchAsync($"PRID={Settings.PatronId}");
             Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.PatronSearchRows.Count);
         }
 
         [TestMethod()]
-        public void PatronTitleListAddTitleTest()
+        public async Task PatronTitleListAddTitleTest()
         {
-            var response = papi.PatronTitleListAddTitle(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
+            var response = await papi.PatronTitleListAddTitleAsync(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronTitleListCopyAllTitlesTest()
+        public async Task PatronTitleListCopyAllTitlesTest()
         {
-            var response = papi.PatronTitleListCopyAllTitles(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
+            var response = await papi.PatronTitleListCopyAllTitlesAsync(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronTitleListCopyTitleTest()
+        public async Task PatronTitleListCopyTitleTest()
         {
-            var response = papi.PatronTitleListCopyTitle(Settings.PatronBarcode, 1234, 1234, 1234, Settings.PatronPin);
+            var response = await papi.PatronTitleListCopyTitleAsync(Settings.PatronBarcode, 1234, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronTitleListDeleteAllTitlesTest()
+        public async Task PatronTitleListDeleteAllTitlesTest()
         {
-            var response = papi.PatronTitleListDeleteAllTitles(Settings.PatronBarcode, 1234, Settings.PatronPin);
+            var response = await papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronTitleListDeleteTitleTest()
+        public async Task PatronTitleListDeleteTitleTest()
         {
-            var response = papi.PatronTitleListDeleteTitle(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
+            var response = await papi.PatronTitleListDeleteTitleAsync(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronTitleListGetTitlesTest()
+        public async Task PatronTitleListGetTitlesTest()
         {
-            var response = papi.PatronTitleListGetTitles(Settings.PatronBarcode, 1234, password: Settings.PatronPin);
+            var response = await papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, 1234, password: Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronTitleListMoveTitleTest()
+        public async Task PatronTitleListMoveTitleTest()
         {
-            var response = papi.PatronTitleListMoveTitle(Settings.PatronBarcode, 1234, 1234, 1234, Settings.PatronPin);
+            var response = await papi.PatronTitleListMoveTitleAsync(Settings.PatronBarcode, 1234, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
 
         [TestMethod()]
-        public void PatronUpdateTest()
+        public async Task PatronUpdateTest()
         {
-            var response = papi.PatronUpdate(Settings.PatronBarcode, new PatronUpdateParams(), Settings.PatronPin);
+            var response = await papi.PatronUpdateAsync(Settings.PatronBarcode, new PatronUpdateParams(), Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
         [TestMethod()]
-        public void PatronUpdateUserNameTest()
+        public async Task PatronUpdateUserNameTest()
         {
-            var response = papi.PatronUpdateUserName(Settings.PatronBarcode + "1234", Settings.PatronPin, Settings.PatronPin);
+            var response = await papi.PatronUpdateUserNameAsync(Settings.PatronBarcode + "1234", Settings.PatronPin, Settings.PatronPin);
             Assert.IsTrue(response.Response.StatusCode == HttpStatusCode.Unauthorized);
         }
 
         [TestMethod()]
-        public void PatronValidateTest()
+        public async Task PatronValidateTest()
         {
-            var response = papi.PatronValidate(Settings.PatronBarcode, Settings.PatronPin);
+            var response = await papi.PatronValidateAsync(Settings.PatronBarcode, Settings.PatronPin);
             Assert.IsTrue(response.Data.PatronID == Settings.PatronId);
         }
 
         [TestMethod()]
-        public void PickupBranchesGetTest()
+        public async Task PickupBranchesGetTest()
         {
-            var response = papi.PickupBranchesGet();
+            var response = await papi.PickupBranchesGetAsync();
             Assert.IsTrue(response.Data.PickupBranchesRows.Any());
         }
 
         [TestMethod()]
-        public void RecordSetContentAddTest()
+        public async Task RecordSetContentAddTest()
         {
-            var response = papi.RecordSetContentAdd(1234, 1234);
+            var response = await papi.RecordSetContentAddAsync(1234, 1234);
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
         [TestMethod()]
-        public void RecordSetContentAddTest_List()
+        public async Task RecordSetContentAddTest_List()
         {
-            var response = papi.RecordSetContentAdd(1234, new[] { 1234 });
+            var response = await papi.RecordSetContentAddAsync(1234, new[] { 1234 });
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
         [TestMethod()]
-        public void RecordSetContentRemoveTest()
+        public async Task RecordSetContentRemoveTest()
         {
-            var response = papi.RecordSetContentRemove(1234, 1234);
+            var response = await papi.RecordSetContentRemoveAsync(1234, 1234);
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
         [TestMethod()]
-        public void RecordSetContentRemoveTest_List()
+        public async Task RecordSetContentRemoveTest_List()
         {
-            var response = papi.RecordSetContentRemove(1234, new[] { 1234 });
+            var response = await papi.RecordSetContentRemoveAsync(1234, new[] { 1234 });
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
         [TestMethod()]
-        public void RecordSetRecordsGetTest()
+        public async Task RecordSetRecordsGetTest()
         {
-            var response = papi.RecordSetRecordsGet(1234);
+            var response = await papi.RecordSetRecordsGetAsync(1234);
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
         //[TestMethod()]
         //public void RemoteStorageItemsGetTest()
         //{
-        //    var response = papi.RemoteStorageItemsGet(7, "asdf", "asdf", 1, 1);
+        //    var response = await papi.RemoteStorageItemsGetAsync(7, "asdf", "asdf", 1, 1);
         //    Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         //}
 
         [TestMethod()]
-        public void SA_GetValueByOrgTest()
+        public async Task SA_GetValueByOrgTest()
         {
-            var response = papi.SA_GetValueByOrg("ORGEMAIL");
+            var response = await papi.SA_GetValueByOrgAsync("ORGEMAIL");
             Assert.IsTrue(response.Data.Value == Settings.OrgEmail);
         }
 
         [TestMethod()]
-        public void ShelfLocationsGetTest()
+        public async Task ShelfLocationsGetTest()
         {
-            var response = papi.ShelfLocationsGet(7);
+            var response = await papi.ShelfLocationsGetAsync(7);
             Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.ShelfLocationsRows.Count());
         }
 
         [TestMethod()]
-        public void Synch_BibsByIdGetTest()
+        public async Task Synch_BibsByIdGetTest()
         {
-            var response = papi.Synch_BibsByIdGet(bibId);
+            var response = await papi.Synch_BibsByIdGetAsync(bibId);
             Assert.IsTrue(response.Response.IsSuccessStatusCode);
         }
     }
