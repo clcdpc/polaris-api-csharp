@@ -15,6 +15,8 @@ namespace Clc.Polaris.Api.Models
     [XmlRoot(ElementName = "AuthenticationResult")]
     public class ProtectedToken : PapiResponseCommon
     {
+        public const string Placeholder = "__PAPI_PROTECTED_ACCESS_TOKEN__";
+
         /// <summary>
         /// Access token
         /// </summary>

@@ -15,8 +15,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronRenewBlocksResult>> PatronRenewBlocksGetAsync(int patronId, int? branchId = null, CancellationToken cancellationToken = default)
         {
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/100/{branchId ?? OrganizationId}/{Token.AccessToken}/circulation/patron/{patronId}/renewblocks";
+            var url = $"/protected/v1/1033/100/{branchId ?? OrganizationId}/{ProtectedToken.Placeholder}/circulation/patron/{patronId}/renewblocks";
             var request = new PapiRestRequest(url);
             return await ExecutePapiAsync<PatronRenewBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }

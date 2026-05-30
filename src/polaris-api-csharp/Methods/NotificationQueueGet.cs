@@ -13,8 +13,7 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PapiResponseCommon>> NotificationQueueGetAsync(int orgId = 1, CancellationToken cancellationToken = default)
         {
             //"protected/{Version}/{LangID}/{AppID}/{OrgID}/{AccessToken}/notification
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/24/{orgId}/{Token.AccessToken}/notification/";
+            var url = $"/protected/v1/1033/24/{orgId}/{ProtectedToken.Placeholder}/notification/";
             var request = new PapiRestRequest(url);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }

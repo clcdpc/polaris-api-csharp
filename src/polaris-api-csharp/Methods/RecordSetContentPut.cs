@@ -16,8 +16,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentPutAsync(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/recordsets/{recordSetId}";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/recordsets/{recordSetId}";
             var body = new { records = string.Join(",", records) };
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
             request.QueryParameters.Add("action", action);

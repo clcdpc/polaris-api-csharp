@@ -16,8 +16,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronBlocksAsync(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/blocks";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{WebUtility.UrlEncode(barcode)}/blocks";
             var body = new CreatePatronBlocksRequest((int)blockType, blockValue);
             var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);

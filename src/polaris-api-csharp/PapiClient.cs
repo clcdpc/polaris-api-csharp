@@ -147,14 +147,44 @@ namespace Clc.Polaris.Api
 
         private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default, ProtectedTokenPreloadMode tokenPreloadMode = ProtectedTokenPreloadMode.Auto)
         {
+            var pathContainsProtectedTokenPlaceholder = RequestPathContainsProtectedTokenPlaceholder(request);
+
+            if (tokenPreloadMode == ProtectedTokenPreloadMode.Skip && pathContainsProtectedTokenPlaceholder)
+            {
+                throw new InvalidOperationException("ProtectedToken.Placeholder cannot be used when protected token preloading is skipped.");
+            }
+
             if (tokenPreloadMode == ProtectedTokenPreloadMode.Auto &&
-                request.AuthRequired &&
-                ((request.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(request.Password) && !request.BlockStaffOverride) || request.IsProtectedMethod))
+                (pathContainsProtectedTokenPlaceholder ||
+                 (request.AuthRequired &&
+                  ((request.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(request.Password) && !request.BlockStaffOverride) || request.IsProtectedMethod))))
             {
                 await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
+            if (pathContainsProtectedTokenPlaceholder)
+            {
+                ReplaceProtectedTokenPlaceholderInPath(request);
+            }
+
             return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static bool RequestPathContainsProtectedTokenPlaceholder(PapiRestRequest request)
+        {
+            return request?.Path?.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) >= 0;
+        }
+
+        private void ReplaceProtectedTokenPlaceholderInPath(PapiRestRequest request)
+        {
+            var token = Token;
+            var accessToken = token?.AccessToken;
+            if (IsProtectedTokenMissingOrExpired(token) || string.IsNullOrWhiteSpace(accessToken))
+            {
+                throw new InvalidOperationException("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.");
+            }
+
+            request.Path = request.Path.Replace(ProtectedToken.Placeholder, accessToken, StringComparison.Ordinal);
         }
 
         private async Task<ProtectedToken> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
