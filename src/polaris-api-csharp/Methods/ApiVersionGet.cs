@@ -2,6 +2,7 @@
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -16,11 +17,11 @@ namespace Clc.Polaris.Api
 		/// </summary>
 		/// <returns>ApiVersionGetResponse</returns>
 		/// <seealso cref="ApiResult"/>
-		public IRestResponse<ApiResult> ApiVersionGet()
+		public async Task<IRestResponse<ApiResult>> ApiVersionGetAsync(CancellationToken cancellationToken = default)
         {
             var url = "/public/v1/1033/100/1/api";
             var request = new PapiRestRequest(url);// { AuthRequired = true, BlockStaffOverride = true };
-            return Execute<ApiResult>(request);
+            return await ExecutePapiAsync<ApiResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

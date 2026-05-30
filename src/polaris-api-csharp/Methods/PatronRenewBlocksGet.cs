@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
@@ -12,11 +13,12 @@ namespace Clc.Polaris.Api
     {
         
 
-        public IRestResponse<PatronRenewBlocksResult> PatronRenewBlocksGet(int patronId, int? branchId = null)
+        public async Task<IRestResponse<PatronRenewBlocksResult>> PatronRenewBlocksGetAsync(int patronId, int? branchId = null, CancellationToken cancellationToken = default)
         {
+            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
             var url = $"/protected/v1/1033/100/{branchId ?? OrganizationId}/{Token.AccessToken}/circulation/patron/{patronId}/renewblocks";
             var request = new PapiRestRequest(url);
-            return Execute<PatronRenewBlocksResult>(request);
+            return await ExecutePapiAsync<PatronRenewBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

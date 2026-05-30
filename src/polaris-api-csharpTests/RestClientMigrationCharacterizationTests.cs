@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api.Tests
     public class RestClientMigrationCharacterizationTests
     {
         [TestMethod]
-        public void PapiRestRequest_Constructors_PreserveCurrentBehavior()
+        public async Task PapiRestRequest_Constructors_PreserveCurrentBehavior()
         {
             var defaultGet = new PapiRestRequest("/public/foo");
             Assert.AreEqual(HttpMethod.Get, defaultGet.Method);
@@ -51,7 +51,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PapiRestRequest_PathClassification_IsStable()
+        public async Task PapiRestRequest_PathClassification_IsStable()
         {
             var publicRequest = new PapiRestRequest("/public/foo");
             Assert.IsTrue(publicRequest.IsPublicMethod);
@@ -63,7 +63,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_AddsPapiHeaders_WhenAuthRequired()
+        public async Task PreformatRestRequest_AddsPapiHeaders_WhenAuthRequired()
         {
             var client = CreateClient();
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
@@ -78,7 +78,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_DoesNotAddPapiHeaders_WhenAuthNotRequired()
+        public async Task PreformatRestRequest_DoesNotAddPapiHeaders_WhenAuthNotRequired()
         {
             var client = CreateClient();
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate")
@@ -93,7 +93,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_PublicAuthenticatedGetWithoutQueryParameters_HashesOriginalUrl()
+        public async Task PreformatRestRequest_PublicAuthenticatedGetWithoutQueryParameters_HashesOriginalUrl()
         {
             var client = CreateClient();
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
@@ -108,7 +108,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_ProtectedGet_UsesProtectedTokenSecretForHash()
+        public async Task PreformatRestRequest_ProtectedGet_UsesProtectedTokenSecretForHash()
         {
             var client = CreateClient();
             client.Token = new ProtectedToken
@@ -129,7 +129,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_PublicAuthenticatedGetWithQueryParameters_HashesEffectiveOutgoingUrl()
+        public async Task PreformatRestRequest_PublicAuthenticatedGetWithQueryParameters_HashesEffectiveOutgoingUrl()
         {
             var client = CreateClient();
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
@@ -145,7 +145,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_AuthenticatedPutWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
+        public async Task PreformatRestRequest_AuthenticatedPutWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
         {
             var client = CreateClient();
             var body = new PatronUpdateParams { EmailAddress = "patron@example.test" };
@@ -162,7 +162,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_AuthenticatedPostWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
+        public async Task PreformatRestRequest_AuthenticatedPostWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
         {
             var client = CreateClient();
             var body = new { Amount = 12.34m };
@@ -180,7 +180,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_AddsStaffOverrideToken_WhenAllowedAndUnblocked()
+        public async Task PreformatRestRequest_AddsStaffOverrideToken_WhenAllowedAndUnblocked()
         {
             var client = CreateClient();
             client.AllowStaffOverrideRequests = true;
@@ -203,7 +203,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_DoesNotAddStaffOverrideToken_WhenBlocked()
+        public async Task PreformatRestRequest_DoesNotAddStaffOverrideToken_WhenBlocked()
         {
             var client = CreateClient();
             client.AllowStaffOverrideRequests = true;
@@ -228,7 +228,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_DoesNotAddStaffOverrideToken_WhenDisabled()
+        public async Task PreformatRestRequest_DoesNotAddStaffOverrideToken_WhenDisabled()
         {
             var client = CreateClient();
             client.AllowStaffOverrideRequests = false;
@@ -250,7 +250,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_RemovesStaleStaffOverrideToken_WhenOverrideBecomesBlocked()
+        public async Task PreformatRestRequest_RemovesStaleStaffOverrideToken_WhenOverrideBecomesBlocked()
         {
             var client = CreateClient();
             client.AllowStaffOverrideRequests = true;
@@ -277,7 +277,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_WhenCalledTwice_ReplacesPapiHeadersWithoutDuplicatingOrChangingBody()
+        public async Task PreformatRestRequest_WhenCalledTwice_ReplacesPapiHeadersWithoutDuplicatingOrChangingBody()
         {
             var client = CreateClient();
             var body = new { Value = "unchanged" };
@@ -302,7 +302,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_AuthorizationChanges_WhenQueryParameterValueChanges()
+        public async Task PreformatRestRequest_AuthorizationChanges_WhenQueryParameterValueChanges()
         {
             var client = CreateClient();
             var first = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
@@ -323,12 +323,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void ApiKeyValidate_RequestShape_IsStable()
+        public async Task ApiKeyValidate_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
 
-            var response = client.ApiKeyValidate();
+            var response = await client.ApiKeyValidateAsync();
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -340,7 +340,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void BibSearch_RequestShape_IsStable()
+        public async Task BibSearch_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
@@ -356,7 +356,7 @@ namespace Clc.Polaris.Api.Tests
                 Limit = "3"
             };
 
-            var response = client.BibSearch(options);
+            var response = await client.BibSearchAsync(options);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -374,12 +374,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void AuthenticateStaffUser_RequestShape_IsStable()
+        public async Task AuthenticateStaffUser_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0,\"AccessToken\":\"t\",\"AccessSecret\":\"s\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}");
             var client = CreateClient(handler);
 
-            var response = client.AuthenticateStaffUser(new PolarisUser
+            var response = await client.AuthenticateStaffUserAsync(new PolarisUser
             {
                 Domain = "main",
                 Username = "staff",
@@ -399,12 +399,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronUpdate_RequestShape_IsStable()
+        public async Task PatronUpdate_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
 
-            var response = client.PatronUpdate("AB C/+#?=", new PatronUpdateParams { EmailAddress = "patron@example.test" }, "1234", ignoresa: true);
+            var response = await client.PatronUpdateAsync("AB C/+#?=", new PatronUpdateParams { EmailAddress = "patron@example.test" }, "1234", ignoresa: true);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
@@ -421,13 +421,13 @@ namespace Clc.Polaris.Api.Tests
 
 
         [TestMethod]
-        public void PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
+        public async Task PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
             client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.UtcNow.AddHours(1) };
 
-            var response = client.PatronSearch("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
+            var response = await client.PatronSearchAsync("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -443,12 +443,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
+        public async Task PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
 
-            var response = client.PatronMessagesGet("ABC 123", unreadOnly: true, password: "1234");
+            var response = await client.PatronMessagesGetAsync("ABC 123", unreadOnly: true, password: "1234");
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -461,7 +461,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PreformatRestRequest_HashesQueryParameters_WithOutgoingUriEncoding()
+        public async Task PreformatRestRequest_HashesQueryParameters_WithOutgoingUriEncoding()
         {
             var client = CreateClient();
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");

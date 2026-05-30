@@ -7,14 +7,16 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<PapiResponseCommon> UpdatePatronNotesData(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null)
+        public async Task<IRestResponse<PapiResponseCommon>> UpdatePatronNotesDataAsync(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
         {
+            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
             var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/notes";
             var body = new UpdatePatronNotesData();
 
@@ -36,7 +38,7 @@ namespace Clc.Polaris.Api
 
             var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

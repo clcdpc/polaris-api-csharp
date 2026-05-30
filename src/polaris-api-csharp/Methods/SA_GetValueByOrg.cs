@@ -2,6 +2,7 @@
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -19,11 +20,12 @@ namespace Clc.Polaris.Api
         /// <returns></returns>
         
 
-        public IRestResponse<StringResult> SA_GetValueByOrg(string attribute, int? organizationId = null)
+        public async Task<IRestResponse<StringResult>> SA_GetValueByOrgAsync(string attribute, int? organizationId = null, CancellationToken cancellationToken = default)
         {
+            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
             var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
             var request = new PapiRestRequest(url);
-            return Execute<StringResult>(request);
+            return await ExecutePapiAsync<StringResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

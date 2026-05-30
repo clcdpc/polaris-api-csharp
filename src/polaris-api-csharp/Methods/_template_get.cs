@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
@@ -10,11 +11,11 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<PapiResponseCommon> PapiGetMethod(string barcode, string password = "")
+        public async Task<IRestResponse<PapiResponseCommon>> PapiGetMethodAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/";
             var request = new PapiRestRequest(url) { Password = password };
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
 
@@ -15,18 +16,18 @@ namespace Clc.Polaris.Api
 {
 	public partial class PapiClient
     {
-        public IRestResponse<PatronRegistrationCreateResult> PatronRegistrationCreate(PatronRegistrationParams _params)
+        public async Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateAsync(PatronRegistrationParams _params, CancellationToken cancellationToken = default)
         {
             var url = "/public/v1/1033/100/1/patron";
             var request = new PapiRestRequest(HttpMethod.Post, url) { BlockStaffOverride = true, Body = _params };
-            return Execute<PatronRegistrationCreateResult>(request);
+            return await ExecutePapiAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
-        public IRestResponse<PatronRegistrationCreateResult> PatronRegistrationCreateV2(PatronRegistrationData _params)
+        public async Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateV2Async(PatronRegistrationData _params, CancellationToken cancellationToken = default)
         {
             var url = "/public/v2/1033/100/1/patron";
             var request = new PapiRestRequest(HttpMethod.Post, url) { BlockStaffOverride = true, Body = _params };
-            return Execute<PatronRegistrationCreateResult>(request);
+            return await ExecutePapiAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

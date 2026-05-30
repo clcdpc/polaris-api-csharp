@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
@@ -10,7 +11,7 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<HoldRequestReplyResult> HoldRequestReply(HoldRequestCreateResult holdCreateResult, int requestingOrgId, HoldRequestReplyAnswer answer, HoldRequestReplyState state)
+        public async Task<IRestResponse<HoldRequestReplyResult>> HoldRequestReplyAsync(HoldRequestCreateResult holdCreateResult, int requestingOrgId, HoldRequestReplyAnswer answer, HoldRequestReplyState state, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/holdrequest/{holdCreateResult.RequestGuid}";
             var body = new HoldRequestReplyData
@@ -23,7 +24,7 @@ namespace Clc.Polaris.Api
             };
 
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
-            return Execute<HoldRequestReplyResult>(request);
+            return await ExecutePapiAsync<HoldRequestReplyResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

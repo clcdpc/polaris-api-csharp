@@ -18,10 +18,12 @@ namespace Clc.Polaris.Api.Tests
         {
             public HttpRequestMessage? LastRequest { get; private set; }
             public string? RequestContent { get; private set; }
+            public CancellationToken CapturedCancellationToken { get; private set; }
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 LastRequest = request;
+                CapturedCancellationToken = cancellationToken;
                 if (request.Content != null)
                 {
                     RequestContent = await request.Content.ReadAsStringAsync(cancellationToken);
@@ -51,15 +53,28 @@ namespace Clc.Polaris.Api.Tests
             return new PapiClient(httpClient, settings);
         }
 
+
         [TestMethod]
-        public void AuthenticatePatron_SendsPostRequestWithJsonBody()
+        public async Task AuthenticatePatronAsync_PassesCancellationTokenToHttpClient()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            await client.AuthenticatePatronAsync("21945001234567", "mypassword", cancellationTokenSource.Token);
+
+            Assert.IsTrue(handler.CapturedCancellationToken.CanBeCanceled);
+        }
+
+        [TestMethod]
+        public async Task AuthenticatePatron_SendsPostRequestWithJsonBody()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "21945001234567";
             var password = "mypassword";
 
-            var response = client.AuthenticatePatron(barcode, password);
+            var response = await client.AuthenticatePatronAsync(barcode, password);
 
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Post, handler.LastRequest.Method);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
@@ -12,13 +13,13 @@ namespace Clc.Polaris.Api
     {
         
 
-        public IRestResponse<HoldRequestCreateResult> HoldRequestCreate(HoldRequestCreateParams holdParams)
+        public async Task<IRestResponse<HoldRequestCreateResult>> HoldRequestCreateAsync(HoldRequestCreateParams holdParams, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/{holdParams.RequestingOrgID}/holdrequest";
             var request = new PapiRestRequest(HttpMethod.Post, url) { Body = holdParams };
-            return Execute<HoldRequestCreateResult>(request);
+            return await ExecutePapiAsync<HoldRequestCreateResult>(request, cancellationToken).ConfigureAwait(false);
         }
-        public IRestResponse<HoldRequestCreateResult> HoldRequestCreate(int patronId, int bibId, int pickupBranchId = 0, DateTime? activationDate = null, int? userId = null, int? workstationId = null, int? requestingOrgId = null)
+        public async Task<IRestResponse<HoldRequestCreateResult>> HoldRequestCreateAsync(int patronId, int bibId, int pickupBranchId = 0, DateTime? activationDate = null, int? userId = null, int? workstationId = null, int? requestingOrgId = null, CancellationToken cancellationToken = default)
         {
             var holdParams = new HoldRequestCreateParams
             {
@@ -31,7 +32,7 @@ namespace Clc.Polaris.Api
                 RequestingOrgID = requestingOrgId ?? OrganizationId
             };
 
-            return HoldRequestCreate(holdParams);
+            return await HoldRequestCreateAsync(holdParams, cancellationToken).ConfigureAwait(false);
         }
     }
 }
