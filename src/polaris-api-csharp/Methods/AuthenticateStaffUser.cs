@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<ProtectedToken>> AuthenticateStaffUserAsync(PolarisUser staffUser, CancellationToken cancellationToken = default)
         {
             var url = "/protected/v1/1033/100/1/authenticator/staff";
-            var response = await PostAsync<ProtectedToken>(url, body: staffUser, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var response = await ExecuteStaffAuthenticationPostAsync<ProtectedToken>(url, body: staffUser, cancellationToken: cancellationToken).ConfigureAwait(false);
             _token = response?.Data;
             return response;
         }

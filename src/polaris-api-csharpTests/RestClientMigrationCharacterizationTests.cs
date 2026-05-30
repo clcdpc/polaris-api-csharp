@@ -379,6 +379,92 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(handler.CancellationTokens[1].CanBeCanceled);
         }
 
+
+        [TestMethod]
+        public async Task ConcurrentProtectedRequests_WithSameCacheKey_AuthenticateStaffOnlyOnce()
+        {
+            var handler = new ProtectedTokenCacheHttpMessageHandler(authDelay: TimeSpan.FromMilliseconds(100));
+            var client = CreateClient(handler);
+            ConfigureStaffTokenCache(client, $"https://concurrent-{Guid.NewGuid():N}.example.test");
+
+            var tasks = Enumerable.Range(0, 8)
+                .Select(index => client.PatronSearchAsync($"name=Smith{index}"))
+                .ToArray();
+
+            await Task.WhenAll(tasks);
+
+            Assert.AreEqual(1, handler.AuthenticateStaffRequestCount);
+            Assert.AreEqual(8, handler.ProtectedSearchRequestCount);
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenCache_WithValidCachedToken_AvoidsStaffAuthentication()
+        {
+            var hostname = $"https://cached-{Guid.NewGuid():N}.example.test";
+            var primingHandler = new ProtectedTokenCacheHttpMessageHandler();
+            var primingClient = CreateClient(primingHandler);
+            ConfigureStaffTokenCache(primingClient, hostname);
+            await primingClient.PatronSavedSearchesGetAsync("ABC123");
+            Assert.AreEqual(1, primingHandler.AuthenticateStaffRequestCount);
+
+            var cachedHandler = new ProtectedTokenCacheHttpMessageHandler();
+            var cachedClient = CreateClient(cachedHandler);
+            ConfigureStaffTokenCache(cachedClient, hostname);
+
+            await cachedClient.PatronSavedSearchesGetAsync("ABC123");
+
+            Assert.AreEqual(0, cachedHandler.AuthenticateStaffRequestCount);
+            Assert.AreEqual(1, cachedHandler.PublicSavedSearchesRequestCount);
+            Assert.AreEqual("cache-token", cachedHandler.LastRequest?.Headers.GetValues("X-PAPI-AccessToken").Single());
+        }
+
+        [TestMethod]
+        public async Task FailedStaffAuthentication_DoesNotPopulateProtectedTokenCache()
+        {
+            var hostname = $"https://failed-auth-{Guid.NewGuid():N}.example.test";
+            var failedHandler = new ProtectedTokenCacheHttpMessageHandler(authStatusCode: HttpStatusCode.InternalServerError, authResponseJson: "{\"PAPIErrorCode\":1}");
+            var failedClient = CreateClient(failedHandler);
+            ConfigureStaffTokenCache(failedClient, hostname);
+
+            await failedClient.PatronSavedSearchesGetAsync("ABC123");
+
+            Assert.AreEqual(1, failedHandler.AuthenticateStaffRequestCount);
+
+            var retryHandler = new ProtectedTokenCacheHttpMessageHandler();
+            var retryClient = CreateClient(retryHandler);
+            ConfigureStaffTokenCache(retryClient, hostname);
+
+            await retryClient.PatronSavedSearchesGetAsync("ABC123");
+
+            Assert.AreEqual(1, retryHandler.AuthenticateStaffRequestCount);
+        }
+
+        [TestMethod]
+        public void ManuallySetToken_StillFormatsProtectedAndPublicOverrideRequests()
+        {
+            var client = CreateClient();
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "manual-token",
+                AccessSecret = "manual-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+
+            var protectedRequest = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/manual-token/search/patrons/Boolean");
+            var formattedProtected = (PapiRestRequest)client.PreformatRestRequest(protectedRequest);
+            var protectedDate = formattedProtected.Headers["PolarisDate"];
+            var protectedExpectedHash = ComputePapiHash("GET", "https://example.test/PAPIService/REST/protected/v1/1033/100/1/manual-token/search/patrons/Boolean", protectedDate, "manual-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{protectedExpectedHash}", formattedProtected.Headers["Authorization"]);
+
+            var publicRequest = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
+            var formattedPublic = (PapiRestRequest)client.PreformatRestRequest(publicRequest);
+            var publicDate = formattedPublic.Headers["PolarisDate"];
+            var publicExpectedHash = ComputePapiHash("GET", "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate", publicDate, "manual-secret", "access-key");
+            Assert.AreEqual("manual-token", formattedPublic.Headers["X-PAPI-AccessToken"]);
+            Assert.AreEqual($"PWS access-id:{publicExpectedHash}", formattedPublic.Headers["Authorization"]);
+        }
+
         [TestMethod]
         public async Task BibSearch_RequestShape_IsStable()
         {
@@ -527,6 +613,20 @@ namespace Clc.Polaris.Api.Tests
         }
 
 
+
+        private static void ConfigureStaffTokenCache(PapiClient client, string hostname)
+        {
+            client.Hostname = hostname;
+            client.AllowStaffOverrideRequests = true;
+            client.UseProtectedTokenCache = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+        }
+
         private static Dictionary<string, string> ParseQuery(string query)
         {
             return query.TrimStart('?')
@@ -551,6 +651,66 @@ namespace Clc.Polaris.Api.Tests
             public int WorkstationId { get; set; } = 1;
             public int OrganizationId { get; set; } = 1;
             public PolarisUser? PolarisOverrideAccount { get; set; }
+        }
+
+
+        private sealed class ProtectedTokenCacheHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly TimeSpan _authDelay;
+            private readonly HttpStatusCode _authStatusCode;
+            private readonly string _authResponseJson;
+            private int _authenticateStaffRequestCount;
+            private int _protectedSearchRequestCount;
+            private int _publicSavedSearchesRequestCount;
+
+            public int AuthenticateStaffRequestCount => _authenticateStaffRequestCount;
+            public int ProtectedSearchRequestCount => _protectedSearchRequestCount;
+            public int PublicSavedSearchesRequestCount => _publicSavedSearchesRequestCount;
+            public HttpRequestMessage? LastRequest { get; private set; }
+
+            public ProtectedTokenCacheHttpMessageHandler(
+                TimeSpan? authDelay = null,
+                HttpStatusCode authStatusCode = HttpStatusCode.OK,
+                string authResponseJson = "{\"PAPIErrorCode\":0,\"AccessToken\":\"cache-token\",\"AccessSecret\":\"cache-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}")
+            {
+                _authDelay = authDelay ?? TimeSpan.Zero;
+                _authStatusCode = authStatusCode;
+                _authResponseJson = authResponseJson;
+            }
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                LastRequest = request;
+                var path = request.RequestUri!.AbsolutePath;
+                if (path.Contains("/authenticator/staff"))
+                {
+                    Interlocked.Increment(ref _authenticateStaffRequestCount);
+                    if (_authDelay > TimeSpan.Zero)
+                    {
+                        await Task.Delay(_authDelay, cancellationToken);
+                    }
+
+                    return new HttpResponseMessage(_authStatusCode)
+                    {
+                        Content = new StringContent(_authResponseJson, Encoding.UTF8, "application/json")
+                    };
+                }
+
+                if (path.Contains("/search/patrons/Boolean"))
+                {
+                    Interlocked.Increment(ref _protectedSearchRequestCount);
+                }
+
+                if (path.Contains("/savedsearches"))
+                {
+                    Interlocked.Increment(ref _publicSavedSearchesRequestCount);
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                };
+            }
         }
 
         private sealed class ProtectedTokenCancellationHttpMessageHandler : HttpMessageHandler

@@ -44,23 +44,16 @@ namespace Clc.Polaris.Api
 
         public bool UseProtectedTokenCache { get; set; } = true;
         private static ConcurrentDictionary<string, ProtectedToken> ProtectedTokenCache { get; set; } = new ConcurrentDictionary<string, ProtectedToken>();
+        private static ConcurrentDictionary<string, SemaphoreSlim> ProtectedTokenLocks { get; set; } = new ConcurrentDictionary<string, SemaphoreSlim>();
 
-        public ProtectedToken _token;
+        private ProtectedToken _token;
 
         /// <summary>
         /// Used for protected methods and public method overrides
         /// </summary>
         public ProtectedToken Token
         {
-            get
-            {
-                if (UseProtectedTokenCache && (_token == null || _token.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
-                {
-                    ProtectedTokenCache.TryGetValue($"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}", out _token);
-                }
-
-                return _token;
-            }
+            get { return _token; }
             set { _token = value; }
         }
 
@@ -107,7 +100,7 @@ namespace Clc.Polaris.Api
                     }
                 }
 
-                if (papiRequest.IsProtectedMethod && string.IsNullOrWhiteSpace(password) && _token != null)
+                if (papiRequest.IsProtectedMethod && string.IsNullOrWhiteSpace(password) && Token != null)
                 {
                     password = Token.AccessSecret;
                 }
@@ -159,26 +152,99 @@ namespace Clc.Polaris.Api
 
         private async Task<ProtectedToken> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
         {
-            if (UseProtectedTokenCache && (_token == null || _token.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
+            if (StaffOverrideAccount == null)
             {
-                ProtectedTokenCache.TryGetValue($"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}", out _token);
+                return _token;
             }
 
-            if ((_token == null || _token.ExpirationDate <= DateTime.Now) && StaffOverrideAccount != null)
+            var cacheKey = BuildProtectedTokenCacheKey();
+            if (!IsTokenMissingOrExpired(_token))
             {
-                var response = await AuthenticateStaffUserAsync(StaffOverrideAccount, cancellationToken).ConfigureAwait(false);
-                _token = response?.Data;
+                return _token;
+            }
 
-                if (UseProtectedTokenCache && response.Response.IsSuccessStatusCode && _token != null)
+            if (TryLoadProtectedTokenFromCache(cacheKey))
+            {
+                return _token;
+            }
+
+            if (string.IsNullOrEmpty(cacheKey))
+            {
+                return await AuthenticateAndCacheProtectedTokenAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+            }
+
+            var protectedTokenLock = ProtectedTokenLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
+            await protectedTokenLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (!IsTokenMissingOrExpired(_token))
                 {
-                    ProtectedTokenCache[$"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}"] = new ProtectedToken(_token);
+                    return _token;
                 }
+
+                if (TryLoadProtectedTokenFromCache(cacheKey))
+                {
+                    return _token;
+                }
+
+                return await AuthenticateAndCacheProtectedTokenAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                protectedTokenLock.Release();
+            }
+        }
+
+        private string BuildProtectedTokenCacheKey()
+        {
+            if (StaffOverrideAccount == null ||
+                string.IsNullOrWhiteSpace(Hostname) ||
+                string.IsNullOrWhiteSpace(StaffOverrideAccount.Domain) ||
+                string.IsNullOrWhiteSpace(StaffOverrideAccount.Username))
+            {
+                return null;
+            }
+
+            return $"{Hostname}{StaffOverrideAccount.Domain}{StaffOverrideAccount.Username}";
+        }
+
+        private bool TryLoadProtectedTokenFromCache(string cacheKey)
+        {
+            if (!UseProtectedTokenCache || string.IsNullOrEmpty(cacheKey) || !IsTokenMissingOrExpired(_token))
+            {
+                return false;
+            }
+
+            return ProtectedTokenCache.TryGetValue(cacheKey, out _token) && !IsTokenMissingOrExpired(_token);
+        }
+
+        private async Task<ProtectedToken> AuthenticateAndCacheProtectedTokenAsync(string cacheKey, CancellationToken cancellationToken)
+        {
+            var previousToken = _token;
+            var response = await AuthenticateStaffUserAsync(StaffOverrideAccount, cancellationToken).ConfigureAwait(false);
+            if (response?.Response?.IsSuccessStatusCode != true || response.Data == null)
+            {
+                _token = previousToken;
+                return _token;
+            }
+
+            _token = response.Data;
+            if (UseProtectedTokenCache && !string.IsNullOrEmpty(cacheKey))
+            {
+                ProtectedTokenCache[cacheKey] = new ProtectedToken(_token);
             }
 
             return _token;
         }
 
-        private async Task<IRestResponse<T>> PostAsync<T>(string url, object body = null, CancellationToken cancellationToken = default)
+        private static bool IsTokenMissingOrExpired(ProtectedToken token)
+        {
+            return token == null || token.ExpirationDate <= DateTime.Now;
+        }
+
+        // Staff authentication intentionally bypasses ExecutePapiAsync<T> because it is
+        // the request that obtains the protected token ExecutePapiAsync<T> preloads.
+        private async Task<IRestResponse<T>> ExecuteStaffAuthenticationPostAsync<T>(string url, object body = null, CancellationToken cancellationToken = default)
         {
             return await ExecuteAsync<T>(new PapiRestRequest(HttpMethod.Post, url) { Body = body }, cancellationToken).ConfigureAwait(false);
         }

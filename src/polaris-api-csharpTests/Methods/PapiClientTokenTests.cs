@@ -35,7 +35,7 @@ namespace Clc.Polaris.Api.Tests
     }
 
     [TestMethod]
-    public void Token_WhenTokenIsNullAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsCachedToken()
+    public void Token_WhenTokenIsNullAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsNullWithoutCacheLookup()
     {
         var handler = new CapturingHttpMessageHandler();
         var client = CreateClient(handler);
@@ -51,9 +51,7 @@ namespace Clc.Polaris.Api.Tests
 
         var token = client.Token;
 
-        Assert.IsNotNull(token);
-        Assert.AreEqual("cached-token", token.AccessToken);
-        Assert.AreEqual("cached-secret", token.AccessSecret);
+        Assert.IsNull(token);
         Assert.AreEqual(0, handler.RequestCount);
     }
 
@@ -78,7 +76,7 @@ namespace Clc.Polaris.Api.Tests
     }
 
     [TestMethod]
-    public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_UsesCachedToken()
+    public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsExistingTokenWithoutCacheLookup()
     {
         var handler = new CapturingHttpMessageHandler();
         var client = CreateClient(handler);
@@ -101,7 +99,7 @@ namespace Clc.Polaris.Api.Tests
         var token = client.Token;
 
         Assert.IsNotNull(token);
-        Assert.AreEqual("cached-token", token.AccessToken);
+        Assert.AreEqual("expired-token", token.AccessToken);
         Assert.AreEqual(0, handler.RequestCount);
     }
 
