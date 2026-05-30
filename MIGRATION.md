@@ -25,3 +25,35 @@ The former synchronous `Execute<T>` and `Post<T>` compatibility shims were inten
 ## Patron reading history overloads
 
 `PatronReadingHistoryClear` overloads that previously accepted `params int[]` now accept `IEnumerable<int>`. This keeps `CancellationToken` as the final optional parameter while still allowing callers to pass arrays or other integer sequences.
+
+## Protected-token path requests
+
+Some protected PAPI endpoints include the protected access token as a URL path segment. In 4.0, built-in client methods for those endpoints use `ProtectedToken.Placeholder` internally for that path segment.
+
+`ExecutePapiAsync` replaces `ProtectedToken.Placeholder` with the current protected access token before the request is sent and before the URL is formatted for the PAPI hash. Consumers generally should not need to use the placeholder directly unless constructing a `PapiRestRequest` manually.
+
+## PatronReadingHistoryClearAsync example
+
+`PatronReadingHistoryClearAsync` accepts an `IEnumerable<int>` for reading-history IDs:
+
+```csharp
+var idsToClear = new[] { 101, 102, 103 };
+
+var response = await client.PatronReadingHistoryClearAsync(
+    barcode: "21221000000000",
+    ids: idsToClear,
+    cancellationToken: cancellationToken);
+```
+
+## Before/after sync-to-async example
+
+```csharp
+// 3.x synchronous call
+var syncResponse = client.PatronReadingHistoryClear("21221000000000", 101, 102, 103);
+
+// 4.0 async call
+var asyncResponse = await client.PatronReadingHistoryClearAsync(
+    "21221000000000",
+    new[] { 101, 102, 103 },
+    cancellationToken);
+```
