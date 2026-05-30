@@ -147,14 +147,47 @@ namespace Clc.Polaris.Api
 
         private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default, ProtectedTokenPreloadMode tokenPreloadMode = ProtectedTokenPreloadMode.Auto)
         {
+            var containsProtectedTokenPlaceholder = ContainsProtectedTokenPlaceholder(request);
+
+            if (containsProtectedTokenPlaceholder && tokenPreloadMode == ProtectedTokenPreloadMode.Skip)
+            {
+                throw new InvalidOperationException("A PAPI request path contains the protected token placeholder, but protected token preloading was skipped.");
+            }
+
             if (tokenPreloadMode == ProtectedTokenPreloadMode.Auto &&
-                request.AuthRequired &&
-                ((request.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(request.Password) && !request.BlockStaffOverride) || request.IsProtectedMethod))
+                (containsProtectedTokenPlaceholder ||
+                    (request.AuthRequired &&
+                    ((request.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(request.Password) && !request.BlockStaffOverride) || request.IsProtectedMethod))))
             {
                 await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
+            if (containsProtectedTokenPlaceholder)
+            {
+                ReplaceProtectedTokenPlaceholder(request);
+            }
+
             return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static bool ContainsProtectedTokenPlaceholder(PapiRestRequest request)
+        {
+            return request?.Path?.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) >= 0;
+        }
+
+        private void ReplaceProtectedTokenPlaceholder(PapiRestRequest request)
+        {
+            if (!ContainsProtectedTokenPlaceholder(request))
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Token?.AccessToken))
+            {
+                throw new InvalidOperationException("A PAPI request path contains the protected token placeholder, but no valid protected access token is available.");
+            }
+
+            request.Path = request.Path.Replace(ProtectedToken.Placeholder, Token.AccessToken, StringComparison.Ordinal);
         }
 
         private async Task<ProtectedToken> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
