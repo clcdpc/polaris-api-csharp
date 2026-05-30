@@ -1,4 +1,4 @@
-﻿using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Models;
 using Clc.Rest;
 using System;
@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
     {
         public IRestResponse<PapiResponseCommon> UpdatePatronNotesData(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/notes?wsid={workstationId ?? WorkstationId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/notes";
             var body = new UpdatePatronNotesData();
 
             if (!string.IsNullOrWhiteSpace(nonBlockingNote))
@@ -34,7 +34,9 @@ namespace Clc.Polaris.Api
                 body.BlockingNoteMode = (int)updateMode;
             }
 
-            return Post<PapiResponseCommon>(url, body: body);
+            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            return Execute<PapiResponseCommon>(request);
         }
     }
 }

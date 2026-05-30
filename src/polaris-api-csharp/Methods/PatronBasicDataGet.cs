@@ -1,4 +1,4 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading.Tasks;
@@ -16,8 +16,10 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PatronBasicDataGetResult> PatronBasicDataGet(string barcode, string password = "", bool addresses = false, bool notes = false)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/basicdata?addresses={Convert.ToInt32(addresses)}&notes={Convert.ToInt32(notes)}";
+            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/basicdata";
             var request = new PapiRestRequest(url) { Password = password };
+            request.QueryParameters.Add("addresses", Convert.ToInt32(addresses));
+            request.QueryParameters.Add("notes", Convert.ToInt32(notes));
             return Execute<PatronBasicDataGetResult>(request);
         }
     }

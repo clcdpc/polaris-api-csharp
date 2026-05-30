@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
@@ -18,8 +18,8 @@ namespace Clc.Polaris.Api
         public IRestResponse<PapiResponseCommon> PatronReadingHistoryClear(string barcode, string password, params int[] ids)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/readinghistory";
-            if (ids.Any()) { url += $"?ids={string.Join(",", ids)}"; }
             var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
+            if (ids.Any()) { request.QueryParameters.Add("ids", string.Join(",", ids)); }
             return Execute<PapiResponseCommon>(request);
         }
     }

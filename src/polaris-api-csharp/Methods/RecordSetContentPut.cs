@@ -1,4 +1,4 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading.Tasks;
@@ -15,9 +15,12 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PapiResponseCommon> RecordSetContentPut(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/recordsets/{recordSetId}?action={action}&userid={userId ?? UserId}&wsid={workstationId ?? WorkstationId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/recordsets/{recordSetId}";
             var body = new { records = string.Join(",", records) };
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
+            request.QueryParameters.Add("action", action);
+            request.QueryParameters.Add("userid", userId ?? UserId);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             return Execute<PapiResponseCommon>(request);
         }
         public IRestResponse<PapiResponseCommon> RecordSetContentAdd(int recordSetId, int recordId, int userId = 1, int workstationId = 1)

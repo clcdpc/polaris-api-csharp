@@ -1,4 +1,4 @@
-﻿
+
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
@@ -17,8 +17,9 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PapiResponseCommon> PatronTitleListDeleteAllTitles(string barcode, int listId, string password = "")
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistdeletealltitles?list={listId}";
+            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistdeletealltitles";
             var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
+            request.QueryParameters.Add("list", listId);
             return Execute<PapiResponseCommon>(request);
         }
     }

@@ -172,11 +172,38 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
             StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/search/bibs/keyword/KW");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "q=harry+potter+%26+stone");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "sort=MP");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "page=2");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "bibsperpage=15");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "limit=3");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "q", "harry potter & stone");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "sort", "MP");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "page", "2");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "bibsperpage", "15");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "limit", "3");
+            Assert.IsNull(handler.LastRequest.Content);
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+        }
+
+
+        [TestMethod]
+        public void PatronSearch_RequestShape_UsesEquivalentQueryParameters()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "staff-token",
+                AccessSecret = "staff-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+
+            var response = client.PatronSearch("name = O'Hara & city: New York", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 12);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/12/staff-token/search/patrons/Boolean");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "q", "name = O'Hara & city: New York");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "patronsperpage", "25");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "page", "3");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "sort", "PATNL");
             Assert.IsNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
@@ -219,12 +246,31 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
             var encodedBarcode = WebUtility.UrlEncode("AB C/+#?=");
             StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, $"/public/v1/1033/100/1/patron/{encodedBarcode}");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "ignoresa=True");
+            AssertQueryParameter(handler.LastRequest.RequestUri, "ignoresa", "True");
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
             Assert.IsNotNull(handler.LastRequestContent);
             StringAssert.Contains(handler.LastRequestContent, "patron@example.test");
+        }
+
+
+        private static void AssertQueryParameter(Uri uri, string name, string expectedValue)
+        {
+            var query = ParseQuery(uri);
+
+            Assert.IsTrue(query.TryGetValue(name, out var actualValue), $"Expected query parameter '{name}' in '{uri.Query}'.");
+            Assert.AreEqual(expectedValue, actualValue);
+        }
+
+        private static Dictionary<string, string> ParseQuery(Uri uri)
+        {
+            return uri.Query.TrimStart('?')
+                .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => part.Split('=', 2))
+                .ToDictionary(
+                    pair => WebUtility.UrlDecode(pair[0]),
+                    pair => pair.Length == 2 ? WebUtility.UrlDecode(pair[1]) : string.Empty);
         }
 
         private static PapiClient CreateClient(HttpMessageHandler? handler = null)

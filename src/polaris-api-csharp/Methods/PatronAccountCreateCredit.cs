@@ -1,4 +1,4 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading.Tasks;
@@ -15,9 +15,11 @@ namespace Clc.Polaris.Api
     {
         public IRestResponse<PapiResponseCommon> PatronAccountCreateCredit(string barcode, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "")
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/createcredit?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/createcredit";
             var body = new PatronAccountCreateCreditData { TxnAmount = txnAmount, PaymentMethodId = paymentMethod, FreeTextNote = note };
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
             return Execute<PapiResponseCommon>(request);
         }
     }

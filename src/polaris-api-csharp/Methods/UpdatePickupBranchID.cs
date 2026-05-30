@@ -1,4 +1,4 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading.Tasks;
@@ -16,8 +16,11 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PapiResponseCommon> UpdatePickupBranchID(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/pickupbranch?userid={userId ?? UserId}&wsid={workstationId ?? WorkstationId}&pickupbranchid={pickupBranchId}";
+            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/pickupbranch";
             var request = new PapiRestRequest(HttpMethod.Put, url) { Password = password };
+            request.QueryParameters.Add("userid", userId ?? UserId);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            request.QueryParameters.Add("pickupbranchid", pickupBranchId);
             return Execute<PapiResponseCommon>(request);
         }
     }
