@@ -141,15 +141,17 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task AuthenticateStaffUserAsync_ReturnsTokenButDoesNotSetClientToken()
+        public async Task AuthenticateStaffUserAsync_ReturnsTokenButDoesNotSetClientTokenOrRecursivelyAuthenticate()
         {
             var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("returned-token", "returned-secret", DateTime.Now.AddHours(1)));
             var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = CreateStaffUser();
             client.Token = new ProtectedToken
             {
                 AccessToken = "existing-token",
                 AccessSecret = "existing-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
             var response = await client.AuthenticateStaffUserAsync(CreateStaffUser());

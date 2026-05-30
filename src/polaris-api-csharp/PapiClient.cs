@@ -139,9 +139,16 @@ namespace Clc.Polaris.Api
         }
 
 
-        private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default)
+        private enum ProtectedTokenPreloadMode
         {
-            if (request.AuthRequired &&
+            Auto,
+            Skip
+        }
+
+        private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default, ProtectedTokenPreloadMode tokenPreloadMode = ProtectedTokenPreloadMode.Auto)
+        {
+            if (tokenPreloadMode == ProtectedTokenPreloadMode.Auto &&
+                request.AuthRequired &&
                 ((request.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(request.Password) && !request.BlockStaffOverride) || request.IsProtectedMethod))
             {
                 await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
@@ -237,12 +244,6 @@ namespace Clc.Polaris.Api
             }
 
             return _token;
-        }
-
-        private async Task<IRestResponse<T>> ExecuteStaffAuthenticationPostAsync<T>(string url, object body = null, CancellationToken cancellationToken = default)
-        {
-            // Staff authentication obtains the protected token, so this intentionally bypasses ExecutePapiAsync<T>.
-            return await ExecuteAsync<T>(new PapiRestRequest(HttpMethod.Post, url) { Body = body }, cancellationToken).ConfigureAwait(false);
         }
 
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)
