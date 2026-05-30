@@ -38,14 +38,14 @@ namespace Clc.Polaris.Api.Tests
                 Path = "/protected/foo",
                 Body = new { Value = "v" },
             };
-            existing.Parameters.Add("limit", "5");
+            existing.QueryParameters.Add("limit", "5");
             existing.Headers.Add("X-Test", "header");
 
             var copied = new PapiRestRequest(existing);
             Assert.AreEqual(existing.Method, copied.Method);
             Assert.AreEqual(existing.Path, copied.Path);
             Assert.AreSame(existing.Body, copied.Body);
-            Assert.AreSame(existing.Parameters, copied.Parameters);
+            Assert.AreSame(existing.QueryParameters, copied.QueryParameters);
             Assert.AreSame(existing.Headers, copied.Headers);
         }
 
