@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Clc.Polaris.Api
 {
@@ -117,6 +118,16 @@ namespace Clc.Polaris.Api
             }
 
             return papiRequest;
+        }
+
+        private IRestResponse<T> Execute<T>(RestRequest request)
+        {
+            return ExecuteAsync<T>(request, CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        private IRestResponse<T> Post<T>(string url, object body = null)
+        {
+            return Execute<T>(new PapiRestRequest(HttpMethod.Post, url) { Body = body });
         }
 
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)
