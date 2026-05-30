@@ -63,10 +63,41 @@ Protected-token-in-path endpoints use `ProtectedToken.Placeholder` internally. M
 
 ## Local tests
 
-Run the test suite from the repository root:
+Run non-integration tests from the repository root:
 
 ```bash
-dotnet test src/polaris-api-csharp.sln
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory!=Integration"
+```
+
+Run integration tests only when you have local Polaris settings configured:
+
+```bash
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration"
+```
+
+Integration tests require local Polaris credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Do not commit real secrets; `appsettings.Test.json` is ignored by git.
+
+A local `appsettings.Test.json` follows this shape:
+
+```json
+{
+  "PapiSettings": {
+    "AccessId": "your-access-id",
+    "AccessKey": "your-access-key",
+    "Hostname": "https://polaris.example.org",
+    "PolarisOverrideAccount": {
+      "Domain": "LIBRARY",
+      "Username": "staff.user",
+      "Password": "staff-password"
+    }
+  },
+  "PatronId": 123456,
+  "PatronBarcode": "12345678901234",
+  "PatronPin": "1234",
+  "FreeTextBlock": "Local integration test block",
+  "PatronListName": "Local integration test list",
+  "OrgEmail": "library@example.org"
+}
 ```
 
 ## Migration guide
