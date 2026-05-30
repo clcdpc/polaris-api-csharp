@@ -145,20 +145,18 @@ namespace Clc.Polaris.Api.Tests
         {
             var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("returned-token", "returned-secret", DateTime.Now.AddHours(1)));
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken
-            {
-                AccessToken = "existing-token",
-                AccessSecret = "existing-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
-            };
+            var staffUser = CreateStaffUser();
+            client.AllowStaffOverrideRequests = true;
+            client.UseProtectedTokenCache = true;
+            client.StaffOverrideAccount = staffUser;
 
-            var response = await client.AuthenticateStaffUserAsync(CreateStaffUser());
+            var response = await client.AuthenticateStaffUserAsync(staffUser);
 
             Assert.IsNotNull(response.Data);
             Assert.AreEqual("returned-token", response.Data.AccessToken);
-            Assert.IsNotNull(client.Token);
-            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.IsNull(client.Token);
             Assert.AreEqual(1, handler.RequestCount);
+            Assert.IsFalse(TryGetCachedToken(client.Hostname, staffUser, out _));
         }
 
         [TestMethod]
