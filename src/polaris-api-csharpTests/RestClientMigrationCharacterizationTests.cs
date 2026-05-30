@@ -353,6 +353,32 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(handler.LastCancellationToken.CanBeCanceled);
         }
 
+
+        [TestMethod]
+        public async Task PatronSearchAsync_PassesCancellationTokenToProtectedTokenAcquisition()
+        {
+            var handler = new ProtectedTokenCancellationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+            using var cts = new CancellationTokenSource();
+
+            var response = await client.PatronSearchAsync("name=Smith", cancellationToken: cts.Token);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(2, handler.Requests.Count);
+            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            Assert.AreEqual(HttpMethod.Post, handler.Requests[0].Method);
+            Assert.IsTrue(handler.CancellationTokens[0].CanBeCanceled);
+            StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+            Assert.IsTrue(handler.CancellationTokens[1].CanBeCanceled);
+        }
+
         [TestMethod]
         public async Task BibSearch_RequestShape_IsStable()
         {
@@ -525,6 +551,28 @@ namespace Clc.Polaris.Api.Tests
             public int WorkstationId { get; set; } = 1;
             public int OrganizationId { get; set; } = 1;
             public PolarisUser? PolarisOverrideAccount { get; set; }
+        }
+
+        private sealed class ProtectedTokenCancellationHttpMessageHandler : HttpMessageHandler
+        {
+            public List<HttpRequestMessage> Requests { get; } = new();
+            public List<CancellationToken> CancellationTokens { get; } = new();
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Requests.Add(request);
+                CancellationTokens.Add(cancellationToken);
+                var requestNumber = Requests.Count;
+
+                var responseJson = requestNumber == 1
+                    ? "{\"PAPIErrorCode\":0,\"AccessToken\":\"protected-token\",\"AccessSecret\":\"protected-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}"
+                    : "{\"PAPIErrorCode\":0}";
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
+                });
+            }
         }
 
         private sealed class CapturingHttpMessageHandler : HttpMessageHandler
