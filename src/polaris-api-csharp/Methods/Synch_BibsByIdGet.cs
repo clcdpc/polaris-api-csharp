@@ -14,8 +14,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int[] bibIds, bool includeItems = false, CancellationToken cancellationToken = default)
         {
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/synch/bibs/MARCxml";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/synch/bibs/MARCxml";
             var request = new PapiRestRequest(url);
             request.QueryParameters.Add("bibids", string.Join(",", bibIds));
             if (includeItems)

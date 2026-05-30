@@ -22,8 +22,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<StringResult>> SA_GetValueByOrgAsync(string attribute, int? organizationId = null, CancellationToken cancellationToken = default)
         {
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
             var request = new PapiRestRequest(url);
             return await ExecutePapiAsync<StringResult>(request, cancellationToken).ConfigureAwait(false);
         }
