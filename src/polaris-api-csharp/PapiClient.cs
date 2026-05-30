@@ -101,6 +101,8 @@ namespace Clc.Polaris.Api
 
             if (papiRequest.AuthRequired)
             {
+                papiRequest.Headers.Remove("X-PAPI-AccessToken");
+
                 if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride)
                 {
                     var token = Token;

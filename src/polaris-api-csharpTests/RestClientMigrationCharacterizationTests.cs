@@ -250,6 +250,33 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public void PreformatRestRequest_RemovesStaleStaffOverrideToken_WhenOverrideBecomesBlocked()
+        {
+            var client = CreateClient();
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "staff-token",
+                AccessSecret = "staff-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
+
+            var first = (PapiRestRequest)client.PreformatRestRequest(request);
+            Assert.AreEqual("staff-token", first.Headers["X-PAPI-AccessToken"]);
+
+            request.BlockStaffOverride = true;
+            var second = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            Assert.AreSame(first, second);
+            Assert.IsFalse(second.Headers.ContainsKey("X-PAPI-AccessToken"));
+            var date = second.Headers["PolarisDate"];
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", second.Headers["Authorization"]);
+        }
+
+        [TestMethod]
         public void PreformatRestRequest_WhenCalledTwice_ReplacesPapiHeadersWithoutDuplicatingOrChangingBody()
         {
             var client = CreateClient();
