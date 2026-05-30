@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
@@ -11,14 +12,14 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<PapiResponseCommon> PatronAccountDeleteTitleList(string barcode, int listId, string password = "")
+
+        public async Task<IRestResponse<PapiResponseCommon>> PatronAccountDeleteTitleListAsync(string barcode, int listId, string password = "", CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patronaccountdeletetitlelist";
             var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
             request.QueryParameters.Add("list", listId);
-            return Execute<PapiResponseCommon>(request);
+            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

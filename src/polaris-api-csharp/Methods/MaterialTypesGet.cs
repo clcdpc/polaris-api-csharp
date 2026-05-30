@@ -1,6 +1,7 @@
 ﻿using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +11,13 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
 
-        public IRestResponse<MaterialTypesGetResult> MaterialTypesGet(int? branchId = null)
+
+        public async Task<IRestResponse<MaterialTypesGetResult>> MaterialTypesGetAsync(int? branchId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/{branchId ?? OrganizationId}/materialtypes";
             var request = new PapiRestRequest(url) { BlockStaffOverride = true };
-            return Execute<MaterialTypesGetResult>(request);
+            return await ExecutePapiAsync<MaterialTypesGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

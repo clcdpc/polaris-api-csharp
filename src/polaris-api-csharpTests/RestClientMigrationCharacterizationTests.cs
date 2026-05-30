@@ -1,4 +1,4 @@
-using Clc.Polaris.Api.Configuration;
+﻿using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -323,12 +323,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void ApiKeyValidate_RequestShape_IsStable()
+        public async Task ApiKeyValidate_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
 
-            var response = client.ApiKeyValidate();
+            var response = await client.ApiKeyValidateAsync();
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -339,8 +339,22 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
         }
 
+
         [TestMethod]
-        public void BibSearch_RequestShape_IsStable()
+        public async Task ApiKeyValidateAsync_PassesCancellationToken()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            using var cts = new CancellationTokenSource();
+
+            var response = await client.ApiKeyValidateAsync(cts.Token);
+
+            Assert.IsNotNull(response);
+            Assert.IsTrue(handler.LastCancellationToken.CanBeCanceled);
+        }
+
+        [TestMethod]
+        public async Task BibSearch_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
@@ -356,7 +370,7 @@ namespace Clc.Polaris.Api.Tests
                 Limit = "3"
             };
 
-            var response = client.BibSearch(options);
+            var response = await client.BibSearchAsync(options);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -374,12 +388,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void AuthenticateStaffUser_RequestShape_IsStable()
+        public async Task AuthenticateStaffUser_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0,\"AccessToken\":\"t\",\"AccessSecret\":\"s\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}");
             var client = CreateClient(handler);
 
-            var response = client.AuthenticateStaffUser(new PolarisUser
+            var response = await client.AuthenticateStaffUserAsync(new PolarisUser
             {
                 Domain = "main",
                 Username = "staff",
@@ -399,12 +413,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronUpdate_RequestShape_IsStable()
+        public async Task PatronUpdate_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
 
-            var response = client.PatronUpdate("AB C/+#?=", new PatronUpdateParams { EmailAddress = "patron@example.test" }, "1234", ignoresa: true);
+            var response = await client.PatronUpdateAsync("AB C/+#?=", new PatronUpdateParams { EmailAddress = "patron@example.test" }, "1234", ignoresa: true);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
@@ -421,13 +435,13 @@ namespace Clc.Polaris.Api.Tests
 
 
         [TestMethod]
-        public void PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
+        public async Task PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
             client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.UtcNow.AddHours(1) };
 
-            var response = client.PatronSearch("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
+            var response = await client.PatronSearchAsync("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -443,12 +457,12 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
+        public async Task PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
 
-            var response = client.PatronMessagesGet("ABC 123", unreadOnly: true, password: "1234");
+            var response = await client.PatronMessagesGetAsync("ABC 123", unreadOnly: true, password: "1234");
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
@@ -519,6 +533,7 @@ namespace Clc.Polaris.Api.Tests
 
             public HttpRequestMessage? LastRequest { get; private set; }
             public string? LastRequestContent { get; private set; }
+            public CancellationToken LastCancellationToken { get; private set; }
 
             public CapturingHttpMessageHandler(string responseJson)
             {
@@ -528,6 +543,7 @@ namespace Clc.Polaris.Api.Tests
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 LastRequest = request;
+                LastCancellationToken = cancellationToken;
                 LastRequestContent = request.Content == null
                     ? null
                     : await request.Content.ReadAsStringAsync(cancellationToken);

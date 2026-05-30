@@ -2,6 +2,7 @@
 using Clc.Polaris.Api.Models;
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,14 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<ProtectedToken> AuthenticateStaffUser(PolarisUser staffUser)
+        public async Task<IRestResponse<ProtectedToken>> AuthenticateStaffUserAsync(PolarisUser staffUser, CancellationToken cancellationToken = default)
         {
             var url = "/protected/v1/1033/100/1/authenticator/staff";
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = staffUser };
-            return Post<ProtectedToken>(url, body: staffUser);
-            //return Execute<ProtectedToken>(request);
+            var response = await PostAsync<ProtectedToken>(url, body: staffUser, cancellationToken: cancellationToken).ConfigureAwait(false);
+            _token = response?.Data;
+            return response;
         }
 
-        
+
     }
 }
