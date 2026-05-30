@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System.Net.Http;
 
 namespace Clc.Polaris.Api
 {
@@ -15,7 +14,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/1/foo";
             var body = new object();
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
+            var request = PapiRestRequest.Post(url, body: body, password: password);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }

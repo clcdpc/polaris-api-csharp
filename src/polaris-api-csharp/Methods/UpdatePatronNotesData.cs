@@ -1,10 +1,9 @@
-﻿using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Models;
 using Clc.Rest;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +34,7 @@ namespace Clc.Polaris.Api
                 body.BlockingNoteMode = (int)updateMode;
             }
 
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
+            var request = PapiRestRequest.Post(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }

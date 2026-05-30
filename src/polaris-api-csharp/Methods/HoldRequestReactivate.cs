@@ -1,10 +1,9 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
-using System.Net.Http;
 using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
@@ -15,7 +14,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/active";
             var body = new { HoldRequestActivationData = new { UserId = userId ?? UserId, activationDate } };
-            var request = new PapiRestRequest(HttpMethod.Put, url, password, body);
+            var request = PapiRestRequest.Put(url, body: body, password: password);
             return await ExecutePapiAsync<HoldRequestActivationResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }

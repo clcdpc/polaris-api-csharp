@@ -1,7 +1,6 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 namespace Clc.Polaris.Api
@@ -13,7 +12,7 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PatronSearchResult>> PatronSearchAsync(string query, int page = 1, int pageSize = 10, PatronSortKeys sortBy = PatronSortKeys.PATN, int? orgId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/protected/v1/1033/100/{orgId ?? OrganizationId}/{ProtectedToken.Placeholder}/search/patrons/Boolean";
-            var request = new PapiRestRequest(url);
+            var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("q", query);
             request.QueryParameters.Add("patronsperpage", pageSize);
             request.QueryParameters.Add("page", page);
