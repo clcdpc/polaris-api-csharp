@@ -141,6 +141,27 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task AuthenticateStaffUserAsync_ReturnsTokenButDoesNotSetClientToken()
+        {
+            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("returned-token", "returned-secret", DateTime.Now.AddHours(1)));
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "existing-token",
+                AccessSecret = "existing-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+
+            var response = await client.AuthenticateStaffUserAsync(CreateStaffUser());
+
+            Assert.IsNotNull(response.Data);
+            Assert.AreEqual("returned-token", response.Data.AccessToken);
+            Assert.IsNotNull(client.Token);
+            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.AreEqual(1, handler.RequestCount);
+        }
+
+        [TestMethod]
         public async Task PatronSearchAsync_ConcurrentProtectedRequestsForSameCacheKey_AuthenticateOnce()
         {
             var handler = new ProtectedTokenHttpMessageHandler();
@@ -178,6 +199,24 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task PatronSearchAsync_SuccessfulStaffAuthentication_LoadsTokenAndCachesIt()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.IsNotNull(client.Token);
+            Assert.AreEqual("protected-token", client.Token.AccessToken);
+            Assert.IsTrue(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out var cachedToken));
+            Assert.IsNotNull(cachedToken);
+            Assert.AreEqual("protected-token", cachedToken.AccessToken);
+            Assert.AreNotSame(client.Token, cachedToken);
+        }
+
+        [TestMethod]
         public async Task PatronAccountGetAsync_FailedStaffAuthentication_DoesNotPopulateProtectedTokenCache()
         {
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
@@ -202,6 +241,48 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsNull(client.Token);
+            Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
+        }
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_FailedStaffAuthentication_DoesNotOverwriteExistingToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "existing-token",
+                AccessSecret = "existing-secret",
+                ExpirationDate = DateTime.Now.AddHours(-1)
+            };
+
+            var response = await client.PatronAccountGetAsync("ABC123");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.IsNotNull(client.Token);
+            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
+        }
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_NullDataStaffAuthentication_DoesNotOverwriteExistingToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
+            var client = CreateProtectedClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "existing-token",
+                AccessSecret = "existing-secret",
+                ExpirationDate = DateTime.Now.AddHours(-1)
+            };
+
+            var response = await client.PatronAccountGetAsync("ABC123");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.IsNotNull(client.Token);
+            Assert.AreEqual("existing-token", client.Token.AccessToken);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
