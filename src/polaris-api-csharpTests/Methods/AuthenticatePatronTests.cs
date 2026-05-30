@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -52,14 +52,14 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void AuthenticatePatron_SendsPostRequestWithJsonBody()
+        public async Task AuthenticatePatron_SendsPostRequestWithJsonBody()
         {
             var handler = new CaptureHttpMessageHandler();
             var client = CreateClient(handler);
             var barcode = "21945001234567";
             var password = "mypassword";
 
-            var response = client.AuthenticatePatron(barcode, password);
+            var response = await client.AuthenticatePatronAsync(barcode, password);
 
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Post, handler.LastRequest.Method);
@@ -70,6 +70,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(handler.RequestContent.Contains($"\"Barcode\":\"{barcode}\"") || handler.RequestContent.Contains($"\"barcode\":\"{barcode}\""), "Body should contain barcode");
             Assert.IsTrue(handler.RequestContent.Contains($"\"Password\":\"{password}\"") || handler.RequestContent.Contains($"\"password\":\"{password}\""), "Body should contain password");
 
+            Assert.IsNotNull(response.Data);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.AreEqual("mock-token", response.Data.AccessToken);
             Assert.AreEqual("mock-secret", response.Data.AccessSecret);
