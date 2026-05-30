@@ -15,8 +15,9 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PapiResponseCommon> PatronAccountDeleteTitleList(string barcode, int listId, string password = "")
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patronaccountdeletetitlelist?list={listId}";
+            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patronaccountdeletetitlelist";
             var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
+            request.QueryParameters.Add("list", listId);
             return Execute<PapiResponseCommon>(request);
         }
     }
