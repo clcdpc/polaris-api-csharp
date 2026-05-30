@@ -1,14 +1,8 @@
 ﻿using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net;
-using System.Text;
-using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
 {
@@ -18,7 +12,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{WebUtility.UrlEncode(barcode)}/blocks";
             var body = new CreatePatronBlocksRequest((int)blockType, blockValue);
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
+            var request = PapiRestRequest.Post(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             request.QueryParameters.Add("userid", userId ?? UserId);
 

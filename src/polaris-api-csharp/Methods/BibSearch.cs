@@ -1,13 +1,8 @@
 ﻿using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 
 namespace Clc.Polaris.Api
 {
@@ -18,7 +13,9 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/{options.Branch}/search/bibs/{options.SearchType}";
             if (options.SearchType == BibSearchTypes.keyword) { url += $"/{options.Qualifier}"; }
 
-            var request = new PapiRestRequest(url) { BlockStaffOverride = true };
+            var request = PapiRestRequest.Get(url);
+
+            request.BlockStaffOverride = true;
             request.QueryParameters.Add("q", options.Term ?? string.Empty);
             request.QueryParameters.Add("sort", options.SortOption);
             request.QueryParameters.Add("page", options.Page);

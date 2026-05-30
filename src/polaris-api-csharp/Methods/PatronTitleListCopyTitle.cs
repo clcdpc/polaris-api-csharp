@@ -1,13 +1,8 @@
 ﻿using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 
 namespace Clc.Polaris.Api
 {
@@ -26,7 +21,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistcopytitle/";
             var body = new PatronTitleListCopyTitleData { FromRecordStoreId = fromRecordStoreId, FromPosition = fromPosition, ToRecordStoreId = toRecordStoreId };
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
+            var request = PapiRestRequest.Post(url, body: body, password: password);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System.Net.Http;
 
 namespace Clc.Polaris.Api
 {
@@ -15,7 +11,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/cataloging/items/{(itemRecordId.HasValue ? itemRecordId.Value.ToString() : oldBarcode)}/barcode";
             var body = new ItemUpdateBarcodeData { ItemBarcode = newBarcode, TransactionBranchId = transactionBranchId ?? OrganizationId };
-            var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
+            var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("wsid", transactionBranchId ?? WorkstationId);
             if (!string.IsNullOrWhiteSpace(oldBarcode)) { request.QueryParameters.Add("isBarcode", 1); }
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
