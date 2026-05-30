@@ -1,4 +1,4 @@
-﻿using Clc.Rest.Models;
+using Clc.Rest.Models;
 using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Clc.Rest;
@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Clc.Polaris.Api
 {
@@ -125,6 +126,17 @@ namespace Clc.Polaris.Api
             var query = new StringBuilder();
             foreach (KeyValuePair<string, object> parameter in request.QueryParameters)
             {
+                if (string.IsNullOrWhiteSpace(parameter.Key) || parameter.Value == null)
+                {
+                    continue;
+                }
+
+                var convertedValue = Convert.ToString(parameter.Value, CultureInfo.InvariantCulture);
+                if (string.IsNullOrWhiteSpace(convertedValue))
+                {
+                    continue;
+                }
+
                 if (query.Length > 0)
                 {
                     query.Append('&');
@@ -132,7 +144,12 @@ namespace Clc.Polaris.Api
 
                 query.Append(Uri.EscapeDataString(parameter.Key));
                 query.Append('=');
-                query.Append(Uri.EscapeDataString(parameter.Value?.ToString() ?? string.Empty));
+                query.Append(Uri.EscapeDataString(convertedValue));
+            }
+
+            if (query.Length == 0)
+            {
+                return url;
             }
 
             return $"{url}{(url.Contains("?") ? "&" : "?")}{query}";
