@@ -354,6 +354,32 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task ProtectedMethodWithoutCachedToken_PassesCancellationTokenToProtectedTokenAcquisition()
+        {
+            var handler = new CapturingHttpMessageHandler(
+                "{\"PAPIErrorCode\":0,\"AccessToken\":\"staff-token\",\"AccessSecret\":\"staff-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}",
+                "{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+            using var cts = new CancellationTokenSource();
+
+            var response = await client.PatronSearchAsync("name = Smith", cancellationToken: cts.Token);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(2, handler.Requests.Count);
+            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            Assert.AreEqual(HttpMethod.Post, handler.Requests[0].Method);
+            Assert.IsTrue(handler.CancellationTokens[0].CanBeCanceled);
+            StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/staff-token/search/patrons/Boolean");
+            Assert.IsTrue(handler.CancellationTokens[1].CanBeCanceled);
+        }
+
+        [TestMethod]
         public async Task BibSearch_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
@@ -529,13 +555,16 @@ namespace Clc.Polaris.Api.Tests
 
         private sealed class CapturingHttpMessageHandler : HttpMessageHandler
         {
-            private readonly string _responseJson;
+            private readonly IReadOnlyList<string> _responseJson;
 
             public HttpRequestMessage? LastRequest { get; private set; }
             public string? LastRequestContent { get; private set; }
             public CancellationToken LastCancellationToken { get; private set; }
+            public List<HttpRequestMessage> Requests { get; } = new List<HttpRequestMessage>();
+            public List<string?> RequestContents { get; } = new List<string?>();
+            public List<CancellationToken> CancellationTokens { get; } = new List<CancellationToken>();
 
-            public CapturingHttpMessageHandler(string responseJson)
+            public CapturingHttpMessageHandler(params string[] responseJson)
             {
                 _responseJson = responseJson;
             }
@@ -547,10 +576,14 @@ namespace Clc.Polaris.Api.Tests
                 LastRequestContent = request.Content == null
                     ? null
                     : await request.Content.ReadAsStringAsync(cancellationToken);
+                Requests.Add(request);
+                RequestContents.Add(LastRequestContent);
+                CancellationTokens.Add(cancellationToken);
 
+                var responseJson = _responseJson[Math.Min(Requests.Count - 1, _responseJson.Count - 1)];
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(_responseJson, Encoding.UTF8, "application/json")
+                    Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                 };
             }
         }
