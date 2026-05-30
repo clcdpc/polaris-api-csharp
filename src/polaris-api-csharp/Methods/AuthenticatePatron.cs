@@ -1,11 +1,10 @@
-﻿using Clc.Rest;
+using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 
 namespace Clc.Polaris.Api
@@ -16,7 +15,8 @@ namespace Clc.Polaris.Api
         {
             var url = "/public/v1/1033/100/1/authenticator/patron";
             var body = new { Barcode = barcode, Password = password };
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body, BlockStaffOverride = true };
+            var request = PapiRestRequest.Post(url, body: body);
+            request.BlockStaffOverride = true;
             return await ExecutePapiAsync<PatronAuthenticationResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
