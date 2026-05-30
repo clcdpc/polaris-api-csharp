@@ -107,9 +107,12 @@ namespace Clc.Polaris.Api.Tests
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
             var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
 
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, "staff-secret", "access-key");
             Assert.IsTrue(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
             Assert.AreEqual("staff-token", formatted.Headers["X-PAPI-AccessToken"]);
-            Assert.IsTrue(formatted.Headers.ContainsKey("Authorization"));
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
         [TestMethod]
@@ -130,8 +133,166 @@ namespace Clc.Polaris.Api.Tests
             };
             var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
 
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
-            Assert.IsTrue(formatted.Headers.ContainsKey("Authorization"));
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+        }
+
+
+        [TestMethod]
+        public void PreformatRestRequest_PublicAuthenticatedGetNoQuery_HashesLegacyUriAndDoesNotChangeBody()
+        {
+            var client = CreateClient();
+            var body = new { ShouldRemain = "untouched" };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate")
+            {
+                Body = body
+            };
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.AreSame(body, formatted.Body);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_PublicAuthenticatedGetWithQueryParameters_HashesOutgoingEffectiveUri()
+        {
+            var client = CreateClient();
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            request.QueryParameters.Add("q", "harry potter & stone");
+            request.QueryParameters.Add("limit", "branch:1 + format/book");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&limit=branch%3A1%20%2B%20format%2Fbook";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_AuthenticatedPutWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
+        {
+            var client = CreateClient();
+            var body = new PatronUpdateParams { EmailAddress = "patron@example.test" };
+            var request = new PapiRestRequest(HttpMethod.Put, "/public/v1/1033/100/1/patron/ABC+123", "1234", body);
+            request.QueryParameters.Add("ignoresa", true);
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/patron/ABC+123?ignoresa=True";
+            var expectedHash = ComputePapiHash("PUT", expectedUri, date, "1234", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.AreSame(body, formatted.Body);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_AuthenticatedPostWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
+        {
+            var client = CreateClient();
+            var body = new { Amount = 12.34m, Reason = "credit" };
+            var request = new PapiRestRequest(HttpMethod.Post, "/public/v1/1033/100/1/patron/ABC+123/account/credit", "1234", body);
+            request.QueryParameters.Add("wsid", 7);
+            request.QueryParameters.Add("userid", 8);
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/patron/ABC+123/account/credit?wsid=7&userid=8";
+            var expectedHash = ComputePapiHash("POST", expectedUri, date, "1234", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.AreSame(body, formatted.Body);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_ProtectedRequest_UsesProtectedTokenSecret()
+        {
+            var client = CreateClient();
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "protected-token",
+                AccessSecret = "protected-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/token/search/patrons/Boolean");
+            request.QueryParameters.Add("q", "name=Smith");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/1/token/search/patrons/Boolean?q=name%3DSmith";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, "protected-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_StaffOverrideDisabled_DoesNotAddTokenAndUsesPublicPassword()
+        {
+            var client = CreateClient();
+            client.AllowStaffOverrideRequests = false;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "staff-token",
+                AccessSecret = "staff-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_CalledTwice_ReplacesAuthHeadersWithoutDuplicatingOrThrowing()
+        {
+            var client = CreateClient();
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "staff-token",
+                AccessSecret = "staff-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
+            request.Headers.Add("X-Existing", "existing-value");
+
+            var first = (PapiRestRequest)client.PreformatRestRequest(request);
+            var second = (PapiRestRequest)client.PreformatRestRequest(first);
+
+            Assert.AreSame(first, second);
+            Assert.AreEqual(1, second.Headers.Count(header => header.Key == "PolarisDate"));
+            Assert.AreEqual(1, second.Headers.Count(header => header.Key == "Authorization"));
+            Assert.AreEqual(1, second.Headers.Count(header => header.Key == "X-PAPI-AccessToken"));
+            Assert.AreEqual("staff-token", second.Headers["X-PAPI-AccessToken"]);
+            Assert.AreEqual("existing-value", second.Headers["X-Existing"]);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_AuthorizationChanges_WhenQueryParameterValuesChange()
+        {
+            var client = CreateClient();
+            var first = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            first.QueryParameters.Add("q", "first value");
+            var second = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            second.QueryParameters.Add("q", "second value");
+
+            var formattedFirst = (PapiRestRequest)client.PreformatRestRequest(first);
+            var formattedSecond = (PapiRestRequest)client.PreformatRestRequest(second);
+
+            Assert.AreNotEqual(formattedFirst.Headers["Authorization"], formattedSecond.Headers["Authorization"]);
         }
 
         [TestMethod]
@@ -182,6 +343,33 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+        }
+
+
+        [TestMethod]
+        public void BibSearch_AuthorizationHeader_HashesSameUriSentByRestClient()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var options = new BibSearchOptions
+            {
+                Branch = 1,
+                SearchType = BibSearchTypes.keyword,
+                Qualifier = SearchQualifiers.KW,
+                Term = "harry potter & stone",
+                SortOption = SearchSortOptions.MP,
+                Page = 2,
+                PageSize = 15,
+                Limit = "branch:1 + format/book"
+            };
+
+            var response = client.BibSearch(options);
+
+            Assert.IsNotNull(response);
+            var date = GetSingleHeader(handler.LastRequest!, "PolarisDate");
+            var authorization = GetSingleHeader(handler.LastRequest!, "Authorization");
+            var expectedHash = ComputePapiHash("GET", handler.LastRequest!.RequestUri!.AbsoluteUri, date, string.Empty, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", authorization);
         }
 
         [TestMethod]
@@ -297,6 +485,11 @@ namespace Clc.Polaris.Api.Tests
             };
         }
 
+
+        private static string GetSingleHeader(HttpRequestMessage request, string headerName)
+        {
+            return request.Headers.GetValues(headerName).Single();
+        }
 
         private static Dictionary<string, string> ParseQuery(string query)
         {
