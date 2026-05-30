@@ -18,8 +18,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PapiResponseCommon>> PatronAccountRefundCreditAsync(string barcode, double txnAmount, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
-            await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/lumpsumrefundcredit";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{WebUtility.UrlEncode(barcode)}/account/lumpsumrefundcredit";
             var body = new PatronAccountRefundCreditData { TxnAmount = txnAmount, FreeTextNote = note };
             var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
