@@ -353,6 +353,49 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(handler.LastCancellationToken.CanBeCanceled);
         }
 
+
+        [TestMethod]
+        public async Task ProtectedRequestWithoutCachedToken_PassesCancellationTokenToProtectedTokenAcquisition()
+        {
+            var handler = new CapturingHttpMessageHandler(
+                "{\"PAPIErrorCode\":0,\"AccessToken\":\"staff-token\",\"AccessSecret\":\"staff-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}",
+                "{\"PAPIErrorCode\":0}")
+            {
+                HoldAuthenticatorRequests = true
+            };
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+            using var cts = new CancellationTokenSource();
+
+            var requestTask = client.PatronMessagesGetAsync("ABC123", cancellationToken: cts.Token);
+            await handler.AuthenticatorRequestStarted.WaitAsync(TimeSpan.FromSeconds(5));
+
+            cts.Cancel();
+            await handler.AuthenticatorRequestCancellationObserved.WaitAsync(TimeSpan.FromSeconds(5));
+            handler.ReleaseAuthenticatorResponse();
+
+            try
+            {
+                await requestTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            Assert.IsTrue(handler.Requests.Count >= 1);
+            Assert.IsTrue(handler.CancellationTokens.Count >= 1);
+            Assert.IsTrue(handler.CancellationTokens[0].CanBeCanceled);
+            Assert.IsTrue(handler.CancellationTokens[0].IsCancellationRequested);
+            Assert.AreEqual(HttpMethod.Post, handler.Requests[0].Method);
+            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+        }
+
         [TestMethod]
         public async Task BibSearch_RequestShape_IsStable()
         {
@@ -529,28 +572,51 @@ namespace Clc.Polaris.Api.Tests
 
         private sealed class CapturingHttpMessageHandler : HttpMessageHandler
         {
-            private readonly string _responseJson;
+            private readonly Queue<string> _responseJsons;
+            private readonly TaskCompletionSource<bool> _authenticatorRequestStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource<bool> _authenticatorRequestCancellationObserved = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource<bool> _releaseAuthenticatorResponse = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             public HttpRequestMessage? LastRequest { get; private set; }
             public string? LastRequestContent { get; private set; }
             public CancellationToken LastCancellationToken { get; private set; }
+            public List<HttpRequestMessage> Requests { get; } = new List<HttpRequestMessage>();
+            public List<CancellationToken> CancellationTokens { get; } = new List<CancellationToken>();
+            public bool HoldAuthenticatorRequests { get; set; }
+            public Task AuthenticatorRequestStarted => _authenticatorRequestStarted.Task;
+            public Task AuthenticatorRequestCancellationObserved => _authenticatorRequestCancellationObserved.Task;
 
-            public CapturingHttpMessageHandler(string responseJson)
+            public CapturingHttpMessageHandler(params string[] responseJsons)
             {
-                _responseJson = responseJson;
+                _responseJsons = new Queue<string>(responseJsons);
+            }
+
+            public void ReleaseAuthenticatorResponse()
+            {
+                _releaseAuthenticatorResponse.TrySetResult(true);
             }
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 LastRequest = request;
                 LastCancellationToken = cancellationToken;
+                Requests.Add(request);
+                CancellationTokens.Add(cancellationToken);
                 LastRequestContent = request.Content == null
                     ? null
                     : await request.Content.ReadAsStringAsync(cancellationToken);
 
+                if (HoldAuthenticatorRequests && request.RequestUri!.AbsolutePath.Contains("/authenticator/staff"))
+                {
+                    using var registration = cancellationToken.Register(() => _authenticatorRequestCancellationObserved.TrySetResult(true));
+                    _authenticatorRequestStarted.TrySetResult(true);
+                    await _releaseAuthenticatorResponse.Task.ConfigureAwait(false);
+                }
+
+                var responseJson = _responseJsons.Count > 1 ? _responseJsons.Dequeue() : _responseJsons.Peek();
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(_responseJson, Encoding.UTF8, "application/json")
+                    Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                 };
             }
         }
