@@ -4,6 +4,7 @@ using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -525,6 +526,93 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+            AssertAuthorizationHashesRequestUri(handler.LastRequest);
+        }
+
+        [TestMethod]
+        public async Task BibSearch_WithDefaultLimit_OmitsLimitFromSentUriAndAuthorizationHash()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var options = new BibSearchOptions
+            {
+                Branch = 1,
+                SearchType = BibSearchTypes.keyword,
+                Qualifier = SearchQualifiers.KW,
+                Term = "harry potter",
+                SortOption = SearchSortOptions.MP,
+                Page = 1,
+                PageSize = 10
+            };
+
+            var response = await client.BibSearchAsync(options);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter&sort=MP&page=1&bibsperpage=10", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.IsFalse(query.ContainsKey("limit"));
+            AssertAuthorizationHashesRequestUri(handler.LastRequest);
+        }
+
+        [TestMethod]
+        public async Task QueryParameter_WithNullValue_IsOmittedFromSentUriAndAuthorizationHash()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            request.QueryParameters.Add("q", "harry potter");
+            request.QueryParameters.Add("limit", null!);
+
+            await ExecutePapiResponseAsync(client, request);
+
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.IsFalse(query.ContainsKey("limit"));
+            AssertAuthorizationHashesRequestUri(handler.LastRequest);
+        }
+
+        [TestMethod]
+        public async Task QueryParameter_WithEmptyStringValue_IsOmittedFromSentUriAndAuthorizationHash()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            request.QueryParameters.Add("q", "harry potter");
+            request.QueryParameters.Add("limit", string.Empty);
+
+            await ExecutePapiResponseAsync(client, request);
+
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.IsFalse(query.ContainsKey("limit"));
+            AssertAuthorizationHashesRequestUri(handler.LastRequest);
+        }
+
+        [TestMethod]
+        public async Task QueryParameter_WithCultureSensitiveValue_UsesInvariantCultureForSentUriAndAuthorizationHash()
+        {
+            var originalCulture = CultureInfo.CurrentCulture;
+            var originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+
+                var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+                var client = CreateClient(handler);
+                var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+                request.QueryParameters.Add("amount", 12.34m);
+
+                await ExecutePapiResponseAsync(client, request);
+
+                Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?amount=12.34", handler.LastRequest!.RequestUri!.AbsoluteUri);
+                AssertAuthorizationHashesRequestUri(handler.LastRequest);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
         }
 
         [TestMethod]
@@ -638,6 +726,27 @@ namespace Clc.Polaris.Api.Tests
                 AllowStaffOverrideRequests = false,
                 UseProtectedTokenCache = false
             };
+        }
+
+
+        private static async Task ExecutePapiResponseAsync(PapiClient client, PapiRestRequest request)
+        {
+            var executePapiAsync = typeof(PapiClient)
+                .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+                .MakeGenericMethod(typeof(PapiResponseCommon));
+            var autoMode = Enum.Parse(
+                typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,
+                "Auto");
+
+            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None, autoMode })!;
+            await task;
+        }
+
+        private static void AssertAuthorizationHashesRequestUri(HttpRequestMessage request, string password = "")
+        {
+            var date = request.Headers.GetValues("PolarisDate").Single();
+            var expectedHash = ComputePapiHash(request.Method.Method, request.RequestUri!.AbsoluteUri, date, password, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", request.Headers.GetValues("Authorization").Single());
         }
 
 
