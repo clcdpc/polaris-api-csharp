@@ -34,7 +34,8 @@ namespace Clc.Polaris.Api
                 body.BlockingNoteMode = (int)updateMode;
             }
 
-            return Post<PapiResponseCommon>(url, body: body);
+            var request = new PapiRestRequest(HttpMethod.Post, url) { Body = body };
+            return Execute<PapiResponseCommon>(request);
         }
     }
 }

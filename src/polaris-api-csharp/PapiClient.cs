@@ -119,6 +119,11 @@ namespace Clc.Polaris.Api
             return papiRequest;
         }
 
+        private IRestResponse<T> Execute<T>(RestRequest request)
+        {
+            return ExecuteAsync<T>(request).GetAwaiter().GetResult();
+        }
+
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)
         {
             var hashString = httpMethod + uri + date + password;
