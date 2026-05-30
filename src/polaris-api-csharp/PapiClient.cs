@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace Clc.Polaris.Api
 {
@@ -112,12 +113,36 @@ namespace Clc.Polaris.Api
                 }
 
                 var date = DateTime.Now.ToUniversalTime().ToString("R");
-                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildUrl(papiRequest), password);
+                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildUrlForPapiHash(papiRequest), password);
                 papiRequest.Headers.Add("PolarisDate", date);
                 papiRequest.Headers.Add("Authorization", string.Format("PWS {0}:{1}", AccessID, hash));
             }
 
             return papiRequest;
+        }
+
+        private string BuildUrlForPapiHash(RestRequest request)
+        {
+            var url = BuildUrl(request);
+            if (request.QueryParameters.Count == 0)
+            {
+                return url;
+            }
+
+            var query = new StringBuilder();
+            foreach (KeyValuePair<string, object> parameter in request.QueryParameters)
+            {
+                if (query.Length > 0)
+                {
+                    query.Append('&');
+                }
+
+                query.Append(Uri.EscapeDataString(parameter.Key));
+                query.Append('=');
+                query.Append(Uri.EscapeDataString(parameter.Value?.ToString() ?? string.Empty));
+            }
+
+            return $"{url}{(url.Contains("?") ? "&" : "?")}{query}";
         }
 
         private IRestResponse<T> Execute<T>(RestRequest request)

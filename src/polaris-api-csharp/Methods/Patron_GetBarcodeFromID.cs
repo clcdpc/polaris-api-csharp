@@ -11,8 +11,9 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<GetBarcodeAndPatronIDResult> Patron_GetBarcodeFromId(int patronId)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/barcode?patronid={patronId}";
+            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/barcode";
             var request = new PapiRestRequest(url);
+            request.QueryParameters.Add("patronid", patronId);
             return Execute<GetBarcodeAndPatronIDResult>(request);
         }
     }

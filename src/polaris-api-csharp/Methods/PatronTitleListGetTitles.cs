@@ -15,8 +15,11 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PatronTitleListGetTitlesResult> PatronTitleListGetTitles(string barcode, int listId, int startPosition = 1, int endPosition = 100, string password = "")
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistgettitles?list={listId}&startPosition={startPosition}&endPosition={endPosition}";
+            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistgettitles";
             var request = new PapiRestRequest(url) { Password = password };
+            request.QueryParameters.Add("list", listId);
+            request.QueryParameters.Add("startPosition", startPosition);
+            request.QueryParameters.Add("endPosition", endPosition);
             return Execute<PatronTitleListGetTitlesResult>(request);
         }
     }

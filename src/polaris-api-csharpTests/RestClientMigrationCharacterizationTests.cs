@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -172,11 +173,12 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
             StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/search/bibs/keyword/KW");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "q=harry+potter+%26+stone");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "sort=MP");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "page=2");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "bibsperpage=15");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "limit=3");
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("harry potter & stone", query["q"]);
+            Assert.AreEqual("MP", query["sort"]);
+            Assert.AreEqual("2", query["page"]);
+            Assert.AreEqual("15", query["bibsperpage"]);
+            Assert.AreEqual("3", query["limit"]);
             Assert.IsNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
@@ -219,12 +221,69 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
             var encodedBarcode = WebUtility.UrlEncode("AB C/+#?=");
             StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, $"/public/v1/1033/100/1/patron/{encodedBarcode}");
-            StringAssert.Contains(handler.LastRequest.RequestUri.Query, "ignoresa=True");
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("True", query["ignoresa"]);
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
             Assert.IsNotNull(handler.LastRequestContent);
             StringAssert.Contains(handler.LastRequestContent, "patron@example.test");
+        }
+
+
+        [TestMethod]
+        public void PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.UtcNow.AddHours(1) };
+
+            var response = client.PatronSearch("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/token/search/patrons/Boolean");
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("name = Smith & status: active", query["q"]);
+            Assert.AreEqual("25", query["patronsperpage"]);
+            Assert.AreEqual("3", query["page"]);
+            Assert.AreEqual("PATNL", query["sort"]);
+            Assert.IsNull(handler.LastRequest.Content);
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+        }
+
+        [TestMethod]
+        public void PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+
+            var response = client.PatronMessagesGet("ABC 123", unreadOnly: true, password: "1234");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/patron/ABC+123/messages");
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("1", query["unreadonly"]);
+            Assert.IsNull(handler.LastRequest.Content);
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
+            Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_HashesQueryParameters_WithOutgoingUriEncoding()
+        {
+            var client = CreateClient();
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            request.QueryParameters.Add("q", "harry potter & stone");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
         private static PapiClient CreateClient(HttpMessageHandler? handler = null)
@@ -236,6 +295,22 @@ namespace Clc.Polaris.Api.Tests
                 AllowStaffOverrideRequests = false,
                 UseProtectedTokenCache = false
             };
+        }
+
+
+        private static Dictionary<string, string> ParseQuery(string query)
+        {
+            return query.TrimStart('?')
+                .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => part.Split('=', 2))
+                .ToDictionary(parts => WebUtility.UrlDecode(parts[0]), parts => parts.Length > 1 ? WebUtility.UrlDecode(parts[1]) : string.Empty);
+        }
+
+        private static string ComputePapiHash(string httpMethod, string uri, string date, string password, string accessKey)
+        {
+            var hashString = httpMethod + uri + date + password;
+            var computedHash = HMACSHA1.HashData(Encoding.UTF8.GetBytes(accessKey), Encoding.UTF8.GetBytes(hashString));
+            return Convert.ToBase64String(computedHash);
         }
 
         private sealed class TestPapiSettings : IPapiSettings
