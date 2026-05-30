@@ -1,5 +1,6 @@
 ﻿using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
+using Clc.Rest;
 using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -126,6 +127,130 @@ namespace Clc.Polaris.Api.Tests
             var expectedHash = ComputePapiHash("GET", expectedUri, date, "protected-secret", "access-key");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+        }
+
+        [TestMethod]
+        public void ProtectedToken_Placeholder_IsStable()
+        {
+            Assert.AreEqual("__PAPI_PROTECTED_ACCESS_TOKEN__", ProtectedToken.Placeholder);
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenPlaceholderRequest_SendsRealAccessTokenAndNeverPlaceholder()
+        {
+            var handler = new ProtectedTokenCancellationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+
+            var response = await client.PatronSearchAsync("name=Smith");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(2, handler.Requests.Count);
+            StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+            Assert.IsFalse(handler.Requests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenPlaceholderRequest_HashesReplacedUrlNotPlaceholderUrl()
+        {
+            var handler = new ProtectedTokenCancellationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+
+            await client.PatronSearchAsync("name=Smith");
+
+            var finalRequest = handler.Requests[1];
+            var date = finalRequest.Headers.GetValues("PolarisDate").Single();
+            var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/1/protected-token/search/patrons/Boolean?q=name%3DSmith&patronsperpage=10&page=1&sort=PATN";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, "protected-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", finalRequest.Headers.GetValues("Authorization").Single());
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenPlaceholderRequest_AcquiresProtectedTokenWhenNoCachedTokenExists()
+        {
+            var handler = new ProtectedTokenCancellationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(2, handler.Requests.Count);
+            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenPlaceholderRequest_UsesCachedProtectedTokenForReplacement()
+        {
+            var cacheKeyHost = $"https://placeholder-cache-{Guid.NewGuid():N}.example.test";
+            var firstHandler = new ProtectedTokenCancellationHttpMessageHandler();
+            var firstClient = CreateClient(firstHandler);
+            firstClient.Hostname = cacheKeyHost;
+            firstClient.UseProtectedTokenCache = true;
+            firstClient.AllowStaffOverrideRequests = true;
+            firstClient.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+            await firstClient.PatronSearchAsync("name=Smith");
+
+            var secondHandler = new ProtectedTokenCancellationHttpMessageHandler();
+            var secondClient = CreateClient(secondHandler);
+            secondClient.Hostname = cacheKeyHost;
+            secondClient.UseProtectedTokenCache = true;
+            secondClient.AllowStaffOverrideRequests = true;
+            secondClient.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "staff",
+                Password = "secret"
+            };
+
+            await secondClient.PatronSearchAsync("name=Jones");
+
+            Assert.AreEqual(1, secondHandler.Requests.Count);
+            StringAssert.Contains(secondHandler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+            Assert.IsFalse(secondHandler.Requests[0].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenPlaceholderRequest_WithPreloadSkipFailsClearlyAndDoesNotSendPlaceholder()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "protected-token",
+                AccessSecret = "protected-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+            var request = new PapiRestRequest($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/search/patrons/Boolean");
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => ExecutePapiWithProtectedTokenPreloadSkipAsync<PapiResponseCommon>(client, request));
+
+            StringAssert.Contains(exception.Message, "protected token placeholder");
+            Assert.IsNull(handler.LastRequest);
         }
 
         [TestMethod]
@@ -524,6 +649,20 @@ namespace Clc.Polaris.Api.Tests
                 AllowStaffOverrideRequests = false,
                 UseProtectedTokenCache = false
             };
+        }
+
+
+        private static Task<IRestResponse<T>> ExecutePapiWithProtectedTokenPreloadSkipAsync<T>(PapiClient client, PapiRestRequest request)
+        {
+            var preloadModeType = typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic);
+            Assert.IsNotNull(preloadModeType);
+            var skip = Enum.Parse(preloadModeType, "Skip");
+            var executeMethod = typeof(PapiClient)
+                .GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Single(method => method.Name == "ExecutePapiAsync" && method.IsGenericMethodDefinition);
+            var task = executeMethod.MakeGenericMethod(typeof(T)).Invoke(client, new[] { request, CancellationToken.None, skip });
+            Assert.IsNotNull(task);
+            return (Task<IRestResponse<T>>)task;
         }
 
 
