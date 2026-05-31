@@ -20,32 +20,62 @@ namespace Clc.Polaris.Api.Tests
     [TestCategory("Integration")]
     public class PapiClientTests
     {
-        TestSettings Settings;
+        private const string MissingIntegrationConfigurationMessage = "Integration test configuration is missing. Provide appsettings.Test.json or environment variables to run integration tests.";
+
+        TestSettings Settings = null!;
 
         protected static IConfiguration InitConfiguration()
         {
             var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.Test.json")
+                .AddJsonFile("appsettings.Test.json", optional: true)
                 .AddEnvironmentVariables()
                 .Build();
 
             return config;
         }
 
-        IPapiClient papi;
+        IPapiClient papi = null!;
         int bibId = 478907;
 
-        public PapiClientTests()
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            InitializeIntegrationTest();
+        }
+
+        private void InitializeIntegrationTest()
         {
             var config = InitConfiguration();
 
-            var papiSettings = config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>()
-                ?? throw new InvalidOperationException("Missing PapiSettings configuration.");
+            var papiSettings = config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>();
+            var testSettings = config.Get<TestSettings>();
 
-            papi = new PapiClient(papiSettings);
+            if (!HasRequiredPapiSettings(papiSettings) || !HasRequiredTestSettings(testSettings))
+            {
+                Assert.Inconclusive(MissingIntegrationConfigurationMessage);
+            }
 
-            Settings = config.Get<TestSettings>()
-                ?? throw new InvalidOperationException("Missing test settings configuration.");
+            papi = new PapiClient(papiSettings!);
+            Settings = testSettings!;
+        }
+
+        private static bool HasRequiredPapiSettings(PapiSettings? settings)
+        {
+            return settings != null
+                && !string.IsNullOrWhiteSpace(settings.AccessId)
+                && !string.IsNullOrWhiteSpace(settings.AccessKey)
+                && !string.IsNullOrWhiteSpace(settings.Hostname);
+        }
+
+        private static bool HasRequiredTestSettings(TestSettings? settings)
+        {
+            return settings != null
+                && settings.PatronId > 0
+                && !string.IsNullOrWhiteSpace(settings.PatronBarcode)
+                && !string.IsNullOrWhiteSpace(settings.PatronPin)
+                && !string.IsNullOrWhiteSpace(settings.FreeTextBlock)
+                && !string.IsNullOrWhiteSpace(settings.PatronListName)
+                && !string.IsNullOrWhiteSpace(settings.OrgEmail);
         }
 
         [TestMethod()]
@@ -66,8 +96,13 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task AuthenticateStaffUserTest()
         {
-            var staffOverrideAccount = papi.StaffOverrideAccount ?? throw new InvalidOperationException("Staff override account is required for this test.");
-            var response = await papi.AuthenticateStaffUserAsync(staffOverrideAccount);
+            var staffOverrideAccount = papi.StaffOverrideAccount;
+            if (staffOverrideAccount == null)
+            {
+                Assert.Inconclusive(MissingIntegrationConfigurationMessage);
+            }
+
+            var response = await papi.AuthenticateStaffUserAsync(staffOverrideAccount!);
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessToken));
