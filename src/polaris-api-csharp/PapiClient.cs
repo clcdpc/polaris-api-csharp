@@ -98,11 +98,12 @@ namespace Clc.Polaris.Api
             {
                 papiRequest.Headers.Remove("X-PAPI-AccessToken");
 
+                var token = Token;
+                var accessSecret = token?.AccessSecret;
+                var accessToken = token?.AccessToken;
+
                 if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride)
                 {
-                    var token = Token;
-                    var accessSecret = token?.AccessSecret;
-                    var accessToken = token?.AccessToken;
                     if (!string.IsNullOrWhiteSpace(accessSecret) && !string.IsNullOrWhiteSpace(accessToken))
                     {
                         password = accessSecret;
@@ -112,8 +113,6 @@ namespace Clc.Polaris.Api
 
                 if (papiRequest.IsProtectedMethod && string.IsNullOrWhiteSpace(password))
                 {
-                    var token = Token;
-                    var accessSecret = token?.AccessSecret;
                     if (!string.IsNullOrWhiteSpace(accessSecret))
                     {
                         password = accessSecret;
