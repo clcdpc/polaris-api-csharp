@@ -47,7 +47,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// How the message was delivered. In the currently implementation this is the patron's phone number.
 		/// </summary>
-		public string? DeliveryString { get; set; }
+		public string DeliveryString { get; set; } = string.Empty;
 
         /// <summary>
         /// Any additional data/notes.
