@@ -438,6 +438,57 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task ProtectedTokenPathRequest_ClearsExpiredToken_WhenStaffReauthenticationFails()
+        {
+            var handler = new FailingStaffAuthenticationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = "failed-refresh",
+                Password = "secret"
+            };
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.UtcNow.AddMinutes(-5)
+            };
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => client.PatronSearchAsync("name=Smith", orgId: 9));
+
+            Assert.IsNull(client.Token);
+            StringAssert.Contains(exception.Message, "valid protected access token");
+            Assert.AreEqual(1, handler.Requests.Count);
+            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_ProtectedGet_DoesNotUseExpiredProtectedTokenSecretForHash()
+        {
+            var client = CreateClient();
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.UtcNow.AddMinutes(-5)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/expired-token/search/patrons/Boolean");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"];
+            var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/1/expired-token/search/patrons/Boolean";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expiredSecretHash = ComputePapiHash("GET", expectedUri, date, "expired-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.AreNotEqual($"PWS access-id:{expiredSecretHash}", formatted.Headers["Authorization"]);
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+        }
+
+        [TestMethod]
         public async Task ProtectedTokenPathRequest_UsesCachedProtectedTokenForPlaceholderReplacement()
         {
             var handler = new ProtectedTokenCancellationHttpMessageHandler();
@@ -886,6 +937,21 @@ namespace Clc.Polaris.Api.Tests
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
+                });
+            }
+        }
+
+        private sealed class FailingStaffAuthenticationHttpMessageHandler : HttpMessageHandler
+        {
+            public List<HttpRequestMessage> Requests { get; } = new();
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Requests.Add(request);
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":-1}", Encoding.UTF8, "application/json")
                 });
             }
         }
