@@ -10,8 +10,6 @@ using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Globalization;
 
 namespace Clc.Polaris.Api
 {
@@ -107,54 +105,15 @@ namespace Clc.Polaris.Api
                 }
 
                 var date = DateTime.Now.ToUniversalTime().ToString("R");
-                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildUrlForPapiHash(papiRequest), password);
+                var requestUri = BuildRequestUri(papiRequest);
+                var hashUri = requestUri.IsAbsoluteUri ? requestUri.AbsoluteUri : requestUri.OriginalString;
+                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, hashUri, password);
                 papiRequest.Headers["PolarisDate"] = date;
                 papiRequest.Headers["Authorization"] = string.Format("PWS {0}:{1}", AccessID, hash);
             }
 
             return papiRequest;
         }
-
-        private string BuildUrlForPapiHash(RestRequest request)
-        {
-            var url = BuildUrl(request);
-            if (request.QueryParameters.Count == 0)
-            {
-                return url;
-            }
-
-            var query = new StringBuilder();
-            foreach (KeyValuePair<string, object> parameter in request.QueryParameters)
-            {
-                if (string.IsNullOrWhiteSpace(parameter.Key) || parameter.Value == null)
-                {
-                    continue;
-                }
-
-                var convertedValue = Convert.ToString(parameter.Value, CultureInfo.InvariantCulture);
-                if (string.IsNullOrWhiteSpace(convertedValue))
-                {
-                    continue;
-                }
-
-                if (query.Length > 0)
-                {
-                    query.Append('&');
-                }
-
-                query.Append(Uri.EscapeDataString(parameter.Key));
-                query.Append('=');
-                query.Append(Uri.EscapeDataString(convertedValue));
-            }
-
-            if (query.Length == 0)
-            {
-                return url;
-            }
-
-            return $"{url}{(url.Contains("?") ? "&" : "?")}{query}";
-        }
-
 
         private enum ProtectedTokenPreloadMode
         {
