@@ -224,6 +224,7 @@ namespace Clc.Polaris.Api.Tests
         {
             var handler = new ProtectedTokenHttpMessageHandler();
             var client = CreateProtectedClient(handler);
+            Assert.IsNotNull(client.StaffOverrideAccount);
             SetCachedToken(client.Hostname, client.StaffOverrideAccount, new ProtectedToken
             {
                 AccessToken = "cached-token",
@@ -235,6 +236,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.IsNotNull(client.Token);
             Assert.AreEqual("cached-token", client.Token.AccessToken);
         }
 
@@ -254,6 +256,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(2, paths.Length);
             StringAssert.Contains(paths[0], "/protected/v1/1033/100/1/authenticator/staff");
             StringAssert.Contains(paths[1], "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+            Assert.IsNotNull(client.StaffOverrideAccount);
             Assert.IsTrue(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out var cachedToken));
             Assert.IsNotNull(cachedToken);
             Assert.AreEqual("protected-token", cachedToken.AccessToken);
@@ -271,6 +274,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsNull(client.Token);
+            Assert.IsNotNull(client.StaffOverrideAccount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
@@ -285,6 +289,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsNull(client.Token);
+            Assert.IsNotNull(client.StaffOverrideAccount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
@@ -305,6 +310,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsNull(client.Token);
+            Assert.IsNotNull(client.StaffOverrideAccount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
@@ -325,6 +331,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsNull(client.Token);
+            Assert.IsNotNull(client.StaffOverrideAccount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
@@ -348,6 +355,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsNull(client.Token);
+            Assert.IsNotNull(client.StaffOverrideAccount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 

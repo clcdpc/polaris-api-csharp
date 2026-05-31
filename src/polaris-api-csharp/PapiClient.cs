@@ -17,17 +17,17 @@ namespace Clc.Polaris.Api
         /// <summary>
         /// Your PAPI Access ID
         /// </summary>
-        public string AccessID { get; set; }
+        public string AccessID { get; set; } = string.Empty;
 
         /// <summary>
         /// Your PAPI Access Key
         /// </summary>
-        public string AccessKey { get; set; }
+        public string AccessKey { get; set; } = string.Empty;
 
         /// <summary>
         /// The base URL of your PAPI service
         /// </summary>
-        public string Hostname { get; set; }
+        public string Hostname { get; set; } = string.Empty;
 
         public int UserId { get; set; } = 1;
         public int WorkstationId { get; set; } = 1;
@@ -38,18 +38,18 @@ namespace Clc.Polaris.Api
         /// <summary>
         /// The staff credentials used for protected methods and public method overrides
         /// </summary>
-        public PolarisUser StaffOverrideAccount { get; set; }
+        public PolarisUser? StaffOverrideAccount { get; set; }
 
         public bool UseProtectedTokenCache { get; set; } = true;
         private static ConcurrentDictionary<string, ProtectedToken> ProtectedTokenCache { get; set; } = new ConcurrentDictionary<string, ProtectedToken>();
         private static ConcurrentDictionary<string, SemaphoreSlim> ProtectedTokenCacheLocks { get; set; } = new ConcurrentDictionary<string, SemaphoreSlim>();
 
-        private ProtectedToken _token;
+        private ProtectedToken? _token;
 
         /// <summary>
         /// Used for protected methods and public method overrides
         /// </summary>
-        public ProtectedToken Token
+        public ProtectedToken? Token
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Clc.Polaris.Api
         /// Initializes a new PAPI client. Configure TLS behavior on the injected <see cref="HttpClient"/>
         /// by supplying an <see cref="HttpClientHandler"/> with the desired settings.
         /// </summary>
-        public PapiClient(HttpClient client, IPapiSettings settings) : base(null, client)
+        public PapiClient(HttpClient? client, IPapiSettings? settings) : base(string.Empty, client)
         {
             if (settings != null)
             {
@@ -91,7 +91,7 @@ namespace Clc.Polaris.Api
 
         public override RestRequest PreformatRestRequest(RestRequest request)
         {
-            var papiRequest = request is PapiRestRequest ? request as PapiRestRequest : new PapiRestRequest(request);
+            var papiRequest = request is PapiRestRequest existingRequest ? existingRequest : new PapiRestRequest(request);
 
             var password = papiRequest.Password;
 
@@ -178,7 +178,7 @@ namespace Clc.Polaris.Api
             request.Path = request.Path.Replace(ProtectedToken.Placeholder, accessToken, StringComparison.Ordinal);
         }
 
-        private async Task<ProtectedToken> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
+        private async Task<ProtectedToken?> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
         {
             var token = Token;
             if (StaffOverrideAccount == null || token != null)
@@ -215,7 +215,7 @@ namespace Clc.Polaris.Api
             }
         }
 
-        private string BuildProtectedTokenCacheKey()
+        private string? BuildProtectedTokenCacheKey()
         {
             if (StaffOverrideAccount == null ||
                 string.IsNullOrWhiteSpace(Hostname) ||
@@ -228,12 +228,12 @@ namespace Clc.Polaris.Api
             return $"{Hostname}|{StaffOverrideAccount.Domain}|{StaffOverrideAccount.Username}";
         }
 
-        private static bool IsProtectedTokenMissingOrExpired(ProtectedToken token)
+        private static bool IsProtectedTokenMissingOrExpired(ProtectedToken? token)
         {
             return token == null || !token.ExpirationDate.HasValue || token.ExpirationDate <= DateTime.Now;
         }
 
-        private bool TryLoadProtectedTokenFromCache(string cacheKey)
+        private bool TryLoadProtectedTokenFromCache(string? cacheKey)
         {
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
             {
@@ -249,21 +249,29 @@ namespace Clc.Polaris.Api
             return false;
         }
 
-        private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenAsync(string cacheKey, CancellationToken cancellationToken)
+        private async Task<ProtectedToken?> AuthenticateAndLoadProtectedTokenAsync(string? cacheKey, CancellationToken cancellationToken)
         {
             var currentToken = Token;
-            var response = await AuthenticateStaffUserAsync(StaffOverrideAccount, cancellationToken).ConfigureAwait(false);
+            var staffOverrideAccount = StaffOverrideAccount;
+            if (staffOverrideAccount == null)
+            {
+                return currentToken;
+            }
+
+            var response = await AuthenticateStaffUserAsync(staffOverrideAccount, cancellationToken).ConfigureAwait(false);
+            var responseData = response?.Data;
             if (response?.Response == null ||
                 !response.Response.IsSuccessStatusCode ||
-                IsProtectedTokenMissingOrExpired(response.Data) ||
-                string.IsNullOrWhiteSpace(response.Data.AccessToken) ||
-                string.IsNullOrWhiteSpace(response.Data.AccessSecret))
+                responseData == null ||
+                IsProtectedTokenMissingOrExpired(responseData) ||
+                string.IsNullOrWhiteSpace(responseData.AccessToken) ||
+                string.IsNullOrWhiteSpace(responseData.AccessSecret))
             {
                 _token = currentToken;
                 return _token;
             }
 
-            _token = response.Data;
+            _token = responseData;
 
             if (UseProtectedTokenCache && !string.IsNullOrWhiteSpace(cacheKey))
             {

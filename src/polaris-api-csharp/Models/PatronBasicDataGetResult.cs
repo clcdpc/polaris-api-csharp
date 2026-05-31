@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Models
 
         public override string ToString()
         {
-            if (PatronBasicData?.PatronID == 0) return base.ToString();
+            if (PatronBasicData == null || PatronBasicData.PatronID == 0) return base.ToString();
             return $"{PatronBasicData.PatronID} - {PatronBasicData.Barcode} - {PatronBasicData.NameFirst} {PatronBasicData.NameLast}";
         }
     }
@@ -88,7 +88,7 @@ namespace Clc.Polaris.Api.Models
         public PatronNotes? PatronNotes { get; set; }
         public PatronSystemBlock[] PatronSystemBlocks { get; set; }
 
-        string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());
+        string fixpn(string? pn) => new string((pn ?? string.Empty).Where(c => char.IsDigit(c)).ToArray());
 
         public string TxtDeliveryPhoneNumber => TxtPhoneNumber == 1 ? fixpn(PhoneNumber) : TxtPhoneNumber == 2 ? fixpn(PhoneNumber2) : TxtPhoneNumber == 3 ? fixpn(PhoneNumber3) : "";
 
@@ -99,7 +99,7 @@ namespace Clc.Polaris.Api.Models
                 switch (DeliveryOptionID)
                 {
                     case 1:
-                        if (PatronAddresses.Count == 0) { return ""; }
+                        if (PatronAddresses == null || PatronAddresses.Count == 0) { return ""; }
                         var address = PatronAddresses[0];
                         var street = !string.IsNullOrWhiteSpace(address.StreetTwo) ? $"{address.StreetOne} {address.StreetTwo}" : address.StreetOne;
                         return $"{street} {address.City}, {address.State} {address.PostalCode}";

@@ -66,6 +66,7 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task AuthenticateStaffUserTest()
         {
+            Assert.IsNotNull(papi.StaffOverrideAccount);
             var response = await papi.AuthenticateStaffUserAsync(papi.StaffOverrideAccount);
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));

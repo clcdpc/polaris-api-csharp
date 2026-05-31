@@ -13,11 +13,11 @@ namespace Clc.Polaris.Api.Models
 		/// </summary>
 		public List<BarcodeAndPatronIDRow> BarcodeAndPatronIDRows { get; set; }
 
-        public string Barcode => BarcodeAndPatronIDRows.FirstOrDefault()?.Barcode;
+        public string? Barcode => BarcodeAndPatronIDRows.FirstOrDefault()?.Barcode;
 
         public override string ToString()
         {
-            return Barcode;
+            return Barcode ?? string.Empty;
         }
     }
 

@@ -2,6 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<!-- API response/request DTOs are populated by serializers; keep existing constructors/public surface while enabling NRT. -->
+		<NoWarn>$(NoWarn);CS8618</NoWarn>
 		<RootNamespace>Clc.Polaris</RootNamespace>
 		<PackageId>Clc.Polaris.Api</PackageId>
 		<Authors>Central Library Consortium, Michael Fields</Authors>

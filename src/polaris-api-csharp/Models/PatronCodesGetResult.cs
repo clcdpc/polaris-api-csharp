@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api.Models
 
         public override string ToString()
         {
-            return string.Join("\r\n", PatronCodesRows?.OrderBy(pc => pc.Description));
+            return string.Join("\r\n", PatronCodesRows?.OrderBy(pc => pc.Description) ?? Enumerable.Empty<PatronCodeRow>());
         }
     }
 

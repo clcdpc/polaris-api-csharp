@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// ISBN of the record.
         /// </summary>
-        public string ISBN => GetBibResultRow(6).FirstOrDefault();
+        public string? ISBN => GetBibResultRow(6).FirstOrDefault();
 
         /// <summary>
         /// Number of items associated with this record system-wide.
@@ -70,7 +70,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Format of the record.
         /// </summary>
-        public string Format => GetBibResultRow(17).FirstOrDefault();
+        public string? Format => GetBibResultRow(17).FirstOrDefault();
 
         /// <summary>
         /// Author of the record.
@@ -100,17 +100,17 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// LCCN of the record.
         /// </summary>
-        public string LCCN => GetBibResultRow(23).FirstOrDefault();
+        public string? LCCN => GetBibResultRow(23).FirstOrDefault();
 
         /// <summary>
         /// ISSN of the record.
         /// </summary>
-        public string ISSN => GetBibResultRow(24).FirstOrDefault();
+        public string? ISSN => GetBibResultRow(24).FirstOrDefault();
 
         /// <summary>
         /// Other number of the record.
         /// </summary>
-        public string OtherNumber => GetBibResultRow(25).FirstOrDefault();
+        public string? OtherNumber => GetBibResultRow(25).FirstOrDefault();
 
         /// <summary>
         /// Genre of the title.
@@ -140,22 +140,22 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Uniform title of the record.
         /// </summary>
-        public string UniformTitle => GetBibResultRow(34).FirstOrDefault();
+        public string? UniformTitle => GetBibResultRow(34).FirstOrDefault();
 
         /// <summary>
         /// Title of the record.
         /// </summary>
-        public string Title => GetBibResultRow(35).FirstOrDefault();
+        public string? Title => GetBibResultRow(35).FirstOrDefault();
 
         /// <summary>
         /// Volume of the record.
         /// </summary>
-        public string Volume => GetBibResultRow(36).FirstOrDefault();
+        public string? Volume => GetBibResultRow(36).FirstOrDefault();
 
         /// <summary>
         /// Frequency of the record.
         /// </summary>
-        public string Frequency => GetBibResultRow(37).FirstOrDefault();
+        public string? Frequency => GetBibResultRow(37).FirstOrDefault();
 
         /// <summary>
         /// Former title of the record.
@@ -191,7 +191,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Medium of the record.
         /// </summary>
-        public string Medium => GetBibResultRow(46).FirstOrDefault();
+        public string? Medium => GetBibResultRow(46).FirstOrDefault();
 
         private int? GetBibResultRowInt(int id)
         {
