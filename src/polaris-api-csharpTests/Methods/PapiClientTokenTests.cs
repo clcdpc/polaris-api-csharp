@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -235,6 +235,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.IsNotNull(client.Token);
             Assert.AreEqual("cached-token", client.Token.AccessToken);
         }
 
@@ -580,15 +581,25 @@ namespace Clc.Polaris.Api.Tests
             locks?.Clear();
         }
 
-        private static void SetCachedToken(string hostname, PolarisUser staffUser, ProtectedToken token)
+        private static void SetCachedToken(string hostname, PolarisUser? staffUser, ProtectedToken token)
         {
+            if (staffUser == null)
+            {
+                throw new ArgumentNullException(nameof(staffUser));
+            }
+
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
             cache?.TryAdd(BuildCacheKey(hostname, staffUser), token);
         }
 
-        private static bool TryGetCachedToken(string hostname, PolarisUser staffUser, out ProtectedToken? token)
+        private static bool TryGetCachedToken(string hostname, PolarisUser? staffUser, out ProtectedToken? token)
         {
             token = null;
+            if (staffUser == null)
+            {
+                return false;
+            }
+
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
             return cache?.TryGetValue(BuildCacheKey(hostname, staffUser), out token) == true;
         }

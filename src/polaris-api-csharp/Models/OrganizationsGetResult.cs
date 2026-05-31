@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// List of organization data
         /// </summary>
-		public List<OrganizationsGetRow> OrganizationsGetRows { get; set; }
+		public List<OrganizationsGetRow> OrganizationsGetRows { get; set; } = new List<OrganizationsGetRow>();
 	}
 
     /// <summary>
@@ -39,17 +39,17 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Name
         /// </summary>
-		public string Name { get; set; }
+		public string? Name { get; set; }
 
         /// <summary>
         /// Abbreviation
         /// </summary>
-		public string Abbreviation { get; set; }
+		public string? Abbreviation { get; set; }
 
         /// <summary>
         /// Display name
         /// </summary>
-		public string DisplayName { get; set; }
+		public string? DisplayName { get; set; }
 
         public override string ToString()
         {

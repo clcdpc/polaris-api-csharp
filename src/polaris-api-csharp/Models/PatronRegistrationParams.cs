@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// ZIP code
         /// </summary>
-		public string PostalCode { get; set; }
+		public string? PostalCode { get; set; }
 
         /// <summary>
         /// ZIP+4
@@ -43,17 +43,17 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// City
         /// </summary>
-		public string City { get; set; }
+		public string? City { get; set; }
 
         /// <summary>
         /// State
         /// </summary>
-		public string State { get; set; }
+		public string? State { get; set; }
 
         /// <summary>
         /// County
         /// </summary>
-		public string County { get; set; }
+		public string? County { get; set; }
 
         /// <summary>
         /// Country ID
@@ -63,57 +63,57 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Street one
         /// </summary>
-		public string StreetOne { get; set; }
+		public string? StreetOne { get; set; }
 
         /// <summary>
         /// Street two
         /// </summary>
-		public string StreetTwo { get; set; }
+		public string? StreetTwo { get; set; }
 
         /// <summary>
         /// First name
         /// </summary>
-		public string NameFirst { get; set; }
+		public string? NameFirst { get; set; }
 
         /// <summary>
         /// Last name
         /// </summary>
-		public string NameLast { get; set; }
+		public string? NameLast { get; set; }
 
         /// <summary>
         /// Middle name
         /// </summary>
-		public string NameMiddle { get; set; }
+		public string? NameMiddle { get; set; }
 
         /// <summary>
         /// User defined field 1
         /// </summary>
-		public string User1 { get; set; }
+		public string? User1 { get; set; }
 
         /// <summary>
         /// User defined field 2
         /// </summary>
-		public string User2 { get; set; }
+		public string? User2 { get; set; }
 
         /// <summary>
         /// User defined field 3
         /// </summary>
-		public string User3 { get; set; }
+		public string? User3 { get; set; }
 
         /// <summary>
         /// User defined field 4
         /// </summary>
-		public string User4 { get; set; }
+		public string? User4 { get; set; }
 
         /// <summary>
         /// User defined field 5
         /// </summary>
-		public string User5 { get; set; }
+		public string? User5 { get; set; }
 
         /// <summary>
         /// Gender
         /// </summary>
-		public string Gender { get; set; }
+		public string? Gender { get; set; }
 
         /// <summary>
         /// Date of birth
@@ -123,17 +123,17 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Phone 1
         /// </summary>
-		public string PhoneVoice1 { get; set; }
+		public string? PhoneVoice1 { get; set; }
 
         /// <summary>
         /// Phone 2
         /// </summary>
-		public string PhoneVoice2 { get; set; }
+		public string? PhoneVoice2 { get; set; }
 
         /// <summary>
         /// Email address
         /// </summary>
-		public string EmailAddress { get; set; }
+		public string? EmailAddress { get; set; }
 
         /// <summary>
         /// Language ID
@@ -151,27 +151,27 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Username
         /// </summary>
-		public string Username { get; set; }
+		public string? Username { get; set; }
 
         /// <summary>
         /// PIN/Password
         /// </summary>
-		public string Password { get; set; }
+		public string? Password { get; set; }
 
         /// <summary>
         /// Password confirmation
         /// </summary>
-		public string Password2 { get; set; }
+		public string? Password2 { get; set; }
 
         /// <summary>
         /// Alternate email address
         /// </summary>
-		public string AltEmailAddress { get; set; }
+		public string? AltEmailAddress { get; set; }
 
         /// <summary>
         /// Phone 3
         /// </summary>
-		public string PhoneVoice3 { get; set; }
+		public string? PhoneVoice3 { get; set; }
 
         /// <summary>
         /// PHone 1 mobile carrier id
@@ -201,7 +201,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Barcode
         /// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
         /// <summary>
         /// eReceipt option ID
@@ -225,9 +225,9 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public DateTime? AddrCheckDate { get; set; }
 
-        public string LegalNameFirst { get; set; }
-        public string LegalNameMiddle { get; set; }
-        public string LegalNameLast { get; set; }
+        public string? LegalNameFirst { get; set; }
+        public string? LegalNameMiddle { get; set; }
+        public string? LegalNameLast { get; set; }
         public bool UseLegalNameOnNotices { get; set; }
 
         public PatronRegistrationParams()

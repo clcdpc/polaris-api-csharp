@@ -20,17 +20,17 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The barcode of the item for a title level hold.
 		/// </summary>
-		public string ItemBarcode { get; set; }
+		public string? ItemBarcode { get; set; }
 
 		/// <summary>
 		/// Volume of the hold request.
 		/// </summary>
-		public string VolumeNumber { get; set; }
+		public string? VolumeNumber { get; set; }
 
 		/// <summary>
 		/// Serial designation of the hold request.
 		/// </summary>
-		public string Designation { get; set; }
+		public string? Designation { get; set; }
 
 		/// <summary>
 		/// OrganizationID of the hold pickup location.
@@ -45,7 +45,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Notes created by patron.
 		/// </summary>
-		public string PatronNotes { get; set; }
+		public string? PatronNotes { get; set; }
 
 		/// <summary>
 		/// The date this hold request will become active.

@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<RootNamespace>Clc.Polaris</RootNamespace>
+		<Nullable>enable</Nullable>
 		<PackageId>Clc.Polaris.Api</PackageId>
 		<Authors>Central Library Consortium, Michael Fields</Authors>
 		<Description>A helper library that assists in the consumption of the Polaris ILS API</Description>

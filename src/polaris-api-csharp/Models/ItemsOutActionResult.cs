@@ -10,6 +10,6 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The result of the item renewal.
 		/// </summary>
-		public ItemRenewResultWrapper ItemRenewResult { get; set; }
+		public ItemRenewResultWrapper? ItemRenewResult { get; set; }
 	}
 }

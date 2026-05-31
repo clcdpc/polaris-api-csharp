@@ -1,4 +1,4 @@
-using Clc.Rest.Models;
+﻿using Clc.Rest.Models;
 using System;
 using System.Net.Http;
 
@@ -10,24 +10,24 @@ namespace Clc.Polaris.Api.Models
         public bool AuthRequired { get; set; } = true;
         public bool JsonSerializerIgnoreNulls { get; set; } = true;
         public bool BlockStaffOverride = false;
-        public string HashString { get; set; }
+        public string? HashString { get; set; }
 
         public bool IsPublicMethod => Path.StartsWith("/public", StringComparison.OrdinalIgnoreCase);
         public bool IsProtectedMethod => Path.StartsWith("/protected", StringComparison.OrdinalIgnoreCase);
 
-        public static PapiRestRequest Get(string path, string password = "", object body = null) =>
+        public static PapiRestRequest Get(string path, string password = "", object? body = null) =>
             new PapiRestRequest(HttpMethod.Get, path, password, body);
 
-        public static PapiRestRequest Delete(string path, string password = "", object body = null) =>
+        public static PapiRestRequest Delete(string path, string password = "", object? body = null) =>
             new PapiRestRequest(HttpMethod.Delete, path, password, body);
 
-        public static PapiRestRequest Post(string path, object body = null, string password = "") =>
+        public static PapiRestRequest Post(string path, object? body = null, string password = "") =>
             new PapiRestRequest(HttpMethod.Post, path, password, body);
 
-        public static PapiRestRequest Put(string path, object body = null, string password = "") =>
+        public static PapiRestRequest Put(string path, object? body = null, string password = "") =>
             new PapiRestRequest(HttpMethod.Put, path, password, body);
 
-        public static PapiRestRequest Create(HttpMethod method, string path, object body = null, string password = "") =>
+        public static PapiRestRequest Create(HttpMethod method, string path, object? body = null, string password = "") =>
             new PapiRestRequest(method, path, password, body);
 
         public PapiRestRequest()
@@ -35,7 +35,7 @@ namespace Clc.Polaris.Api.Models
 
         }
 
-        public PapiRestRequest(HttpMethod method, string url, string password = "", object body = null) : base()
+        public PapiRestRequest(HttpMethod method, string url, string password = "", object? body = null) : base()
         {
             Method = method;
             Path = url;
@@ -43,7 +43,7 @@ namespace Clc.Polaris.Api.Models
             Body = body;
         }
 
-        public PapiRestRequest(string url, string password = "", object body = null) : this(HttpMethod.Get, url, password, body)
+        public PapiRestRequest(string url, string password = "", object? body = null) : this(HttpMethod.Get, url, password, body)
         {
         }
 

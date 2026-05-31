@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -16,10 +16,10 @@ namespace Clc.Polaris.Api
         public Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default)
             => PatronReadingHistoryClearAsync(barcode, null, ids, cancellationToken);
 
-        public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string password, IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string? password, IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/readinghistory";
-            var request = PapiRestRequest.Delete(url, password: password);
+            var request = PapiRestRequest.Delete(url, password: password ?? string.Empty);
             if (ids.Any()) { request.QueryParameters.Add("ids", string.Join(",", ids)); }
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }

@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The patron's barcode.
 		/// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
 		/// <summary>
 		/// Indicates valid patron.
@@ -35,7 +35,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The name of the patron's assigned branch.
 		/// </summary>
-		public string AssignedBranchName { get; set; }
+		public string? AssignedBranchName { get; set; }
 
 		/// <summary>
 		/// The date this patron's registration expires.
