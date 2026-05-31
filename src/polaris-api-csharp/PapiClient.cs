@@ -254,7 +254,8 @@ namespace Clc.Polaris.Api
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)
         {
             var hashString = httpMethod + uri + date + password;
-            byte[] computedHash = new HMACSHA1(Encoding.UTF8.GetBytes(AccessKey)).ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            using var hmac = new HMACSHA1(Encoding.UTF8.GetBytes(AccessKey));
+            byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(hashString));
             return Convert.ToBase64String(computedHash);
         }
     }
