@@ -588,7 +588,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task BibKeywordSearchAsync_ThroughInterface_RequestShapeMatchesConcreteClient()
+        public async Task BibKeywordSearchAsync_ThroughInterface_RequestShapeIsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             IPapiClient client = CreateClient(handler);
@@ -620,9 +620,8 @@ namespace Clc.Polaris.Api.Tests
         public async Task BibKeywordSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
-            var concreteClient = CreateClient(handler);
-            concreteClient.OrganizationId = 42;
-            IPapiClient client = concreteClient;
+            IPapiClient client = CreateClient(handler);
+            client.OrganizationId = 42;
 
             var response = await client.BibKeywordSearchAsync("default branch search");
 
@@ -634,7 +633,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task BibBooleanSearchAsync_ThroughInterface_RequestShapeMatchesConcreteClient()
+        public async Task BibBooleanSearchAsync_ThroughInterface_RequestShapeIsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             IPapiClient client = CreateClient(handler);
@@ -659,6 +658,22 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
+        public async Task BibBooleanSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            IPapiClient client = CreateClient(handler);
+            client.OrganizationId = 42;
+
+            var response = await client.BibBooleanSearchAsync("TI=Default Branch");
+
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(handler.LastRequest);
+            StringAssert.Contains(handler.LastRequest!.RequestUri!.AbsolutePath, "/public/v1/1033/100/42/search/bibs/boolean");
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/boolean?q=TI%3DDefault%20Branch&sort=MP&page=1&bibsperpage=10", handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
