@@ -73,12 +73,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// First name
         /// </summary>
-		public string? NameFirst { get; set; }
+		public string NameFirst { get; set; } = string.Empty;
 
         /// <summary>
         /// Last name
         /// </summary>
-		public string? NameLast { get; set; }
+		public string NameLast { get; set; } = string.Empty;
 
         /// <summary>
         /// Middle name

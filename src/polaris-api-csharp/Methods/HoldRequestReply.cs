@@ -13,6 +13,16 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<HoldRequestReplyResult>> HoldRequestReplyAsync(HoldRequestCreateResult holdCreateResult, int requestingOrgId, HoldRequestReplyAnswer answer, HoldRequestReplyState state, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/holdrequest/{holdCreateResult.RequestGuid}";
+            if (string.IsNullOrEmpty(holdCreateResult.TxnGroupQualifier))
+            {
+                throw new InvalidOperationException("Hold request reply requires TxnGroupQualifier from the hold request create result.");
+            }
+
+            if (string.IsNullOrEmpty(holdCreateResult.TxnQualifier))
+            {
+                throw new InvalidOperationException("Hold request reply requires TxnQualifier from the hold request create result.");
+            }
+
             var body = new HoldRequestReplyData
             {
                 TxnGroupQualifier = holdCreateResult.TxnGroupQualifier,
