@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api.Models
         /// Container for bib holding rows
         /// </summary>
         [XmlElement(ElementName = "BibHoldingsGetRows")]
-        public List<BibHoldingsGetRow> BibHoldingsGetRows { get; set; }
+        public List<BibHoldingsGetRow> BibHoldingsGetRows { get; set; } = new List<BibHoldingsGetRow>();
     }
 
     /// <summary>
@@ -28,138 +28,138 @@ namespace Clc.Polaris.Api.Models
         /// Item's assigned branch ID
         /// </summary>
         [XmlElement(ElementName = "LocationID")]
-        public string LocationID { get; set; }
+        public string? LocationID { get; set; }
 
         /// <summary>
         /// Item's assigned branch name
         /// </summary>
         [XmlElement(ElementName = "LocationName")]
-        public string LocationName { get; set; }
+        public string? LocationName { get; set; }
 
         /// <summary>
         /// CollectionID
         /// </summary>
         [XmlElement(ElementName = "CollectionID")]
-        public string CollectionID { get; set; }
+        public string? CollectionID { get; set; }
 
         /// <summary>
         /// Collection name
         /// </summary>
         [XmlElement(ElementName = "CollectionName")]
-        public string CollectionName { get; set; }
+        public string? CollectionName { get; set; }
 
         /// <summary>
         /// Barcode
         /// </summary>
         [XmlElement(ElementName = "Barcode")]
-        public string Barcode { get; set; }
+        public string? Barcode { get; set; }
 
         /// <summary>
         /// Public note
         /// </summary>
         [XmlElement(ElementName = "PublicNote")]
-        public string PublicNote { get; set; }
+        public string? PublicNote { get; set; }
 
         /// <summary>
         /// Call number
         /// </summary>
         [XmlElement(ElementName = "CallNumber")]
-        public string CallNumber { get; set; }
+        public string? CallNumber { get; set; }
 
         /// <summary>
         /// Designation
         /// </summary>
         [XmlElement(ElementName = "Designation")]
-        public string Designation { get; set; }
+        public string? Designation { get; set; }
 
         /// <summary>
         /// Shelf location
         /// </summary>
         [XmlElement(ElementName = "ShelfLocation")]
-        public string ShelfLocation { get; set; }
+        public string? ShelfLocation { get; set; }
 
         /// <summary>
         /// Circulation status
         /// </summary>
         [XmlElement(ElementName = "CircStatus")]
-        public string CircStatus { get; set; }
+        public string? CircStatus { get; set; }
 
         /// <summary>
         /// Last circulation date
         /// </summary>
         [XmlElement(ElementName = "LastCircDate")]
-        public string LastCircDate { get; set; }
+        public string? LastCircDate { get; set; }
 
         /// <summary>
         /// Material type
         /// </summary>
         [XmlElement(ElementName = "MaterialType")]
-        public string MaterialType { get; set; }
+        public string? MaterialType { get; set; }
 
         /// <summary>
         /// Textual holdings note
         /// </summary>
         [XmlElement(ElementName = "TextualHoldingsNote")]
-        public string TextualHoldingsNote { get; set; }
+        public string? TextualHoldingsNote { get; set; }
 
         /// <summary>
         /// Retention statement
         /// </summary>
         [XmlElement(ElementName = "RetentionStatement")]
-        public string RetentionStatement { get; set; }
+        public string? RetentionStatement { get; set; }
 
         /// <summary>
         /// Holdings statement
         /// </summary>
         [XmlElement(ElementName = "HoldingsStatement")]
-        public string HoldingsStatement { get; set; }
+        public string? HoldingsStatement { get; set; }
 
         /// <summary>
         /// Holdings note
         /// </summary>
         [XmlElement(ElementName = "HoldingsNote")]
-        public string HoldingsNote { get; set; }
+        public string? HoldingsNote { get; set; }
 
         /// <summary>
         /// Total items at the assigned location
         /// </summary>
         [XmlElement(ElementName = "ItemsTotal")]
-        public string ItemsTotal { get; set; }
+        public string? ItemsTotal { get; set; }
 
         /// <summary>
         /// Items available for checkouts
         /// </summary>
         [XmlElement(ElementName = "ItemsIn")]
-        public string ItemsIn { get; set; }
+        public string? ItemsIn { get; set; }
 
         /// <summary>
         /// Holdable
         /// </summary>
         [XmlElement(ElementName = "Holdable")]
-        public string Holdable { get; set; }
+        public string? Holdable { get; set; }
 
         /// <summary>
         /// Volume number
         /// </summary>
         [XmlElement(ElementName = "VolumeNumber")]
-        public string VolumeNumber { get; set; }
+        public string? VolumeNumber { get; set; }
 
         /// <summary>
         /// Due date
         /// </summary>
         [XmlElement(ElementName = "DueDate")]
-        public string DueDate { get; set; }
+        public string? DueDate { get; set; }
 
         /// <summary>
         /// Is this material type chargeable
         /// </summary>
         [XmlElement(ElementName = "IsMaterialTypeChargeable")]
-        public string IsMaterialTypeChargeable { get; set; }
+        public string? IsMaterialTypeChargeable { get; set; }
 
         /// <summary>
         /// Is this an electronic item
         /// </summary>
         [XmlElement(ElementName = "IsElectronicItem")]
-        public string IsElectronicItem { get; set; }
+        public string? IsElectronicItem { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Models
 {
     public partial class RecordSetRecordsGetResult : PapiResponseCommon
     {
-        public List<RecordSetRecordsGetRow> RecordSetRecordsGetRows { get; set; }
+        public List<RecordSetRecordsGetRow> RecordSetRecordsGetRows { get; set; } = new List<RecordSetRecordsGetRow>();
 
         public IEnumerable<int> Ids { get { return RecordSetRecordsGetRows.Select(r => r.RecordID); } }
 

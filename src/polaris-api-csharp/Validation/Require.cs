@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Validation
         /// </summary>
         /// <param name="name"></param>
         /// <param name="value"></param>
-        public static void Argument(string name, object value)
+        public static void Argument(string name, object? value)
         {
             if (value == null)
             {

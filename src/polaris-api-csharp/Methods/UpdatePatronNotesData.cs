@@ -1,4 +1,4 @@
-using Clc.Polaris.Api.Models;
+﻿using Clc.Polaris.Api.Models;
 using Clc.Polaris.Models;
 using Clc.Rest;
 using System;
@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public async Task<IRestResponse<PapiResponseCommon>> UpdatePatronNotesDataAsync(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PapiResponseCommon>> UpdatePatronNotesDataAsync(string barcode, string? nonBlockingNote = null, string? blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
         {
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{WebUtility.UrlEncode(barcode)}/notes";
             var body = new UpdatePatronNotesData();
