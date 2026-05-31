@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Clc.Polaris.Api.Validation
 {
@@ -14,13 +12,20 @@ namespace Clc.Polaris.Api.Validation
         /// <summary>
         /// Verify argument is provided
         /// </summary>
-        /// <param name="name"></param>
         /// <param name="value"></param>
-        public static void Argument(string name, object? value)
+        /// <param name="name"></param>
+        public static void Argument(
+            [NotNull] object? value,
+            [CallerArgumentExpression(nameof(value))] string? name = null)
         {
             if (value == null)
             {
                 throw new ArgumentNullException(name);
+            }
+
+            if (value is string stringValue && string.IsNullOrWhiteSpace(stringValue))
+            {
+                throw new ArgumentException("Value cannot be empty or whitespace.", name);
             }
         }
     }

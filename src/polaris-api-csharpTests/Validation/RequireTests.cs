@@ -1,6 +1,6 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Clc.Polaris.Api.Validation;
 using System;
+using Clc.Polaris.Api.Validation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Validation.Tests
 {
@@ -8,31 +8,59 @@ namespace Clc.Polaris.Api.Validation.Tests
     public class RequireTests
     {
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void Argument_NullValue_ThrowsArgumentNullException()
+        public void Argument_NullObject_ThrowsArgumentNullException()
         {
-            // Arrange
-            string argumentName = "testArgument";
             object? nullValue = null;
 
-            // Act
-            Require.Argument(argumentName, nullValue);
+            var exception = Assert.ThrowsException<ArgumentNullException>(() => Require.Argument(nullValue));
 
-            // Assert is handled by ExpectedException
+            Assert.AreEqual(nameof(nullValue), exception.ParamName);
         }
 
         [TestMethod]
-        public void Argument_NotNullValue_DoesNotThrow()
+        public void Argument_NonNullObject_DoesNotThrow()
         {
-            // Arrange
-            string argumentName = "testArgument";
             object notNullValue = new object();
 
-            // Act
-            Require.Argument(argumentName, notNullValue);
+            Require.Argument(notNullValue);
+        }
 
-            // Assert
-            // No exception should be thrown
+        [TestMethod]
+        public void Argument_NullString_ThrowsArgumentNullException()
+        {
+            string? nullString = null;
+
+            var exception = Assert.ThrowsException<ArgumentNullException>(() => Require.Argument(nullString));
+
+            Assert.AreEqual(nameof(nullString), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Argument_EmptyString_ThrowsArgumentException()
+        {
+            string emptyString = string.Empty;
+
+            var exception = Assert.ThrowsException<ArgumentException>(() => Require.Argument(emptyString));
+
+            Assert.AreEqual(nameof(emptyString), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Argument_WhitespaceString_ThrowsArgumentException()
+        {
+            string whitespaceString = "   ";
+
+            var exception = Assert.ThrowsException<ArgumentException>(() => Require.Argument(whitespaceString));
+
+            Assert.AreEqual(nameof(whitespaceString), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Argument_NonEmptyString_DoesNotThrow()
+        {
+            string nonEmptyString = "value";
+
+            Require.Argument(nonEmptyString);
         }
     }
 }
