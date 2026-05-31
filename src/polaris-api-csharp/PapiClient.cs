@@ -99,12 +99,11 @@ namespace Clc.Polaris.Api
 
                 if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride)
                 {
-                    var accessSecret = Token?.AccessSecret;
-                    var accessToken = Token?.AccessToken;
-                    if (!string.IsNullOrWhiteSpace(accessSecret) && !string.IsNullOrWhiteSpace(accessToken))
+                    var token = Token;
+                    if (token != null)
                     {
-                        password = accessSecret;
-                        papiRequest.Headers["X-PAPI-AccessToken"] = accessToken;
+                        password = token.AccessSecret;
+                        papiRequest.Headers["X-PAPI-AccessToken"] = token.AccessToken;
                     }
                 }
 
@@ -161,8 +160,9 @@ namespace Clc.Polaris.Api
 
         private void ReplaceProtectedTokenPlaceholderInPath(PapiRestRequest request)
         {
-            var accessToken = Token?.AccessToken;
-            if (string.IsNullOrWhiteSpace(accessToken))
+            var token = Token;
+            var accessToken = token?.AccessToken;
+            if (IsProtectedTokenMissingOrExpired(token) || string.IsNullOrWhiteSpace(accessToken))
             {
                 throw new InvalidOperationException("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.");
             }
@@ -172,15 +172,15 @@ namespace Clc.Polaris.Api
 
         private async Task<ProtectedToken> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
         {
-            if (StaffOverrideAccount == null || Token != null)
+            if (StaffOverrideAccount == null || !IsProtectedTokenMissingOrExpired(_token))
             {
-                return Token;
+                return _token;
             }
 
             var cacheKey = BuildProtectedTokenCacheKey();
             if (TryLoadProtectedTokenFromCache(cacheKey))
             {
-                return Token;
+                return _token;
             }
 
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
@@ -192,9 +192,9 @@ namespace Clc.Polaris.Api
             await cacheLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (Token != null || TryLoadProtectedTokenFromCache(cacheKey))
+                if (!IsProtectedTokenMissingOrExpired(_token) || TryLoadProtectedTokenFromCache(cacheKey))
                 {
-                    return Token;
+                    return _token;
                 }
 
                 return await AuthenticateAndLoadProtectedTokenAsync(cacheKey, cancellationToken).ConfigureAwait(false);
@@ -241,9 +241,11 @@ namespace Clc.Polaris.Api
 
         private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenAsync(string cacheKey, CancellationToken cancellationToken)
         {
+            var currentToken = Token;
             var response = await AuthenticateStaffUserAsync(StaffOverrideAccount, cancellationToken).ConfigureAwait(false);
             if (response?.Response == null || !response.Response.IsSuccessStatusCode || IsProtectedTokenMissingOrExpired(response.Data))
             {
+                _token = currentToken;
                 return Token;
             }
 
