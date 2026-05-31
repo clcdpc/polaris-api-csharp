@@ -592,6 +592,43 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task ExecutePapiAsync_QueryParameterWithWhitespaceValue_OmitsParameterAndHashesSentUri()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            request.QueryParameters.Add("q", "harry potter");
+            request.QueryParameters.Add("limit", "   ");
+
+            await ExecuteRawPapiRequestAsync(client, request);
+
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.IsFalse(query.ContainsKey("limit"));
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_QueryParameterWithBlankKey_OmitsParameterAndHashesSentUri()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            request.QueryParameters.Add("q", "harry potter");
+            request.QueryParameters.Add("   ", "branch:1");
+
+            await ExecuteRawPapiRequestAsync(client, request);
+
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual(1, query.Count);
+            Assert.IsTrue(query.ContainsKey("q"));
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
         public async Task ExecutePapiAsync_OnlyIneffectiveQueryParameters_OmitsQueryStringAndHashesSentUri()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
@@ -649,6 +686,24 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&limit=branch%3A1", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_ExistingQueryString_AppendsQueryParametersAndHashesSentUri()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW?existing=1");
+            request.QueryParameters.Add("q", "harry potter");
+
+            await ExecuteRawPapiRequestAsync(client, request);
+
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?existing=1&q=harry%20potter", handler.LastRequest!.RequestUri!.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("1", query["existing"]);
+            Assert.AreEqual("harry potter", query["q"]);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
