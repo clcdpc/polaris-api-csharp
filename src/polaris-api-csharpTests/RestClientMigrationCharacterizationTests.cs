@@ -588,6 +588,50 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task BibKeywordSearchAsync_CanBeCalledThroughInterfaceAndPreservesRequestShape()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            IPapiClient client = CreateClient(handler);
+
+            var response = await client.BibKeywordSearchAsync("harry potter & stone", branchId: 7, page: 3, pageSize: 20, sortBy: SearchSortOptions.TI);
+
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/7/search/bibs/keyword/KW");
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/7/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sort=TI&page=3&bibsperpage=20", handler.LastRequest.RequestUri.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("harry potter & stone", query["q"]);
+            Assert.AreEqual("TI", query["sort"]);
+            Assert.AreEqual("3", query["page"]);
+            Assert.AreEqual("20", query["bibsperpage"]);
+            Assert.IsNull(handler.LastRequest.Content);
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
+        public async Task BibBooleanSearchAsync_CanBeCalledThroughInterfaceAndPreservesRequestShape()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            IPapiClient client = CreateClient(handler);
+
+            var response = await client.BibBooleanSearchAsync("AU=Rowling AND TI=Stone", branchId: 8, page: 4, pageSize: 25, sortBy: SearchSortOptions.PD);
+
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/8/search/bibs/boolean");
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/8/search/bibs/boolean?q=AU%3DRowling%20AND%20TI%3DStone&sort=PD&page=4&bibsperpage=25", handler.LastRequest.RequestUri.AbsoluteUri);
+            var query = ParseQuery(handler.LastRequest.RequestUri.Query);
+            Assert.AreEqual("AU=Rowling AND TI=Stone", query["q"]);
+            Assert.AreEqual("PD", query["sort"]);
+            Assert.AreEqual("4", query["page"]);
+            Assert.AreEqual("25", query["bibsperpage"]);
+            Assert.IsNull(handler.LastRequest.Content);
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
         public async Task BibSearchAsync_DefaultLimit_OmitsLimitAndHashesSentUri()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
