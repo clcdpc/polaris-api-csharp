@@ -3,7 +3,6 @@ using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Clc.Rest;
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -65,10 +64,12 @@ namespace Clc.Polaris.Api
             set { _token = value; }
         }
 
+        /// <summary>
+        /// Initializes a new PAPI client. Configure TLS behavior on the injected <see cref="HttpClient"/>
+        /// by supplying an <see cref="HttpClientHandler"/> with the desired settings.
+        /// </summary>
         public PapiClient(HttpClient client, IPapiSettings settings) : base(null, client)
         {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
             if (settings != null)
             {
                 AccessID = settings.AccessId;
