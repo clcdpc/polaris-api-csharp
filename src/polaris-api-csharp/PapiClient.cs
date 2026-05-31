@@ -99,10 +99,12 @@ namespace Clc.Polaris.Api
 
                 if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride)
                 {
-                    if (!string.IsNullOrWhiteSpace(Token?.AccessSecret) && !string.IsNullOrWhiteSpace(Token?.AccessToken))
+                    var accessSecret = Token?.AccessSecret;
+                    var accessToken = Token?.AccessToken;
+                    if (!string.IsNullOrWhiteSpace(accessSecret) && !string.IsNullOrWhiteSpace(accessToken))
                     {
-                        password = Token.AccessSecret;
-                        papiRequest.Headers["X-PAPI-AccessToken"] = Token.AccessToken;
+                        password = accessSecret;
+                        papiRequest.Headers["X-PAPI-AccessToken"] = accessToken;
                     }
                 }
 
@@ -159,12 +161,13 @@ namespace Clc.Polaris.Api
 
         private void ReplaceProtectedTokenPlaceholderInPath(PapiRestRequest request)
         {
-            if (string.IsNullOrWhiteSpace(Token?.AccessToken))
+            var accessToken = Token?.AccessToken;
+            if (string.IsNullOrWhiteSpace(accessToken))
             {
                 throw new InvalidOperationException("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.");
             }
 
-            request.Path = request.Path.Replace(ProtectedToken.Placeholder, Token.AccessToken, StringComparison.Ordinal);
+            request.Path = request.Path.Replace(ProtectedToken.Placeholder, accessToken, StringComparison.Ordinal);
         }
 
         private async Task<ProtectedToken> EnsureProtectedTokenAsync(CancellationToken cancellationToken = default)
