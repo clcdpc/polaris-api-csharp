@@ -516,7 +516,7 @@ namespace Clc.Polaris.Api.Tests
 
             public CapturingHttpMessageHandler(string? responseJson = null)
             {
-                _responseJson = responseJson ?? CreateProtectedTokenJson("new-token", "new-secret", DateTime.UtcNow.AddHours(1));
+                _responseJson = responseJson ?? CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1));
             }
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

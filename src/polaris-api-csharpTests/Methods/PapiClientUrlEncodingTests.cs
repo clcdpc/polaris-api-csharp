@@ -116,7 +116,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
 
             await client.CreatePatronBlocksAsync(barcode, BlockType.FreeText, "note", userId: 888, workstationId: 999);
@@ -139,7 +139,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
 
             await client.Patron_GetBarcodeFromIdAsync(patronId);
@@ -181,7 +181,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
 
             await client.NotificationQueueGetAsync(1);
