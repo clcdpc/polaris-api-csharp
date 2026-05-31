@@ -129,6 +129,31 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
         }
 
+
+        [TestMethod]
+        public void PreformatRestRequest_ProtectedGet_DoesNotUseExpiredProtectedTokenSecretForHash()
+        {
+            var client = CreateClient();
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-protected-token",
+                AccessSecret = "expired-protected-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(-1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/expired-protected-token/search/patrons/Boolean");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"];
+            var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/1/expired-protected-token/search/patrons/Boolean";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var staleHash = ComputePapiHash("GET", expectedUri, date, "expired-protected-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.AreNotEqual($"PWS access-id:{staleHash}", formatted.Headers["Authorization"]);
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+            Assert.IsNull(client.Token);
+        }
+
         [TestMethod]
         public void PreformatRestRequest_PublicAuthenticatedGetWithQueryParameters_HashesEffectiveOutgoingUrl()
         {
@@ -200,6 +225,55 @@ namespace Clc.Polaris.Api.Tests
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
             var expectedHash = ComputePapiHash("GET", expectedUri, date, "staff-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+        }
+
+
+        [TestMethod]
+        public void PreformatRestRequest_PublicStaffOverride_DoesNotUseExpiredProtectedTokenOrAddStaleAccessTokenHeader()
+        {
+            var client = CreateClient();
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-staff-token",
+                AccessSecret = "expired-staff-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(-1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
+            request.Headers["X-PAPI-AccessToken"] = "stale-header-token";
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+            var date = formatted.Headers["PolarisDate"];
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var staleHash = ComputePapiHash("GET", expectedUri, date, "expired-staff-secret", "access-key");
+            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
+            Assert.AreNotEqual($"PWS access-id:{staleHash}", formatted.Headers["Authorization"]);
+            Assert.IsNull(client.Token);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_PublicStaffOverride_DoesNotAddAccessTokenHeaderWhenTokenValuesAreBlank()
+        {
+            var client = CreateClient();
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = " ",
+                AccessSecret = "staff-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+            var date = formatted.Headers["PolarisDate"];
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
+            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
@@ -435,6 +509,28 @@ namespace Clc.Polaris.Api.Tests
             StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
             StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/protected-token/search/patrons/Boolean");
             Assert.IsFalse(handler.Requests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+        }
+
+
+        [TestMethod]
+        public async Task ProtectedTokenPathRequest_WhenAuthenticationCannotProvideValidToken_ThrowsClearPlaceholderException()
+        {
+            var handler = new CapturingHttpMessageHandler("{}");
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = $"invalid-placeholder-{Guid.NewGuid():N}",
+                Password = "secret"
+            };
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith", orgId: 9));
+
+            Assert.AreEqual("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.", exception.Message);
+            Assert.IsNotNull(handler.LastRequest);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            Assert.IsNull(client.Token);
         }
 
         [TestMethod]

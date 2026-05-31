@@ -79,7 +79,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsExistingTokenWithoutCacheLookupOrAuthenticating()
+        public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsNullAndClearsTokenWithoutCacheLookupOrAuthenticating()
         {
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
@@ -101,13 +101,13 @@ namespace Clc.Polaris.Api.Tests
 
             var token = client.Token;
 
-            Assert.IsNotNull(token);
-            Assert.AreEqual("expired-token", token.AccessToken);
+            Assert.IsNull(token);
+            Assert.IsNull(client.Token);
             Assert.AreEqual(0, handler.RequestCount);
         }
 
         [TestMethod]
-        public void Token_WhenExistingTokenIsExpiredAndNoStaffOverrideAccount_ReturnsExistingTokenWithoutAuthenticating()
+        public void Token_WhenExistingTokenIsExpiredAndNoStaffOverrideAccount_ReturnsNullAndClearsTokenWithoutAuthenticating()
         {
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
@@ -120,8 +120,26 @@ namespace Clc.Polaris.Api.Tests
 
             var token = client.Token;
 
-            Assert.IsNotNull(token);
-            Assert.AreEqual("expired-token", token.AccessToken);
+            Assert.IsNull(token);
+            Assert.IsNull(client.Token);
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public void Token_WhenExistingTokenHasNoExpiration_ReturnsNullAndClearsTokenWithoutAuthenticating()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "missing-expiration-token",
+                AccessSecret = "missing-expiration-secret"
+            };
+
+            var token = client.Token;
+
+            Assert.IsNull(token);
+            Assert.IsNull(client.Token);
             Assert.AreEqual(0, handler.RequestCount);
         }
 
@@ -270,7 +288,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task PatronAccountGetAsync_FailedStaffAuthentication_DoesNotOverwriteExistingToken()
+        public async Task PatronAccountGetAsync_FailedStaffAuthentication_AfterExpiredExistingTokenClearsToken()
         {
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
             var client = CreateProtectedClient(handler);
@@ -285,13 +303,12 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.IsNotNull(client.Token);
-            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
         [TestMethod]
-        public async Task PatronAccountGetAsync_NullDataStaffAuthentication_DoesNotOverwriteExistingToken()
+        public async Task PatronAccountGetAsync_NullDataStaffAuthentication_AfterExpiredExistingTokenClearsToken()
         {
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
             var client = CreateProtectedClient(handler);
@@ -306,8 +323,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.IsNotNull(client.Token);
-            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
