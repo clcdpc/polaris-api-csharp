@@ -437,6 +437,64 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(handler.Requests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
         }
 
+
+        [TestMethod]
+        public async Task ProtectedTokenPathRequest_WithExpiredToken_AcquiresProtectedTokenBeforePlaceholderReplacement()
+        {
+            var handler = new ProtectedTokenCancellationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = $"expired-placeholder-{Guid.NewGuid():N}",
+                Password = "secret"
+            };
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(-1)
+            };
+
+            var response = await client.PatronSearchAsync("name=Smith", orgId: 9);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(2, handler.Requests.Count);
+            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/protected-token/search/patrons/Boolean");
+            Assert.IsFalse(handler.Requests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+            Assert.AreEqual("protected-token", client.Token!.AccessToken);
+        }
+
+        [TestMethod]
+        public async Task ProtectedTokenPathRequest_WhenAuthenticationCannotProvideValidToken_ThrowsPlaceholderExceptionBeforeProtectedRequest()
+        {
+            var handler = new FailingStaffAuthenticationHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = new PolarisUser
+            {
+                Domain = "main",
+                Username = $"failed-placeholder-{Guid.NewGuid():N}",
+                Password = "secret"
+            };
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.UtcNow.AddHours(-1)
+            };
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => client.PatronSearchAsync("name=Smith", orgId: 9));
+
+            Assert.AreEqual("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.", exception.Message);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.IsNull(client.Token);
+        }
+
         [TestMethod]
         public async Task ProtectedTokenPathRequest_UsesCachedProtectedTokenForPlaceholderReplacement()
         {
@@ -886,6 +944,30 @@ namespace Clc.Polaris.Api.Tests
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
+                });
+            }
+        }
+
+        private sealed class FailingStaffAuthenticationHttpMessageHandler : HttpMessageHandler
+        {
+            public int AuthenticationRequestCount { get; private set; }
+            public int ProtectedRequestCount { get; private set; }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
+                {
+                    AuthenticationRequestCount++;
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                    });
+                }
+
+                ProtectedRequestCount++;
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
                 });
             }
         }

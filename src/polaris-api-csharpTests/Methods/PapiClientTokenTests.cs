@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,7 +80,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsExistingTokenWithoutCacheLookupOrAuthenticating()
+        public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsNullAndClearsTokenWithoutCacheLookupOrAuthenticating()
         {
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
@@ -101,13 +102,13 @@ namespace Clc.Polaris.Api.Tests
 
             var token = client.Token;
 
-            Assert.IsNotNull(token);
-            Assert.AreEqual("expired-token", token.AccessToken);
+            Assert.IsNull(token);
+            Assert.IsNull(client.Token);
             Assert.AreEqual(0, handler.RequestCount);
         }
 
         [TestMethod]
-        public void Token_WhenExistingTokenIsExpiredAndNoStaffOverrideAccount_ReturnsExistingTokenWithoutAuthenticating()
+        public void Token_WhenExistingTokenIsExpiredAndNoStaffOverrideAccount_ReturnsNullAndClearsTokenWithoutAuthenticating()
         {
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
@@ -120,8 +121,26 @@ namespace Clc.Polaris.Api.Tests
 
             var token = client.Token;
 
-            Assert.IsNotNull(token);
-            Assert.AreEqual("expired-token", token.AccessToken);
+            Assert.IsNull(token);
+            Assert.IsNull(client.Token);
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public void Token_WhenExistingTokenHasNoExpiration_ReturnsNullAndClearsTokenWithoutAuthenticating()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "missing-expiration-token",
+                AccessSecret = "missing-expiration-secret"
+            };
+
+            var token = client.Token;
+
+            Assert.IsNull(token);
+            Assert.IsNull(client.Token);
             Assert.AreEqual(0, handler.RequestCount);
         }
 
@@ -270,7 +289,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task PatronAccountGetAsync_FailedStaffAuthentication_DoesNotOverwriteExistingToken()
+        public async Task PatronAccountGetAsync_FailedStaffAuthentication_AfterExpiredExistingTokenClearsToken()
         {
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
             var client = CreateProtectedClient(handler);
@@ -285,13 +304,12 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.IsNotNull(client.Token);
-            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
         }
 
         [TestMethod]
-        public async Task PatronAccountGetAsync_NullDataStaffAuthentication_DoesNotOverwriteExistingToken()
+        public async Task PatronAccountGetAsync_NullDataStaffAuthentication_AfterExpiredExistingTokenClearsToken()
         {
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
             var client = CreateProtectedClient(handler);
@@ -306,9 +324,98 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.IsNotNull(client.Token);
-            Assert.AreEqual("existing-token", client.Token.AccessToken);
+            Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
+        }
+
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_InvalidStaffAuthentication_AfterExpiredExistingTokenClearsTokenAndDoesNotCache()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson(string.Empty, string.Empty, DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "existing-token",
+                AccessSecret = "existing-secret",
+                ExpirationDate = DateTime.Now.AddHours(-1)
+            };
+
+            var response = await client.PatronAccountGetAsync("ABC123");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.IsNull(client.Token);
+            Assert.IsFalse(TryGetCachedToken(client.Hostname, client.StaffOverrideAccount, out _));
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_ExpiredProtectedToken_DoesNotUseSecretForProtectedMethodSigning()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.Now.AddHours(-1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/expired-token/search/patrons/Boolean");
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var uri = client.BuildRequestUri(formatted).AbsoluteUri;
+            Assert.AreEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, string.Empty, "access-key")}", formatted.Headers["Authorization"]);
+            Assert.AreNotEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, "expired-secret", "access-key")}", formatted.Headers["Authorization"]);
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+            Assert.IsNull(client.Token);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_ExpiredProtectedToken_DoesNotUseSecretOrHeaderForPublicStaffOverrideSigning()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.Now.AddHours(-1)
+            };
+            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC");
+            request.Headers["X-PAPI-AccessToken"] = "stale-token";
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
+
+            var date = formatted.Headers["PolarisDate"].ToString();
+            var uri = client.BuildRequestUri(formatted).AbsoluteUri;
+            var authorization = formatted.Headers["Authorization"];
+            Assert.AreEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, string.Empty, "access-key")}", authorization);
+            Assert.AreNotEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, "expired-secret", "access-key")}", authorization);
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
+            Assert.IsNull(client.Token);
+        }
+
+        [TestMethod]
+        public void PreformatRestRequest_PublicStaffOverrideWithMissingTokenValues_DoesNotAddAccessTokenHeader()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.Token = new ProtectedToken
+            {
+                AccessToken = " ",
+                AccessSecret = "manual-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+
+            var formatted = (PapiRestRequest)client.PreformatRestRequest(new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC"));
+
+            Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
         }
 
         [TestMethod]
@@ -390,6 +497,13 @@ namespace Clc.Polaris.Api.Tests
                 $"\"AccessSecret\":\"{accessSecret}\"," +
                 $"\"AuthExpDate\":\"{expirationDate:O}\"" +
                 "}";
+        }
+
+        private static string ComputePapiHash(string httpMethod, string uri, string date, string password, string accessKey)
+        {
+            var hashString = httpMethod + uri + date + password;
+            var computedHash = HMACSHA1.HashData(Encoding.UTF8.GetBytes(accessKey), Encoding.UTF8.GetBytes(hashString));
+            return Convert.ToBase64String(computedHash);
         }
 
         private sealed class CapturingHttpMessageHandler : HttpMessageHandler
