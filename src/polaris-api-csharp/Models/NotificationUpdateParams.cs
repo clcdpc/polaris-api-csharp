@@ -47,12 +47,12 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// How the message was delivered. In the currently implementation this is the patron's phone number.
 		/// </summary>
-		public string DeliveryString { get; set; }
+		public string? DeliveryString { get; set; }
 
         /// <summary>
         /// Any additional data/notes.
         /// </summary>
-        public string Details { get; set; }
+        public string? Details { get; set; }
 
         /// <summary>
         /// The ID of the patron.
@@ -64,6 +64,6 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public int? ItemRecordId { get; set; }
 
-        public string ItemBarcode { get; set; }
+        public string? ItemBarcode { get; set; }
     }
 }

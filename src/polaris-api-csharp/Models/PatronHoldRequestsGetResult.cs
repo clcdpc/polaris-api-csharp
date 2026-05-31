@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// A list of rows containing information about a hold.
 		/// </summary>
-		public List<PatronHoldRequestsGetRow> PatronHoldRequestsGetRows { get; set; }
+		public List<PatronHoldRequestsGetRow> PatronHoldRequestsGetRows { get; set; } = new();
 	}
 
 	/// <summary>
@@ -37,22 +37,22 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The status description of the hold.
 		/// </summary>
-		public string StatusDescription { get; set; }
+		public string? StatusDescription { get; set; }
 
 		/// <summary>
 		/// Title of the item on hold.
 		/// </summary>
-		public string Title { get; set; }
+		public string? Title { get; set; }
 
 		/// <summary>
 		/// Author of the item on hold.
 		/// </summary>
-		public string Author { get; set; }
+		public string? Author { get; set; }
 
 		/// <summary>
 		/// Call number of the item on hold.
 		/// </summary>
-		public string CallNumber { get; set; }
+		public string? CallNumber { get; set; }
 
 		/// <summary>
 		/// Format ID of the item on hold.
@@ -62,7 +62,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Format description of the item on hold.
 		/// </summary>
-		public string FormatDescription { get; set; }
+		public string? FormatDescription { get; set; }
 
 		/// <summary>
 		/// ID of the branch the hold will be picked up at.
@@ -72,7 +72,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Name of the branch the hold will be picked up at.
 		/// </summary>
-		public string PickupBranchName { get; set; }
+		public string? PickupBranchName { get; set; }
 
 		/// <summary>
 		/// Date the item can be picked up by.
@@ -102,7 +102,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Name used to identify a group of titles that can satisfy this hold request
 		/// </summary>
-		public string GroupName { get; set; }
+		public string? GroupName { get; set; }
 
 		/// <summary>
 		/// Is the hold an item level hold.

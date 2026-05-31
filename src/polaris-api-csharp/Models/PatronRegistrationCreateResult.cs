@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron's barcode
         /// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
         /// <summary>
         /// Patron ID

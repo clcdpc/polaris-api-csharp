@@ -9,9 +9,9 @@ namespace Clc.Polaris.Api.Configuration
     {
         public const string SECTION_NAME = "PapiSettings";
 
-        public string AccessId { get; set; }
-        public string AccessKey { get; set; }
-        public string Hostname { get; set; }
+        public string AccessId { get; set; } = string.Empty;
+        public string AccessKey { get; set; } = string.Empty;
+        public string Hostname { get; set; } = string.Empty;
         public int OrganizationId { get; set; } = 1;
         public int UserId { get; set; } = 1;
         public int WorkstationId { get; set; } = 1;

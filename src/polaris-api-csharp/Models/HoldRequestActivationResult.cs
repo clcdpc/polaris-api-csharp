@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Information about activated holds.
 		/// </summary>
-		public List<HoldActivationRow> HoldActivationRows { get; set; }
+		public List<HoldActivationRow> HoldActivationRows { get; set; } = new();
 	}
 
 	/// <summary>
@@ -43,6 +43,6 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The error message if not sucessful.
 		/// </summary>
-		public string ErrorMessage { get; set; }
+		public string? ErrorMessage { get; set; }
 	}
 }

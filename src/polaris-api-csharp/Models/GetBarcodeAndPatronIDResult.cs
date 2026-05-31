@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// A collection of rows containing a PatronID and barcode.
 		/// </summary>
-		public List<BarcodeAndPatronIDRow> BarcodeAndPatronIDRows { get; set; }
+		public List<BarcodeAndPatronIDRow> BarcodeAndPatronIDRows { get; set; } = new();
 
         public string? Barcode => BarcodeAndPatronIDRows.FirstOrDefault()?.Barcode;
 
@@ -34,7 +34,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The patron's barcode
 		/// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
 		public override string ToString()
 		{

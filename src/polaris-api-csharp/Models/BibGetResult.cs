@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// List of rows containing raw bibliographic record information.
         /// </summary>
-        public List<BibGetRow> BibGetRows { get; set; }
+        public List<BibGetRow> BibGetRows { get; set; } = new();
 
         /// <summary>
         /// Publisher(s) of the record.
@@ -202,7 +202,7 @@ namespace Clc.Polaris.Api.Models
 
         private List<string> GetBibResultRow(int id)
         {
-            return BibGetRows.Where(b => b.ElementID == id).Select(b => b.Value).ToList();
+            return BibGetRows.Where(b => b.ElementID == id).Select(b => b.Value).OfType<string>().ToList();
         }
     }
 
@@ -225,12 +225,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// The label associated with this element.
         /// </summary>
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         /// <summary>
         /// The value of the element.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         public override string ToString()
         {

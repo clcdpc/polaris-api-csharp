@@ -1,4 +1,4 @@
-﻿
+
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using System.Net;

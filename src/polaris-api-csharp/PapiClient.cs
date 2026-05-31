@@ -17,17 +17,17 @@ namespace Clc.Polaris.Api
         /// <summary>
         /// Your PAPI Access ID
         /// </summary>
-        public string AccessID { get; set; }
+        public string AccessID { get; set; } = string.Empty;
 
         /// <summary>
         /// Your PAPI Access Key
         /// </summary>
-        public string AccessKey { get; set; }
+        public string AccessKey { get; set; } = string.Empty;
 
         /// <summary>
         /// The base URL of your PAPI service
         /// </summary>
-        public string Hostname { get; set; }
+        public string Hostname { get; set; } = string.Empty;
 
         public int UserId { get; set; } = 1;
         public int WorkstationId { get; set; } = 1;

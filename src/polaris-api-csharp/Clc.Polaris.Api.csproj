@@ -3,8 +3,6 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<!-- Response/config DTOs are populated by XML/JSON serializers or configuration binding after construction. -->
-		<NoWarn>$(NoWarn);CS8618</NoWarn>
 		<RootNamespace>Clc.Polaris</RootNamespace>
 		<PackageId>Clc.Polaris.Api</PackageId>
 		<Authors>Central Library Consortium, Michael Fields</Authors>

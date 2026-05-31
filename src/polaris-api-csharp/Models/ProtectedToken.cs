@@ -20,12 +20,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Access token
         /// </summary>
-        public string AccessToken { get; set; }
+        public string? AccessToken { get; set; }
 
         /// <summary>
         /// Access secret
         /// </summary>
-        public string AccessSecret { get; set; }
+        public string? AccessSecret { get; set; }
 
         /// <summary>
         /// Token expiration date

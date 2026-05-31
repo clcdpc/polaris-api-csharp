@@ -1,4 +1,4 @@
-﻿using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Models;
 using Clc.Rest;
 using System;

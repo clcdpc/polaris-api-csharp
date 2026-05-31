@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Error message, if any
         /// </summary>
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
 
         public override string ToString()
         {
