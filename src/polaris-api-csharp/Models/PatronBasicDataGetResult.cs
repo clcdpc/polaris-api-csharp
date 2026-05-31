@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Models
 
         public override string ToString()
         {
-            if (PatronBasicData?.PatronID == 0) return base.ToString();
+            if (PatronBasicData == null || PatronBasicData.PatronID == 0) return base.ToString();
             return $"{PatronBasicData.PatronID} - {PatronBasicData.Barcode} - {PatronBasicData.NameFirst} {PatronBasicData.NameLast}";
         }
     }
