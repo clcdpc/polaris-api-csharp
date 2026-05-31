@@ -105,20 +105,14 @@ namespace Clc.Polaris.Api
                 }
 
                 var date = DateTime.Now.ToUniversalTime().ToString("R");
-                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, BuildRequestUriForPapiHash(papiRequest), password);
+                var requestUri = BuildRequestUri(papiRequest);
+                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, requestUri.AbsoluteUri, password);
                 papiRequest.Headers["PolarisDate"] = date;
                 papiRequest.Headers["Authorization"] = string.Format("PWS {0}:{1}", AccessID, hash);
             }
 
             return papiRequest;
         }
-
-        private string BuildRequestUriForPapiHash(RestRequest request)
-        {
-            var uri = BuildRequestUri(request);
-            return uri.IsAbsoluteUri ? uri.AbsoluteUri : uri.OriginalString;
-        }
-
 
         private enum ProtectedTokenPreloadMode
         {
