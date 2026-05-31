@@ -116,7 +116,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "protected-token",
                 AccessSecret = "protected-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
             var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
 
@@ -189,7 +189,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
@@ -212,7 +212,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate")
@@ -237,7 +237,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
@@ -259,7 +259,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(1)
+                ExpirationDate = DateTime.Now.AddHours(1)
             };
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/apikeyvalidate");
 
@@ -386,7 +386,7 @@ namespace Clc.Polaris.Api.Tests
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken { AccessToken = "real-token", AccessSecret = "real-secret", ExpirationDate = DateTime.UtcNow.AddHours(1) };
+            client.Token = new ProtectedToken { AccessToken = "real-token", AccessSecret = "real-secret", ExpirationDate = DateTime.Now.AddHours(1) };
 
             var response = await client.PatronSearchAsync("name=Smith", orgId: 9);
 
@@ -401,7 +401,7 @@ namespace Clc.Polaris.Api.Tests
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken { AccessToken = "hash-token", AccessSecret = "hash-secret", ExpirationDate = DateTime.UtcNow.AddHours(1) };
+            client.Token = new ProtectedToken { AccessToken = "hash-token", AccessSecret = "hash-secret", ExpirationDate = DateTime.Now.AddHours(1) };
 
             await client.PatronSearchAsync("name=Smith", orgId: 9);
 
@@ -454,7 +454,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(-1)
+                ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
             var response = await client.PatronSearchAsync("name=Smith", orgId: 9);
@@ -483,7 +483,7 @@ namespace Clc.Polaris.Api.Tests
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.UtcNow.AddHours(-1)
+                ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
             var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
@@ -817,7 +817,7 @@ namespace Clc.Polaris.Api.Tests
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.UtcNow.AddHours(1) };
+            client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.Now.AddHours(1) };
 
             var response = await client.PatronSearchAsync("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
 
