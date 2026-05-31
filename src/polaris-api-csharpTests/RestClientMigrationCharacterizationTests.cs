@@ -617,6 +617,23 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task BibKeywordSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var concreteClient = CreateClient(handler);
+            concreteClient.OrganizationId = 42;
+            IPapiClient client = concreteClient;
+
+            var response = await client.BibKeywordSearchAsync("default branch search");
+
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(handler.LastRequest);
+            StringAssert.Contains(handler.LastRequest!.RequestUri!.AbsolutePath, "/public/v1/1033/100/42/search/bibs/keyword/KW");
+            Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/keyword/KW?q=default%20branch%20search&sort=MP&page=1&bibsperpage=10", handler.LastRequest.RequestUri.AbsoluteUri);
+            AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
         public async Task BibBooleanSearchAsync_ThroughInterface_RequestShapeMatchesConcreteClient()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
