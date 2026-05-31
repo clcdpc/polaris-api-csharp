@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Information about cancelled holds.
 		/// </summary>
-		public List<HoldRequestCancelRow> HoldRequestCancelRows { get; set; }
+		public List<HoldRequestCancelRow> HoldRequestCancelRows { get; set; } = new();
 	}
 
 	/// <summary>
@@ -31,6 +31,6 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The error message returned by the Polaris API.
 		/// </summary>
-		public string ErrorMessage { get; set; }
+		public string? ErrorMessage { get; set; }
 	}
 }

@@ -12,6 +12,10 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<HoldRequestReplyResult>> HoldRequestReplyAsync(HoldRequestCreateResult holdCreateResult, int requestingOrgId, HoldRequestReplyAnswer answer, HoldRequestReplyState state, CancellationToken cancellationToken = default)
         {
+            Require.Argument(holdCreateResult);
+            Require.Argument(holdCreateResult.TxnGroupQualifier);
+            Require.Argument(holdCreateResult.TxnQualifier);
+
             var url = $"/public/v1/1033/100/1/holdrequest/{holdCreateResult.RequestGuid}";
             var body = new HoldRequestReplyData
             {

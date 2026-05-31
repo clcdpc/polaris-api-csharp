@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Models
 
     public class PickupBranchesGetResult : PapiResponseCommon
     {
-        public List<PickupBranchesRow> PickupBranchesRows { get; set; }
+        public List<PickupBranchesRow> PickupBranchesRows { get; set; } = new();
 
         public List<int> PickupBranches => PickupBranchesRows.Select(b => b.ID).ToList();
     }

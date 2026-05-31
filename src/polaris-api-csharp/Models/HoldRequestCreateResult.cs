@@ -15,12 +15,12 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// TxnGroupQualifier of the hold request.
 		/// </summary>
-		public string TxnGroupQualifier { get; set; }
+		public string? TxnGroupQualifier { get; set; }
 
 		/// <summary>
 		/// TxnQualifier of the hold request.
 		/// </summary>
-		public string TxnQualifier { get; set; }
+		public string? TxnQualifier { get; set; }
 
 		/// <summary>
 		/// Status type of the hold request.
@@ -35,7 +35,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// Display text.
 		/// </summary>
-		public string Message { get; set; }
+		public string? Message { get; set; }
 
 		/// <summary>
 		/// Position of this hold in the queue.

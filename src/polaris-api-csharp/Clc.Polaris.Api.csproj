@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
 		<RootNamespace>Clc.Polaris</RootNamespace>
 		<PackageId>Clc.Polaris.Api</PackageId>
 		<Authors>Central Library Consortium, Michael Fields</Authors>

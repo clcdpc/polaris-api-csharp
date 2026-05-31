@@ -235,7 +235,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.ProtectedRequestCount);
-            Assert.AreEqual("cached-token", client.Token.AccessToken);
+            Assert.AreEqual("cached-token", client.Token?.AccessToken);
         }
 
         [TestMethod]
@@ -580,17 +580,17 @@ namespace Clc.Polaris.Api.Tests
             locks?.Clear();
         }
 
-        private static void SetCachedToken(string hostname, PolarisUser staffUser, ProtectedToken token)
+        private static void SetCachedToken(string hostname, PolarisUser? staffUser, ProtectedToken token)
         {
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
             cache?.TryAdd(BuildCacheKey(hostname, staffUser), token);
         }
 
-        private static bool TryGetCachedToken(string hostname, PolarisUser staffUser, out ProtectedToken? token)
+        private static bool TryGetCachedToken(string hostname, PolarisUser? staffUser, out ProtectedToken? token)
         {
             token = null;
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
-            return cache?.TryGetValue(BuildCacheKey(hostname, staffUser), out token) == true;
+            return staffUser != null && cache?.TryGetValue(BuildCacheKey(hostname, staffUser), out token) == true;
         }
 
         private static T? GetPrivateStaticProperty<T>(string propertyName) where T : class
@@ -599,8 +599,9 @@ namespace Clc.Polaris.Api.Tests
             return cacheProperty?.GetValue(null) as T;
         }
 
-        private static string BuildCacheKey(string hostname, PolarisUser staffUser)
+        private static string BuildCacheKey(string hostname, PolarisUser? staffUser)
         {
+            if (staffUser == null) { throw new ArgumentNullException(nameof(staffUser)); }
             return $"{hostname}|{staffUser.Domain}|{staffUser.Username}";
         }
     }

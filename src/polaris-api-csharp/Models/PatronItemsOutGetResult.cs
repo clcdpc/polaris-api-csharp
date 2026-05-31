@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// A list of rows containing information about the items the patron has out.
 		/// </summary>
-		public List<PatronItemsOutGetRow> PatronItemsOutGetRows { get; set; }
+		public List<PatronItemsOutGetRow> PatronItemsOutGetRows { get; set; } = new();
 	}
 
 	/// <summary>
@@ -27,7 +27,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The item's barcode.
 		/// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
 		/// <summary>
 		/// The ID of the bibliographic record this item is assigned to.
@@ -42,22 +42,22 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The description of this item's format.
 		/// </summary>
-		public string FormatDescription { get; set; }
+		public string? FormatDescription { get; set; }
 
 		/// <summary>
 		/// The title of the item.
 		/// </summary>
-		public string Title { get; set; }
+		public string? Title { get; set; }
 
 		/// <summary>
 		/// The author of the item.
 		/// </summary>
-		public string Author { get; set; }
+		public string? Author { get; set; }
 
 		/// <summary>
 		/// The call number of the item.
 		/// </summary>
-		public string CallNumber { get; set; }
+		public string? CallNumber { get; set; }
 
 		/// <summary>
 		/// The date this itemw as checked out.
@@ -87,7 +87,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The name of the branch this item is assigned to.
 		/// </summary>
-		public string AssignedBranchName { get; set; }
+		public string? AssignedBranchName { get; set; }
 
 		/// <summary>
 		/// The ID of the branch this item was checked out from.
@@ -97,7 +97,7 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The name of the branch this item was checked out from.
 		/// </summary>
-		public string LoaningBranchName { get; set; }
+		public string? LoaningBranchName { get; set; }
 
         public override string ToString()
         {

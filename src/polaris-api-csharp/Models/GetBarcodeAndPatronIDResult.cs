@@ -11,13 +11,13 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// A collection of rows containing a PatronID and barcode.
 		/// </summary>
-		public List<BarcodeAndPatronIDRow> BarcodeAndPatronIDRows { get; set; }
+		public List<BarcodeAndPatronIDRow> BarcodeAndPatronIDRows { get; set; } = new();
 
-        public string Barcode => BarcodeAndPatronIDRows.FirstOrDefault()?.Barcode;
+        public string? Barcode => BarcodeAndPatronIDRows.FirstOrDefault()?.Barcode;
 
         public override string ToString()
         {
-            return Barcode;
+            return Barcode ?? string.Empty;
         }
     }
 
@@ -34,11 +34,11 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// The patron's barcode
 		/// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
 		public override string ToString()
 		{
-			return Barcode;
+			return Barcode ?? string.Empty;
 		}
 	}
 }

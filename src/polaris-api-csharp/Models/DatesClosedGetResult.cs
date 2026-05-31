@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Models
 {
     public class DatesClosedGetResult
     {
-        public List<DatesClosedRow> DatesClosedRows { get; set; }
+        public List<DatesClosedRow> DatesClosedRows { get; set; } = new();
 
         public override string ToString()
         {

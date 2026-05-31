@@ -5,7 +5,7 @@ namespace Clc.Polaris.Api.Models
 {
     public class ItemRenewResultWrapper : PapiResponseCommon
     {
-        public ItemRenewResultBody ItemRenewResult { get; set; }
+        public ItemRenewResultBody? ItemRenewResult { get; set; }
     }
     /// <summary>
     /// Lists of items that could and couldn't be renewed.
@@ -15,12 +15,12 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// A list of items that could not be renewed.
 		/// </summary>
-		public List<ItemRenewBlockRow> BlockRows { get; set; }// = new List<ItemRenewBlockRow>();
+		public List<ItemRenewBlockRow> BlockRows { get; set; } = new(); // = new List<ItemRenewBlockRow>();
 
         /// <summary>
         /// A list of successfully renewed items.
         /// </summary>
-        public List<ItemRenewDueDateRow> DueDateRows { get; set; }// = new List<ItemRenewDueDateRow>();
+        public List<ItemRenewDueDateRow> DueDateRows { get; set; } = new(); // = new List<ItemRenewDueDateRow>();
 	}
 
     /// <summary>
@@ -48,7 +48,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Description of the error.
         /// </summary>
-        public string ErrorDesc { get; set; }
+        public string? ErrorDesc { get; set; }
 
         /// <summary>
         /// ID of the item record.

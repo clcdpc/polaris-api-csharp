@@ -14,17 +14,17 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Domain
         /// </summary>
-        public string Domain { get; set; }
+        public string Domain { get; set; } = string.Empty;
 
         /// <summary>
         /// Username
         /// </summary>
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         /// <summary>
         /// Password
         /// </summary>
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         public PolarisUser()
         {
