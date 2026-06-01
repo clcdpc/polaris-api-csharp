@@ -190,5 +190,39 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(expectedPath, handler.LastRequest!.RequestUri!.AbsolutePath);
         }
+
+        [TestMethod]
+        public async Task HoldRequestReply_ConstructsCorrectUrlAndBody()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+            var holdCreateResult = new HoldRequestCreateResult
+            {
+                RequestGuid = Guid.NewGuid(),
+                TxnGroupQualifier = "group-qual",
+                TxnQualifier = "txn-qual"
+            };
+            var requestingOrgId = 42;
+            var answer = HoldRequestReplyAnswer.Yes;
+            var state = HoldRequestReplyState.AcceptILLPolicy;
+
+            client.HoldRequestReply(holdCreateResult, requestingOrgId, answer, state);
+
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
+
+            var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/holdrequest/{holdCreateResult.RequestGuid}";
+            Assert.AreEqual(expectedPath, handler.LastRequest.RequestUri!.AbsolutePath);
+
+            var content = handler.LastRequest.Content;
+            Assert.IsNotNull(content);
+            var contentString = await content.ReadAsStringAsync();
+
+            Assert.IsTrue(contentString.Contains("\"TxnGroupQualifier\":\"group-qual\""));
+            Assert.IsTrue(contentString.Contains("\"TxnQualifier\":\"txn-qual\""));
+            Assert.IsTrue(contentString.Contains($"\"RequestingOrgID\":{requestingOrgId}"));
+            Assert.IsTrue(contentString.Contains($"\"Answer\":{(int)answer}"));
+            Assert.IsTrue(contentString.Contains($"\"State\":{(int)state}"));
+        }
     }
 }
