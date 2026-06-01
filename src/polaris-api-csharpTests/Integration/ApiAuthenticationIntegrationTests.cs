@@ -56,10 +56,7 @@ public sealed class ApiAuthenticationIntegrationTests : IntegrationTestBase
     [TestMethod]
     public void AuthenticatePatronAsync_FailedLogin_IsDisabledByDefaultToAvoidAccountLockout()
     {
-        if (!Options.EnableAuthenticationFailureTests)
-        {
-            Assert.Inconclusive("Failed-authentication tests are disabled by default because repeated bad PIN/password attempts can lock real accounts. Set IntegrationTestOptions:EnableAuthenticationFailureTests=true only for disposable credentials, then add a local test case.");
-        }
+        RequireAuthenticationFailureTestsEnabled();
 
         Assert.Inconclusive("No failed-authentication scenario is checked in. Configure disposable credentials locally before adding assertions.");
     }

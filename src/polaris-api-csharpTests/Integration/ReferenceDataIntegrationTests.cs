@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.Tests.Integration;
 
 [TestClass]
 [TestCategory("Integration")]
-public sealed class CollectionsAndLookupIntegrationTests : IntegrationTestBase
+public sealed class ReferenceDataIntegrationTests : IntegrationTestBase
 {
     [TestMethod]
     public async Task CollectionsGetAsync_ReturnsRowsAndRowCountCode()
@@ -81,6 +81,17 @@ public sealed class CollectionsAndLookupIntegrationTests : IntegrationTestBase
         var data = PapiIntegrationAssert.HasPapiData(response);
 
         PapiIntegrationAssert.RowCountMatchesPapiCode(response, data.OrganizationsGetRows.Count);
+    }
+
+    [TestMethod]
+    public async Task PatronCodesGetAsync_ReturnsConfiguredCodes()
+    {
+        RequirePapiConfiguration();
+
+        var response = await Papi.PatronCodesGetAsync();
+        var data = PapiIntegrationAssert.HasPapiData(response);
+
+        Assert.IsTrue(data.PatronCodesRows.Any());
     }
 
     [TestMethod]

@@ -54,17 +54,6 @@ public sealed class PatronReadIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public async Task PatronCodesGetAsync_ReturnsConfiguredCodes()
-    {
-        RequirePapiConfiguration();
-
-        var response = await Papi.PatronCodesGetAsync();
-        var data = PapiIntegrationAssert.Success(response);
-
-        Assert.IsTrue(data.PatronCodesRows.Any());
-    }
-
-    [TestMethod]
     public async Task PatronHoldRequestsGetAsync_WithConfiguredPatron_ReturnsSuccessShape()
     {
         RequirePatronCredentials();

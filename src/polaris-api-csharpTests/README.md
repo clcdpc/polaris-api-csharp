@@ -32,7 +32,7 @@ Copy the example file and replace placeholders with values for a disposable/safe
 cp src/polaris-api-csharpTests/appsettings.Test.example.json src/polaris-api-csharpTests/appsettings.Test.json
 ```
 
-`appsettings.Test.json` is intentionally not committed. The test project copies it to the output directory only when the file exists.
+`appsettings.Test.json` is intentionally not committed. The test project copies it to the output directory only when the file exists. Integration-only fixture values are bound to `IntegrationScenarioSettings` from the existing `TestSettings` section so older local configuration files and environment-variable names continue to work.
 
 ## Environment variables
 
@@ -61,6 +61,11 @@ The integration fixture also loads environment variables using standard .NET con
 - `TestSettings__RemoteStorageBranchId`
 - `TestSettings__RemoteStorageStartDate`
 - `TestSettings__RemoteStorageEndDate`
+- `TestSettings__RecordSetId`
+- `TestSettings__ItemRecordId`
+- `TestSettings__ItemBarcode`
+- `TestSettings__PatronAccountTransactionId`
+- `TestSettings__HoldRequestId`
 - `IntegrationTestOptions__EnableMutatingIntegrationTests`
 - `IntegrationTestOptions__EnableStaffProtectedTests`
 - `IntegrationTestOptions__EnableScenarioDependentTests`
@@ -81,6 +86,7 @@ Additional success-path scenarios require:
 - Staff/protected endpoints: `PapiSettings:PolarisOverrideAccount:*` plus `IntegrationTestOptions:EnableStaffProtectedTests=true`
 - `SA_GetValueByOrgAsync`: `TestSettings:OrgEmail` matching the configured organization
 - Remote storage: `TestSettings:RemoteStorageBranchId`, `RemoteStorageStartDate`, and `RemoteStorageEndDate`, plus scenario-dependent tests enabled
+- Optional scenario fixtures for local extensions: `TestSettings:RecordSetId`, `ItemRecordId`, `ItemBarcode`, `PatronAccountTransactionId`, and `HoldRequestId`
 
 Do not use production patrons/items unless the site owner has explicitly approved the tests. Prefer disposable patrons, fixture records, and non-production PAPI instances.
 
@@ -106,7 +112,7 @@ Record-set tests use nonexistent record-set IDs and assert documented negative `
 
 ## Scenario-dependent placeholders
 
-Some client methods require real local data that cannot be safely invented, such as renewable checked-out items, complete patron registration payloads, or remote-storage activity windows. The suite includes inconclusive placeholder tests documenting the method name, required fixture settings, and intended assertion strategy. Enable them only after adding local fixture data:
+Some client methods require real local data that cannot be safely invented, such as renewable checked-out items, complete patron registration payloads, or remote-storage activity windows. The suite includes inconclusive placeholder tests documenting the method name, why scenario data is required, the required fixture settings, and the intended assertion strategy. Enable them only after adding local fixture data:
 
 ```bash
 IntegrationTestOptions__EnableScenarioDependentTests=true
@@ -135,9 +141,10 @@ The guide was used selectively to confirm endpoint routes, response shapes, row-
 | Endpoint group | Success tests | Known-error reachability tests | Mutating tests gated by config | Placeholders requiring scenario data |
 | --- | --- | --- | --- | --- |
 | API/version/authentication | API key validation, API version, patron auth, staff auth when enabled | None by default | None | Failed-auth testing is a placeholder because account lockout is a risk |
-| Bibliographic/catalog lookup | Bib get, branch-specific bib get, keyword/boolean search, holdings, synch bibs by ID | None | None | `HeadingsSearchAsync` remains a client `NotImplementedException` check |
-| Collections/material/status lookup | Collections, dates closed, item statuses, limit filters, MARC types, material types, organizations, pickup branches, shelf locations | None | None | None |
-| Patron reads | validate, barcode-from-id, basic data, blocks, codes, hold/ILL/items out, messages, preferences, reading history, renew blocks, saved searches, patron search | None | None | None |
+| Bibliographic/catalog lookup | Bib get, branch-specific bib get, keyword/boolean search, holdings | None | None | `HeadingsSearchAsync` remains a client `NotImplementedException` check |
+| Reference data lookup | Collections, dates closed, item statuses, limit filters, MARC types, material types, organizations, patron codes, pickup branches, shelf locations | None | None | None |
+| Synch | synch bibs by ID | None | None | None |
+| Patron reads | validate, barcode-from-id, basic data, blocks, hold/ILL/items out, messages, preferences, reading history, renew blocks, saved searches, patron search | None | None | None |
 | Patron account/title lists | account get, title lists get | nonexistent charge/payment/title-list IDs | create/delete title list, create credit, deposit credit | None |
 | Hold requests/circulation | hold request list | nonexistent hold request, bib, request GUID, pickup branch, item renewal IDs | item barcode update is additionally gated because the endpoint mutates item data | renew-all requires a patron with renewable checked-out items |
 | Patron mutations/messages | None by default | nonexistent patron message, reading-history title, notification update IDs; unsafe username update asserts unauthorized | patron blocks, no-op patron update, notes update | patron registration v1/v2 require complete disposable-registration fixtures |

@@ -92,17 +92,4 @@ public sealed class CatalogLookupIntegrationTests : IntegrationTestBase
 
         Assert.ThrowsException<NotImplementedException>(() => Papi.HeadingsSearchAsync(NonexistentBibId));
     }
-
-    [TestMethod]
-    public async Task Synch_BibsByIdGetAsync_WithConfiguredBib_ReturnsSynchronisationPayload()
-    {
-        RequireBibScenario();
-
-        var response = await Papi.Synch_BibsByIdGetAsync(Settings.BibId);
-        var data = PapiIntegrationAssert.HasData(response);
-
-        Assert.IsNotNull(response.Response);
-        Assert.IsTrue(response.Response!.IsSuccessStatusCode);
-        Assert.IsTrue(data.PAPIErrorCode >= 0, data.ErrorMessage?.ToString());
-    }
 }

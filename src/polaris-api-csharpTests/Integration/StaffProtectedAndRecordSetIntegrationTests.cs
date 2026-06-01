@@ -99,10 +99,7 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
             "TestSettings:RemoteStorageBranchId, TestSettings:RemoteStorageStartDate, and TestSettings:RemoteStorageEndDate for a branch/date range with remote-storage activity",
             "call RemoteStorageItemsGetAsync and assert PAPIErrorCode equals the deserialized row count");
 
-        if (Settings.RemoteStorageBranchId <= 0 || string.IsNullOrWhiteSpace(Settings.RemoteStorageStartDate) || string.IsNullOrWhiteSpace(Settings.RemoteStorageEndDate))
-        {
-            Assert.Inconclusive("Remote storage scenario settings are incomplete.");
-        }
+        RequireRemoteStorageScenario();
 
         var response = await Papi.RemoteStorageItemsGetAsync(Settings.RemoteStorageBranchId, Settings.RemoteStorageStartDate, Settings.RemoteStorageEndDate, 10, 1);
         var data = PapiIntegrationAssert.HasPapiData(response);
