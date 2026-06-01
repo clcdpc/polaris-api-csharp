@@ -7,12 +7,12 @@ namespace Clc.Polaris.Api.Tests.Integration;
 
 public abstract class IntegrationTestBase
 {
-    protected const int NonexistentBibId = 1234;
-    protected const int NonexistentItemRecordId = 1234;
-    protected const int NonexistentRequestId = 1234;
-    protected const int NonexistentRecordSetId = 1234;
-    protected const int NonexistentTitleListId = 1234;
-    protected const int NonexistentNotificationId = 1234;
+    protected const int NonexistentBibId = 2_147_483_647;
+    protected const int NonexistentItemRecordId = 2_147_483_647;
+    protected const int NonexistentRequestId = 2_147_483_647;
+    protected const int NonexistentRecordSetId = 2_147_483_647;
+    protected const int NonexistentTitleListId = 2_147_483_647;
+    protected const int NonexistentNotificationId = 2_147_483_647;
 
     private const string MissingConfigurationMessage = "Integration test configuration is missing. Provide appsettings.Test.json or environment variables to run live PAPI tests.";
 
@@ -146,12 +146,17 @@ public abstract class IntegrationTestBase
 
     protected void RequireMutatingTestsEnabled()
     {
-        RequirePatronCredentials();
+        RequirePapiConfiguration();
 
         if (!Options.EnableMutatingIntegrationTests)
         {
-            Assert.Inconclusive("Mutating integration tests are disabled. Set IntegrationTestOptions:EnableMutatingIntegrationTests=true only for safe test fixtures.");
+            Assert.Inconclusive("Mutating integration tests are disabled. Set IntegrationTestOptions:EnableMutatingIntegrationTests=true only for safe disposable test fixtures.");
         }
+    }
+
+    protected void DocumentScenarioDependentPlaceholder(string methodName, string whyScenarioDataIsRequired, string requiredSettings, string assertionStrategy)
+    {
+        Assert.Inconclusive($"{methodName} is a scenario-dependent placeholder and has no executable fixture-backed implementation yet. Reason: {whyScenarioDataIsRequired}. Required settings: {requiredSettings}. Intended assertion strategy: {assertionStrategy}. No live API call was made.");
     }
 
     protected void RequireScenarioDependentTestsEnabled(string methodName, string requiredSettings, string assertionStrategy)
