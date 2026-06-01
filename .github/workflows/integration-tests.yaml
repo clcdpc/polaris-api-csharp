@@ -1,0 +1,106 @@
+name: integration-tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_mutating_tests:
+        description: Run gated mutating integration tests against disposable fixtures
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      enable_staff_protected_tests:
+        description: Run protected/staff integration tests using repository or environment secrets
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      enable_scenario_dependent_tests:
+        description: Run scenario-dependent placeholder-gated tests after configuring safe fixtures
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_VERSION: 8.0.x
+  CONFIGURATION: Release
+  SOLUTION: src/polaris-api-csharp.sln
+  TEST_PROJECT: src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj
+  TEST_RESULTS_DIR: TestResults
+
+jobs:
+  integration-tests:
+    name: live PAPI integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: integration-tests
+
+    env:
+      PapiSettings__Hostname: ${{ secrets.PAPI_HOSTNAME }}
+      PapiSettings__AccessId: ${{ secrets.PAPI_ACCESS_ID }}
+      PapiSettings__AccessKey: ${{ secrets.PAPI_ACCESS_KEY }}
+      PapiSettings__OrganizationId: ${{ vars.PAPI_ORGANIZATION_ID || 1 }}
+      PapiSettings__UserId: ${{ vars.PAPI_USER_ID || 1 }}
+      PapiSettings__WorkstationId: ${{ vars.PAPI_WORKSTATION_ID || 1 }}
+      PapiSettings__PolarisOverrideAccount__Domain: ${{ secrets.PAPI_STAFF_DOMAIN }}
+      PapiSettings__PolarisOverrideAccount__Username: ${{ secrets.PAPI_STAFF_USERNAME }}
+      PapiSettings__PolarisOverrideAccount__Password: ${{ secrets.PAPI_STAFF_PASSWORD }}
+      TestSettings__PatronId: ${{ vars.PAPI_TEST_PATRON_ID || 0 }}
+      TestSettings__PatronBarcode: ${{ secrets.PAPI_TEST_PATRON_BARCODE }}
+      TestSettings__PatronPin: ${{ secrets.PAPI_TEST_PATRON_PIN }}
+      TestSettings__BibId: ${{ vars.PAPI_TEST_BIB_ID || 0 }}
+      TestSettings__BranchId: ${{ vars.PAPI_TEST_BRANCH_ID || 0 }}
+      TestSettings__OrganizationId: ${{ vars.PAPI_TEST_ORGANIZATION_ID || 1 }}
+      TestSettings__WorkstationId: ${{ vars.PAPI_TEST_WORKSTATION_ID || 1 }}
+      TestSettings__UserId: ${{ vars.PAPI_TEST_USER_ID || 1 }}
+      TestSettings__OrgEmail: ${{ vars.PAPI_TEST_ORG_EMAIL || 'test@example.org' }}
+      TestSettings__PatronListName: ${{ vars.PAPI_TEST_PATRON_LIST_NAME || 'PAPI integration test list' }}
+      TestSettings__FreeTextBlock: ${{ vars.PAPI_TEST_FREE_TEXT_BLOCK || 'PAPI integration test block' }}
+      IntegrationTestOptions__EnableMutatingIntegrationTests: ${{ inputs.enable_mutating_tests }}
+      IntegrationTestOptions__EnableStaffProtectedTests: ${{ inputs.enable_staff_protected_tests }}
+      IntegrationTestOptions__EnableScenarioDependentTests: ${{ inputs.enable_scenario_dependent_tests }}
+      IntegrationTestOptions__EnableAuthenticationFailureTests: 'false'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore "$SOLUTION"
+
+      - name: Build
+        run: dotnet build "$SOLUTION" --configuration "$CONFIGURATION" --no-restore -warnaserror
+
+      - name: Run integration tests
+        run: |
+          dotnet test "$TEST_PROJECT" \
+            --configuration "$CONFIGURATION" \
+            --no-build \
+            --filter "TestCategory=Integration" \
+            --logger "trx;LogFileName=integration-tests.trx" \
+            --results-directory "$TEST_RESULTS_DIR"
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: ${{ env.TEST_RESULTS_DIR }}/*.trx
