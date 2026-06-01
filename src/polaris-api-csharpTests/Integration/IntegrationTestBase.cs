@@ -18,7 +18,7 @@ public abstract class IntegrationTestBase
 
     protected IPapiClient Papi { get; private set; } = null!;
     protected PapiSettings PapiSettings { get; private set; } = null!;
-    protected TestSettings Settings { get; private set; } = null!;
+    protected IntegrationScenarioSettings Settings { get; private set; } = null!;
     protected IntegrationTestOptions Options { get; private set; } = null!;
 
     [TestInitialize]
@@ -30,7 +30,7 @@ public abstract class IntegrationTestBase
             .Build();
 
         PapiSettings = config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>() ?? new PapiSettings();
-        Settings = config.GetSection(TestSettings.SECTION_NAME).Get<TestSettings>() ?? new TestSettings();
+        Settings = config.GetSection(IntegrationScenarioSettings.SectionName).Get<IntegrationScenarioSettings>() ?? new IntegrationScenarioSettings();
         Options = config.GetSection(nameof(IntegrationTestOptions)).Get<IntegrationTestOptions>() ?? new IntegrationTestOptions();
 
         Papi = new PapiClient(PapiSettings);
@@ -53,42 +53,70 @@ public abstract class IntegrationTestBase
     protected void RequirePatronCredentials()
     {
         RequirePapiConfiguration();
-
-        var missing = new List<string>();
-        if (!HasValue(Settings.PatronBarcode) || IsPlaceholder(Settings.PatronBarcode)) missing.Add("TestSettings:PatronBarcode");
-        if (!HasValue(Settings.PatronPin) || IsPlaceholder(Settings.PatronPin)) missing.Add("TestSettings:PatronPin");
-
-        InconclusiveIfMissing(missing);
+        InconclusiveIfMissing(MissingScenarioSettings(
+            (Settings.PatronBarcode, SettingName(nameof(IntegrationScenarioSettings.PatronBarcode))),
+            (Settings.PatronPin, SettingName(nameof(IntegrationScenarioSettings.PatronPin)))));
     }
 
     protected void RequirePatronId()
     {
         RequirePapiConfiguration();
-
-        if (Settings.PatronId <= 0)
-        {
-            Assert.Inconclusive($"{MissingConfigurationMessage} Missing setting: TestSettings:PatronId.");
-        }
+        RequirePositiveScenarioId(Settings.PatronId, SettingName(nameof(IntegrationScenarioSettings.PatronId)), "a patron record that can be safely read by the integration suite");
     }
+
+    protected void RequireBibId() => RequireBibScenario();
 
     protected void RequireBibScenario()
     {
         RequirePapiConfiguration();
-
-        if (Settings.BibId <= 0)
-        {
-            Assert.Inconclusive($"Scenario data required: set TestSettings:KnownBibId to a bibliographic record that can be safely read.");
-        }
+        RequirePositiveScenarioId(Settings.BibId, SettingName(nameof(IntegrationScenarioSettings.BibId)), "a bibliographic record that can be safely read by the integration suite");
     }
+
+    protected void RequireBranchId() => RequireBranchScenario();
 
     protected void RequireBranchScenario()
     {
         RequirePapiConfiguration();
+        RequirePositiveScenarioId(Settings.BranchId, SettingName(nameof(IntegrationScenarioSettings.BranchId)), "a branch/organization ID that can be safely read by the integration suite");
+    }
 
-        if (Settings.BranchId <= 0)
-        {
-            Assert.Inconclusive($"Scenario data required: set TestSettings:BranchId to a branch/organization ID that can be safely read.");
-        }
+    protected void RequireRecordSetId()
+    {
+        RequirePapiConfiguration();
+        RequirePositiveScenarioId(Settings.RecordSetId, SettingName(nameof(IntegrationScenarioSettings.RecordSetId)), "a real record set intended for scenario-dependent assertions");
+    }
+
+    protected void RequireItemRecordId()
+    {
+        RequirePapiConfiguration();
+        RequirePositiveScenarioId(Settings.ItemRecordId, SettingName(nameof(IntegrationScenarioSettings.ItemRecordId)), "an item record intended for scenario-dependent assertions");
+    }
+
+    protected void RequireItemBarcode()
+    {
+        RequirePapiConfiguration();
+        InconclusiveIfMissing(MissingScenarioSettings((Settings.ItemBarcode, SettingName(nameof(IntegrationScenarioSettings.ItemBarcode)))));
+    }
+
+    protected void RequirePatronAccountTransactionId()
+    {
+        RequirePapiConfiguration();
+        RequirePositiveScenarioId(Settings.PatronAccountTransactionId, SettingName(nameof(IntegrationScenarioSettings.PatronAccountTransactionId)), "a patron account transaction intended for scenario-dependent assertions");
+    }
+
+    protected void RequireHoldRequestId()
+    {
+        RequirePapiConfiguration();
+        RequirePositiveScenarioId(Settings.HoldRequestId, SettingName(nameof(IntegrationScenarioSettings.HoldRequestId)), "a hold request intended for scenario-dependent assertions");
+    }
+
+    protected void RequireRemoteStorageScenario()
+    {
+        RequirePapiConfiguration();
+        RequirePositiveScenarioId(Settings.RemoteStorageBranchId, SettingName(nameof(IntegrationScenarioSettings.RemoteStorageBranchId)), "a branch with remote-storage activity for the configured date range");
+        InconclusiveIfMissing(MissingScenarioSettings(
+            (Settings.RemoteStorageStartDate, SettingName(nameof(IntegrationScenarioSettings.RemoteStorageStartDate))),
+            (Settings.RemoteStorageEndDate, SettingName(nameof(IntegrationScenarioSettings.RemoteStorageEndDate)))));
     }
 
     protected void RequireStaffProtectedTestsEnabled()
@@ -130,24 +158,46 @@ public abstract class IntegrationTestBase
     {
         if (!Options.EnableScenarioDependentTests)
         {
-            Assert.Inconclusive($"{methodName} requires scenario data and is disabled by default. Required settings: {requiredSettings}. Intended assertions: {assertionStrategy}.");
+            Assert.Inconclusive($"{methodName} requires scenario data and is disabled by default. Reason: the endpoint depends on local fixture state that cannot be safely inferred. Required settings: {requiredSettings}. Intended assertion strategy: {assertionStrategy}.");
+        }
+    }
+
+    protected void RequireAuthenticationFailureTestsEnabled()
+    {
+        RequirePapiConfiguration();
+
+        if (!Options.EnableAuthenticationFailureTests)
+        {
+            Assert.Inconclusive("Authentication-failure integration tests are disabled. Set IntegrationTestOptions:EnableAuthenticationFailureTests=true only with disposable credentials where failed login attempts are safe.");
         }
     }
 
     protected void RequireOrgEmailScenario()
     {
         RequirePapiConfiguration();
+        InconclusiveIfMissing(MissingScenarioSettings((Settings.OrgEmail, SettingName(nameof(IntegrationScenarioSettings.OrgEmail)))));
+    }
 
-        if (!HasValue(Settings.OrgEmail) || IsPlaceholder(Settings.OrgEmail))
+    protected int BranchIdOrConfiguredOrganizationId => Settings.EffectiveBranchId(PapiSettings.OrganizationId);
+    protected int OrganizationIdOrConfigured => Settings.EffectiveOrganizationId(PapiSettings.OrganizationId);
+    protected int UserIdOrConfigured => Settings.EffectiveUserId(PapiSettings.UserId);
+    protected int WorkstationIdOrConfigured => Settings.EffectiveWorkstationId(PapiSettings.WorkstationId);
+
+    private static string SettingName(string propertyName) => $"{IntegrationScenarioSettings.SectionName}:{propertyName}";
+
+    private static void RequirePositiveScenarioId(int value, string settingName, string reason)
+    {
+        if (value <= 0)
         {
-            Assert.Inconclusive("Scenario data required: set TestSettings:OrgEmail to the expected ORGEMAIL System Administration value for the configured organization.");
+            Assert.Inconclusive($"Scenario data required: set {settingName} to {reason}.");
         }
     }
 
-    protected int BranchIdOrConfiguredOrganizationId => Settings.BranchId > 0 ? Settings.BranchId : PapiSettings.OrganizationId;
-    protected int OrganizationIdOrConfigured => Settings.OrganizationId > 0 ? Settings.OrganizationId : PapiSettings.OrganizationId;
-    protected int UserIdOrConfigured => Settings.UserId > 0 ? Settings.UserId : PapiSettings.UserId;
-    protected int WorkstationIdOrConfigured => Settings.WorkstationId > 0 ? Settings.WorkstationId : PapiSettings.WorkstationId;
+    private static IReadOnlyCollection<string> MissingScenarioSettings(params (string? Value, string SettingName)[] settings) =>
+        settings
+            .Where(setting => !HasValue(setting.Value) || IsPlaceholder(setting.Value))
+            .Select(setting => setting.SettingName)
+            .ToList();
 
     private static void InconclusiveIfMissing(IReadOnlyCollection<string> missing)
     {
@@ -162,5 +212,9 @@ public abstract class IntegrationTestBase
     private static bool IsPlaceholder(string? value) =>
         value?.Contains("REPLACE_WITH_", StringComparison.OrdinalIgnoreCase) == true ||
         string.Equals(value, "https://example.org", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(value, "test@example.org", StringComparison.OrdinalIgnoreCase);
+        string.Equals(value, "http://example.org", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "https://example.com", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "http://example.com", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "test@example.org", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "test@example.com", StringComparison.OrdinalIgnoreCase);
 }

@@ -48,6 +48,11 @@ jobs:
       TestSettings__RemoteStorageBranchId: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_BRANCH_ID }}
       TestSettings__RemoteStorageStartDate: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_START_DATE }}
       TestSettings__RemoteStorageEndDate: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_END_DATE }}
+      TestSettings__RecordSetId: ${{ secrets.PAPI_TEST_RECORD_SET_ID }}
+      TestSettings__ItemRecordId: ${{ secrets.PAPI_TEST_ITEM_RECORD_ID }}
+      TestSettings__ItemBarcode: ${{ secrets.PAPI_TEST_ITEM_BARCODE }}
+      TestSettings__PatronAccountTransactionId: ${{ secrets.PAPI_TEST_PATRON_ACCOUNT_TRANSACTION_ID }}
+      TestSettings__HoldRequestId: ${{ secrets.PAPI_TEST_HOLD_REQUEST_ID }}
       IntegrationTestOptions__EnableMutatingIntegrationTests: ${{ inputs.enable_mutating_tests }}
       IntegrationTestOptions__EnableStaffProtectedTests: ${{ inputs.enable_staff_protected_tests }}
       IntegrationTestOptions__EnableScenarioDependentTests: ${{ inputs.enable_scenario_dependent_tests }}
