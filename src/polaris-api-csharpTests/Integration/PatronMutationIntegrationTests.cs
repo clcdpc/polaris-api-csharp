@@ -12,6 +12,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     public async Task CreatePatronBlocksAsync_FreeText_WhenMutatingTestsEnabled_ReturnsSuccessOrDuplicateBlock()
     {
         RequireMutatingTestsEnabled();
+        RequireStaffProtectedTestsEnabled();
         RequirePatronCredentials();
         if (string.IsNullOrWhiteSpace(Settings.FreeTextBlock))
         {
@@ -28,6 +29,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     public async Task CreatePatronBlocksAsync_SystemBlock_WhenMutatingTestsEnabled_ReturnsSuccessOrDuplicateBlock()
     {
         RequireMutatingTestsEnabled();
+        RequireStaffProtectedTestsEnabled();
         RequirePatronCredentials();
 
         var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.System, "128", UserIdOrConfigured, WorkstationIdOrConfigured);
@@ -40,6 +42,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     public async Task CreatePatronBlocksAsync_LibraryAssignedBlock_WhenMutatingTestsEnabled_ReturnsSuccessOrDuplicateBlock()
     {
         RequireMutatingTestsEnabled();
+        RequireStaffProtectedTestsEnabled();
         RequirePatronCredentials();
 
         var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.LibraryAssigned, "1", UserIdOrConfigured, WorkstationIdOrConfigured);
@@ -135,6 +138,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     public async Task UpdatePatronNotesDataAsync_WhenMutatingTestsEnabled_UpdatesConfiguredPatronNotes()
     {
         RequireMutatingTestsEnabled();
+        RequireStaffProtectedTestsEnabled();
         RequirePatronCredentials();
 
         var response = await Papi.UpdatePatronNotesDataAsync(Settings.PatronBarcode, nonBlockingNote: "PAPI integration test note", updateMode: UpdateNoteMode.Prepend, workstationId: WorkstationIdOrConfigured);

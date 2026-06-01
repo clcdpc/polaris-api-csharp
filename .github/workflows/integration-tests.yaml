@@ -28,31 +28,17 @@ jobs:
       PapiSettings__Hostname: ${{ secrets.PAPI_HOSTNAME }}
       PapiSettings__AccessId: ${{ secrets.PAPI_ACCESS_ID }}
       PapiSettings__AccessKey: ${{ secrets.PAPI_ACCESS_KEY }}
-      PapiSettings__OrganizationId: ${{ secrets.PAPI_ORGANIZATION_ID }}
-      PapiSettings__UserId: ${{ secrets.PAPI_USER_ID }}
-      PapiSettings__WorkstationId: ${{ secrets.PAPI_WORKSTATION_ID }}
       PapiSettings__PolarisOverrideAccount__Domain: ${{ secrets.PAPI_STAFF_DOMAIN }}
       PapiSettings__PolarisOverrideAccount__Username: ${{ secrets.PAPI_STAFF_USERNAME }}
       PapiSettings__PolarisOverrideAccount__Password: ${{ secrets.PAPI_STAFF_PASSWORD }}
-      TestSettings__PatronId: ${{ secrets.PAPI_TEST_PATRON_ID }}
       TestSettings__PatronBarcode: ${{ secrets.PAPI_TEST_PATRON_BARCODE }}
       TestSettings__PatronPin: ${{ secrets.PAPI_TEST_PATRON_PIN }}
-      TestSettings__BibId: ${{ secrets.PAPI_TEST_BIB_ID }}
-      TestSettings__BranchId: ${{ secrets.PAPI_TEST_BRANCH_ID }}
-      TestSettings__OrganizationId: ${{ secrets.PAPI_TEST_ORGANIZATION_ID }}
-      TestSettings__WorkstationId: ${{ secrets.PAPI_TEST_WORKSTATION_ID }}
-      TestSettings__UserId: ${{ secrets.PAPI_TEST_USER_ID }}
       TestSettings__OrgEmail: ${{ secrets.PAPI_TEST_ORG_EMAIL }}
       TestSettings__PatronListName: ${{ secrets.PAPI_TEST_PATRON_LIST_NAME }}
       TestSettings__FreeTextBlock: ${{ secrets.PAPI_TEST_FREE_TEXT_BLOCK }}
-      TestSettings__RemoteStorageBranchId: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_BRANCH_ID }}
       TestSettings__RemoteStorageStartDate: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_START_DATE }}
       TestSettings__RemoteStorageEndDate: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_END_DATE }}
-      TestSettings__RecordSetId: ${{ secrets.PAPI_TEST_RECORD_SET_ID }}
-      TestSettings__ItemRecordId: ${{ secrets.PAPI_TEST_ITEM_RECORD_ID }}
       TestSettings__ItemBarcode: ${{ secrets.PAPI_TEST_ITEM_BARCODE }}
-      TestSettings__PatronAccountTransactionId: ${{ secrets.PAPI_TEST_PATRON_ACCOUNT_TRANSACTION_ID }}
-      TestSettings__HoldRequestId: ${{ secrets.PAPI_TEST_HOLD_REQUEST_ID }}
       IntegrationTestOptions__EnableMutatingIntegrationTests: ${{ inputs.enable_mutating_tests }}
       IntegrationTestOptions__EnableStaffProtectedTests: ${{ inputs.enable_staff_protected_tests }}
       IntegrationTestOptions__EnableScenarioDependentTests: ${{ inputs.enable_scenario_dependent_tests }}
@@ -65,6 +51,47 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Export configured numeric integration settings
+        env:
+          PAPI_ORGANIZATION_ID: ${{ secrets.PAPI_ORGANIZATION_ID }}
+          PAPI_USER_ID: ${{ secrets.PAPI_USER_ID }}
+          PAPI_WORKSTATION_ID: ${{ secrets.PAPI_WORKSTATION_ID }}
+          PAPI_TEST_PATRON_ID: ${{ secrets.PAPI_TEST_PATRON_ID }}
+          PAPI_TEST_BIB_ID: ${{ secrets.PAPI_TEST_BIB_ID }}
+          PAPI_TEST_BRANCH_ID: ${{ secrets.PAPI_TEST_BRANCH_ID }}
+          PAPI_TEST_ORGANIZATION_ID: ${{ secrets.PAPI_TEST_ORGANIZATION_ID }}
+          PAPI_TEST_WORKSTATION_ID: ${{ secrets.PAPI_TEST_WORKSTATION_ID }}
+          PAPI_TEST_USER_ID: ${{ secrets.PAPI_TEST_USER_ID }}
+          PAPI_TEST_REMOTE_STORAGE_BRANCH_ID: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_BRANCH_ID }}
+          PAPI_TEST_RECORD_SET_ID: ${{ secrets.PAPI_TEST_RECORD_SET_ID }}
+          PAPI_TEST_ITEM_RECORD_ID: ${{ secrets.PAPI_TEST_ITEM_RECORD_ID }}
+          PAPI_TEST_PATRON_ACCOUNT_TRANSACTION_ID: ${{ secrets.PAPI_TEST_PATRON_ACCOUNT_TRANSACTION_ID }}
+          PAPI_TEST_HOLD_REQUEST_ID: ${{ secrets.PAPI_TEST_HOLD_REQUEST_ID }}
+        run: |
+          append_if_set() {
+            local target_name="$1"
+            local value="$2"
+
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$target_name" "$value" >> "$GITHUB_ENV"
+            fi
+          }
+
+          append_if_set "PapiSettings__OrganizationId" "$PAPI_ORGANIZATION_ID"
+          append_if_set "PapiSettings__UserId" "$PAPI_USER_ID"
+          append_if_set "PapiSettings__WorkstationId" "$PAPI_WORKSTATION_ID"
+          append_if_set "TestSettings__PatronId" "$PAPI_TEST_PATRON_ID"
+          append_if_set "TestSettings__BibId" "$PAPI_TEST_BIB_ID"
+          append_if_set "TestSettings__BranchId" "$PAPI_TEST_BRANCH_ID"
+          append_if_set "TestSettings__OrganizationId" "$PAPI_TEST_ORGANIZATION_ID"
+          append_if_set "TestSettings__WorkstationId" "$PAPI_TEST_WORKSTATION_ID"
+          append_if_set "TestSettings__UserId" "$PAPI_TEST_USER_ID"
+          append_if_set "TestSettings__RemoteStorageBranchId" "$PAPI_TEST_REMOTE_STORAGE_BRANCH_ID"
+          append_if_set "TestSettings__RecordSetId" "$PAPI_TEST_RECORD_SET_ID"
+          append_if_set "TestSettings__ItemRecordId" "$PAPI_TEST_ITEM_RECORD_ID"
+          append_if_set "TestSettings__PatronAccountTransactionId" "$PAPI_TEST_PATRON_ACCOUNT_TRANSACTION_ID"
+          append_if_set "TestSettings__HoldRequestId" "$PAPI_TEST_HOLD_REQUEST_ID"
 
       - name: Restore
         run: dotnet restore src/polaris-api-csharp.sln

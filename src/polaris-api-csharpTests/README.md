@@ -32,7 +32,7 @@ Copy the example file and replace placeholders with values for a disposable/safe
 cp src/polaris-api-csharpTests/appsettings.Test.example.json src/polaris-api-csharpTests/appsettings.Test.json
 ```
 
-`appsettings.Test.json` is intentionally not committed. The test project copies it to the output directory only when the file exists. Integration-only fixture values are bound to `IntegrationScenarioSettings` from the existing `TestSettings` section so older local configuration files and environment-variable names continue to work.
+`appsettings.Test.json` is intentionally not committed. The test project copies it to the output directory only when the file exists. Integration-only fixture values prefer the current nested `TestSettings` section shown in `appsettings.Test.example.json`. If that section is absent, the fixture falls back to the legacy root-level shape (`PatronId`, `PatronBarcode`, `PatronPin`, `FreeTextBlock`, `PatronListName`, `OrgEmail`, and the other scenario fields at the JSON root), so older local configuration files and legacy root-level environment-variable names continue to work.
 
 ## Environment variables
 
@@ -71,6 +71,8 @@ The integration fixture also loads environment variables using standard .NET con
 - `IntegrationTestOptions__EnableScenarioDependentTests`
 - `IntegrationTestOptions__EnableAuthenticationFailureTests`
 
+When configuring GitHub Actions or local shells, omit optional numeric settings when you do not have a value. Do not set numeric variables such as `TestSettings__PatronId`, `TestSettings__BibId`, `TestSettings__BranchId`, `TestSettings__RecordSetId`, `TestSettings__ItemRecordId`, `TestSettings__PatronAccountTransactionId`, or `TestSettings__HoldRequestId` to an empty string; unset values bind as their default `0` and allow the integration gates to mark tests inconclusive cleanly.
+
 ## Fixture data required
 
 Minimum live read-only configuration:
@@ -83,7 +85,7 @@ Additional success-path scenarios require:
 - Patron read tests: `TestSettings:PatronId`, `PatronBarcode`, and `PatronPin`
 - Catalog success tests: `TestSettings:BibId`
 - Branch-specific lookups: `TestSettings:BranchId`
-- Staff/protected endpoints: `PapiSettings:PolarisOverrideAccount:*` plus `IntegrationTestOptions:EnableStaffProtectedTests=true`
+- Staff/protected endpoints, including protected read routes such as patron barcode lookup, patron renew-block lookup, patron search, synchronization bib lookup, record-set reads, notification queue, hold request list, remote storage, and system-administration value reads: `PapiSettings:PolarisOverrideAccount:*` plus `IntegrationTestOptions:EnableStaffProtectedTests=true`
 - `SA_GetValueByOrgAsync`: `TestSettings:OrgEmail` matching the configured organization
 - Remote storage: `TestSettings:RemoteStorageBranchId`, `RemoteStorageStartDate`, and `RemoteStorageEndDate`, plus scenario-dependent tests enabled
 - Optional scenario fixtures for local extensions: `TestSettings:RecordSetId`, `ItemRecordId`, `ItemBarcode`, `PatronAccountTransactionId`, and `HoldRequestId`
@@ -102,7 +104,7 @@ The mutating gate checks live PAPI configuration and the explicit option only. P
 
 ## Staff-protected tests
 
-Protected/staff tests are disabled by default because they require a staff override account and may access protected PAPI routes. To run them, provide `PapiSettings:PolarisOverrideAccount` credentials and set:
+Protected/staff tests are disabled by default because they require a staff override account and may access protected PAPI routes. Some read-only client methods use protected-token URLs even though they do not mutate data, so they are gated here as well; a run with public PAPI credentials but no staff override credentials should report these tests as inconclusive instead of attempting live protected calls. To run them, provide `PapiSettings:PolarisOverrideAccount` credentials and set:
 
 ```bash
 IntegrationTestOptions__EnableStaffProtectedTests=true
@@ -145,9 +147,9 @@ The guide was used selectively to confirm endpoint routes, response shapes, row-
 | API/version/authentication | API key validation, API version, patron auth, staff auth when enabled | None by default | None | Failed-auth testing is a placeholder because account lockout is a risk |
 | Bibliographic/catalog lookup | Bib get, branch-specific bib get, keyword/boolean search, holdings | None | None | `HeadingsSearchAsync` remains a client `NotImplementedException` check |
 | Reference data lookup | Collections, dates closed, item statuses, limit filters, MARC types, material types, organizations, patron codes, pickup branches, shelf locations | None | None | None |
-| Synch | synch bibs by ID | None | None | None |
-| Patron reads | validate, barcode-from-id, basic data, blocks, hold/ILL/items out, messages, preferences, reading history, renew blocks, saved searches, patron search | None | None | None |
-| Patron account/title lists | account get, title lists get | None by default for payment/refund/void/title-list mutations | unique create/delete title list, create credit, deposit credit | payment/refund/void and hard-coded title-list mutation reachability require disposable account/list fixtures |
+| Synch | synch bibs by ID (staff/protected-gated) | None | None | None |
+| Patron reads | validate, basic data, blocks, hold/ILL/items out, messages, preferences, reading history, saved searches; barcode-from-id, renew blocks, and patron search are staff/protected-gated | None | None | None |
+| Patron account/title lists | account get, title lists get | None by default for payment/refund/void/title-list mutations | unique create/delete title list, create credit and deposit credit (credit calls are staff/protected-gated) | payment/refund/void and hard-coded title-list mutation reachability require disposable account/list fixtures |
 | Hold requests/circulation | hold request list (staff/protected-gated) | None by default for hold/item mutations | None without disposable fixtures | hold create/cancel/reactivate/suspend/reply/pickup updates, item renew, renew-all, and item barcode update require disposable fixtures |
-| Patron mutations/messages | None by default | None by default for patron message/reading-history/notification mutations | patron blocks, no-op patron update, username unauthorized check, notes update | patron message, reading-history, notification update, and registration v1/v2 require disposable fixtures |
+| Patron mutations/messages | None by default | None by default for patron message/reading-history/notification mutations | patron blocks and notes update are staff/protected-gated; no-op patron update and username unauthorized check use patron credentials | patron message, reading-history, notification update, and registration v1/v2 require disposable fixtures |
 | Staff/protected/record sets | hold request list, SA value lookup, notification queue when staff tests are enabled | read-only record-set get with a known-invalid sentinel ID | None without disposable fixtures | record-set add/remove/put mutations and remote storage require explicit scenario data |

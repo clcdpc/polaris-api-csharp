@@ -1,5 +1,6 @@
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Runtime.ExceptionServices;
 
 namespace Clc.Polaris.Api.Tests.Integration;
 
@@ -90,32 +91,64 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
         }
 
         var uniqueListName = $"{Settings.PatronListName}-{Guid.NewGuid():N}";
+        var createSucceeded = false;
         int? createdListId = null;
+        Exception? testFailure = null;
+
         try
         {
             var createResponse = await Papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, uniqueListName, Settings.PatronPin);
             PapiIntegrationAssert.ExactZeroSuccess(createResponse);
+            createSucceeded = true;
 
-            var getResponse = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
-            var getData = PapiIntegrationAssert.Success(getResponse);
-            var list = getData.PatronAccountTitleListsRows.SingleOrDefault(l => l.RecordStoreName == uniqueListName);
-            Assert.IsNotNull(list, "The title list created by this test should be visible before cleanup.");
-            createdListId = list.RecordStoreId;
+            createdListId = await TryFindTitleListIdAsync(uniqueListName);
+            Assert.IsTrue(createdListId.HasValue, "The title list created by this test should be visible before cleanup.");
+        }
+        catch (Exception ex)
+        {
+            testFailure = ex;
         }
         finally
         {
-            if (createdListId.HasValue)
+            if (createSucceeded)
             {
-                var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdListId.Value, Settings.PatronPin);
-                PapiIntegrationAssert.Success(deleteResponse);
+                try
+                {
+                    createdListId ??= await TryFindTitleListIdAsync(uniqueListName);
+
+                    if (createdListId.HasValue)
+                    {
+                        var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdListId.Value, Settings.PatronPin);
+                        PapiIntegrationAssert.Success(deleteResponse);
+                    }
+                }
+                catch (Exception cleanupException) when (testFailure != null)
+                {
+                    throw new AssertFailedException($"Title-list cleanup failed after the test had already failed. Cleanup failure: {cleanupException.Message}. Original test failure: {testFailure.Message}", cleanupException);
+                }
             }
         }
+
+        if (testFailure != null)
+        {
+            ExceptionDispatchInfo.Capture(testFailure).Throw();
+        }
+    }
+
+    private async Task<int?> TryFindTitleListIdAsync(string uniqueListName)
+    {
+        var getResponse = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
+        var getData = PapiIntegrationAssert.Success(getResponse);
+        var list = getData.PatronAccountTitleListsRows.SingleOrDefault(l => l.RecordStoreName == uniqueListName);
+
+        return list?.RecordStoreId;
     }
 
     [TestMethod]
     public async Task PatronAccountCreateCreditAsync_WhenMutatingTestsEnabled_CreatesCredit()
     {
         RequireMutatingTestsEnabled();
+        RequireStaffProtectedTestsEnabled();
         RequirePatronCredentials();
 
         var response = await Papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash, WorkstationIdOrConfigured, UserIdOrConfigured, "integration testing");
@@ -127,6 +160,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     public async Task PatronAccountDepositCreditAsync_WhenMutatingTestsEnabled_DepositsCredit()
     {
         RequireMutatingTestsEnabled();
+        RequireStaffProtectedTestsEnabled();
         RequirePatronCredentials();
 
         var response = await Papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, WorkstationIdOrConfigured, UserIdOrConfigured, "integration testing");
