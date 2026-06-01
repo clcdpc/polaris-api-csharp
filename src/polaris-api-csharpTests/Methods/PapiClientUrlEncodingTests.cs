@@ -190,5 +190,32 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(expectedPath, handler.LastRequest!.RequestUri!.AbsolutePath);
         }
+
+        [TestMethod]
+        public void ShelfLocationsGet_WithBranchId_UsesBranchIdInUrl()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+            int branchId = 789;
+
+            client.ShelfLocationsGet(branchId);
+
+            var expectedPath = $"/PAPIService/REST/public/v1/1033/100/{branchId}/shelflocations";
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(expectedPath, handler.LastRequest!.RequestUri!.AbsolutePath);
+        }
+
+        [TestMethod]
+        public void ShelfLocationsGet_WithoutBranchId_DefaultsToOrganizationId()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+
+            client.ShelfLocationsGet();
+
+            var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/shelflocations"; // OrganizationId from CreateClient is 1
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(expectedPath, handler.LastRequest!.RequestUri!.AbsolutePath);
+        }
     }
 }
