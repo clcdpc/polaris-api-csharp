@@ -60,8 +60,6 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// List of blocks on the patron's account
         /// </summary>
-        ////public Blocks Blocks { get; set; }
-
         public List<Block> Blocks { get; set; }
 
         /// <summary>
