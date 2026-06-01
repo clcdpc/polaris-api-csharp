@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api
 
         public IRestResponse<PatronSearchResult> PatronSearch(string query, int page = 1, int pageSize = 10, PatronSortKeys sortBy = PatronSortKeys.PATN, int? orgId = null)
         {
-            var url = $"/protected/v1/1033/100/{orgId ?? OrganizationId}/{Token.AccessToken}/search/patrons/Boolean?q={WebUtility.UrlEncode(query)}&patronsperpage={pageSize}&page={page}&sort={sortBy}";
+            var url = $"/public/v1/1033/100/{orgId ?? OrganizationId}/patron/search?q={WebUtility.UrlEncode(query)}&page={page}&maxpagesize={pageSize}&sortby={(int)sortBy}";
             var request = new PapiRestRequest(url);
             return Execute<PatronSearchResult>(request);
         }

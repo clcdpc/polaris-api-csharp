@@ -190,5 +190,27 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(expectedPath, handler.LastRequest!.RequestUri!.AbsolutePath);
         }
+
+        [TestMethod]
+        public void PatronSearch_EncodesQueryAndConstructsCorrectUrl()
+        {
+            var handler = new CaptureHttpMessageHandler();
+            var client = CreateClient(handler);
+
+            var query = "smith, john&co%";
+            var page = 2;
+            var pageSize = 25;
+            var sortBy = PatronSortKeys.PATN;
+            var orgId = 42;
+
+            client.PatronSearch(query, page, pageSize, sortBy, orgId);
+
+            var expectedPath = $"/PAPIService/REST/public/v1/1033/100/{orgId}/patron/search";
+            var expectedQuery = $"?q={WebUtility.UrlEncode(query)}&page={page}&maxpagesize={pageSize}&sortby={(int)sortBy}";
+
+            Assert.IsNotNull(handler.LastRequest);
+            Assert.AreEqual(expectedPath, handler.LastRequest!.RequestUri!.AbsolutePath);
+            Assert.AreEqual(expectedQuery, handler.LastRequest.RequestUri.Query);
+        }
     }
 }
