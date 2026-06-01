@@ -11,6 +11,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task CreatePatronBlocksAsync_FreeText_WhenMutatingTestsEnabled_ReturnsSuccessOrDuplicateBlock()
     {
+        RequireStaffProtectedTestsEnabled();
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
         if (string.IsNullOrWhiteSpace(Settings.FreeTextBlock))
@@ -27,6 +28,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task CreatePatronBlocksAsync_SystemBlock_WhenMutatingTestsEnabled_ReturnsSuccessOrDuplicateBlock()
     {
+        RequireStaffProtectedTestsEnabled();
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
 
@@ -39,6 +41,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task CreatePatronBlocksAsync_LibraryAssignedBlock_WhenMutatingTestsEnabled_ReturnsSuccessOrDuplicateBlock()
     {
+        RequireStaffProtectedTestsEnabled();
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
 
@@ -134,6 +137,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task UpdatePatronNotesDataAsync_WhenMutatingTestsEnabled_UpdatesConfiguredPatronNotes()
     {
+        RequireStaffProtectedTestsEnabled();
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
 

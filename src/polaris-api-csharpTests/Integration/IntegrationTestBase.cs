@@ -30,10 +30,23 @@ public abstract class IntegrationTestBase
             .Build();
 
         PapiSettings = config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>() ?? new PapiSettings();
-        Settings = config.GetSection(IntegrationScenarioSettings.SectionName).Get<IntegrationScenarioSettings>() ?? new IntegrationScenarioSettings();
+        Settings = LoadIntegrationScenarioSettings(config);
         Options = config.GetSection(nameof(IntegrationTestOptions)).Get<IntegrationTestOptions>() ?? new IntegrationTestOptions();
 
         Papi = new PapiClient(PapiSettings);
+    }
+
+    internal static IntegrationScenarioSettings LoadIntegrationScenarioSettings(IConfiguration config)
+    {
+        var settings = config.Get<IntegrationScenarioSettings>() ?? new IntegrationScenarioSettings();
+        var testSettingsSection = config.GetSection(IntegrationScenarioSettings.SectionName);
+
+        if (testSettingsSection.Exists())
+        {
+            testSettingsSection.Bind(settings);
+        }
+
+        return settings;
     }
 
     protected void RequirePapiConfiguration()

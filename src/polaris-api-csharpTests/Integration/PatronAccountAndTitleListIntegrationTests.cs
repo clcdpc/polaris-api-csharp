@@ -90,31 +90,65 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
         }
 
         var uniqueListName = $"{Settings.PatronListName}-{Guid.NewGuid():N}";
+        var createSucceeded = false;
         int? createdListId = null;
+        Exception? testFailure = null;
+
         try
         {
             var createResponse = await Papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, uniqueListName, Settings.PatronPin);
             PapiIntegrationAssert.ExactZeroSuccess(createResponse);
+            createSucceeded = true;
 
-            var getResponse = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
-            var getData = PapiIntegrationAssert.Success(getResponse);
-            var list = getData.PatronAccountTitleListsRows.SingleOrDefault(l => l.RecordStoreName == uniqueListName);
-            Assert.IsNotNull(list, "The title list created by this test should be visible before cleanup.");
-            createdListId = list.RecordStoreId;
+            createdListId = await TryFindTitleListIdAsync(uniqueListName);
+            Assert.IsTrue(createdListId.HasValue, "The title list created by this test should be visible before cleanup.");
+        }
+        catch (Exception ex)
+        {
+            testFailure = ex;
+            throw;
         }
         finally
         {
-            if (createdListId.HasValue)
+            if (createSucceeded)
             {
-                var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdListId.Value, Settings.PatronPin);
-                PapiIntegrationAssert.Success(deleteResponse);
+                try
+                {
+                    createdListId ??= await TryFindTitleListIdAsync(uniqueListName);
+
+                    if (createdListId.HasValue)
+                    {
+                        var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdListId.Value, Settings.PatronPin);
+                        PapiIntegrationAssert.Success(deleteResponse);
+                    }
+                    else
+                    {
+                        Assert.Fail($"Cleanup could not find title list '{uniqueListName}' created by this test.");
+                    }
+                }
+                catch (Exception cleanupFailure) when (testFailure != null)
+                {
+                    Console.Error.WriteLine($"Cleanup failed for title list '{uniqueListName}' after the test had already failed: {cleanupFailure}");
+                }
             }
         }
+    }
+
+    private async Task<int?> TryFindTitleListIdAsync(string uniqueListName)
+    {
+        var getResponse = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
+        var getData = PapiIntegrationAssert.Success(getResponse);
+        var matchingLists = getData.PatronAccountTitleListsRows
+            .Where(l => string.Equals(l.RecordStoreName, uniqueListName, StringComparison.Ordinal))
+            .ToList();
+
+        return matchingLists.Count == 1 ? matchingLists[0].RecordStoreId : null;
     }
 
     [TestMethod]
     public async Task PatronAccountCreateCreditAsync_WhenMutatingTestsEnabled_CreatesCredit()
     {
+        RequireStaffProtectedTestsEnabled();
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
 
@@ -126,6 +160,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     [TestMethod]
     public async Task PatronAccountDepositCreditAsync_WhenMutatingTestsEnabled_DepositsCredit()
     {
+        RequireStaffProtectedTestsEnabled();
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
 

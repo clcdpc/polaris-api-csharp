@@ -22,6 +22,7 @@ public sealed class PatronReadIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task Patron_GetBarcodeFromIdAsync_WithConfiguredPatron_ReturnsBarcode()
     {
+        RequireStaffProtectedTestsEnabled();
         RequirePatronId();
         RequirePatronCredentials();
 
@@ -124,6 +125,7 @@ public sealed class PatronReadIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task PatronRenewBlocksGetAsync_WithConfiguredPatron_ReturnsSuccessShape()
     {
+        RequireStaffProtectedTestsEnabled();
         RequirePatronId();
 
         var response = await Papi.PatronRenewBlocksGetAsync(Settings.PatronId, BranchIdOrConfiguredOrganizationId);
@@ -142,6 +144,7 @@ public sealed class PatronReadIntegrationTests : IntegrationTestBase
     [TestMethod]
     public async Task PatronSearchAsync_WithConfiguredPatronId_ReturnsMatchingRows()
     {
+        RequireStaffProtectedTestsEnabled();
         RequirePatronId();
 
         var response = await Papi.PatronSearchAsync($"PRID={Settings.PatronId}", orgId: OrganizationIdOrConfigured);
