@@ -8,40 +8,39 @@ namespace Clc.Polaris.Api.Tests.Integration;
 public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
 {
     [TestMethod]
-    public async Task HoldRequestCancelAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestCancelAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.HoldRequestCancelAsync(Settings.PatronBarcode, NonexistentRequestId, Settings.PatronPin, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestCancelAsync),
+            "canceling a hold request mutates patron hold state and a hard-coded request ID might exist in a live Polaris database",
+            "disposable patron credentials plus a configured disposable hold request ID created for this test",
+            "call HoldRequestCancelAsync only for the disposable hold request and assert the documented success or domain error without touching pre-existing holds");
     }
 
     [TestMethod]
-    public async Task HoldRequestCreateAsync_WithNonexistentBib_ReturnsDocumentedError()
+    public void HoldRequestCreateAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePatronId();
-
-        var holdParams = new HoldRequestCreateParams(Settings.PatronId, NonexistentBibId, BranchIdOrConfiguredOrganizationId, OrganizationIdOrConfigured);
-        var response = await Papi.HoldRequestCreateAsync(holdParams);
-
-        PapiIntegrationAssert.PapiError(response, -4006);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestCreateAsync),
+            "creating a hold request mutates patron hold state and a hard-coded bib ID might exist in a live Polaris database",
+            "a disposable patron ID and disposable bibliographic scenario data explicitly approved for hold creation",
+            "call HoldRequestCreateAsync with disposable fixture data and assert the documented PAPIErrorCode while cleaning up any created hold");
     }
 
     [TestMethod]
-    public async Task HoldRequestCreateAsync_ConvenienceOverload_WithNonexistentBib_ReturnsDocumentedError()
+    public void HoldRequestCreateAsync_ConvenienceOverload_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePatronId();
-
-        var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, NonexistentBibId, BranchIdOrConfiguredOrganizationId, requestingOrgId: OrganizationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4006);
+        DocumentScenarioDependentPlaceholder(
+            nameof(PapiClient.HoldRequestCreateAsync),
+            "creating a hold request mutates patron hold state and a hard-coded bib ID might exist in a live Polaris database",
+            "a disposable patron ID and disposable bibliographic scenario data explicitly approved for hold creation",
+            "call the convenience overload with disposable fixture data and assert the documented PAPIErrorCode while cleaning up any created hold");
     }
 
     [TestMethod]
     public async Task HoldRequestGetListAsync_WithConfiguredBranch_ReturnsSuccessShape()
     {
-        RequirePapiConfiguration();
+        RequireStaffProtectedTestsEnabled();
 
         var response = await Papi.HoldRequestGetListAsync(BranchIdOrConfiguredOrganizationId);
         var data = PapiIntegrationAssert.Success(response);
@@ -50,73 +49,72 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public async Task HoldRequestReactivateAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestReactivateAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, NonexistentRequestId, DateTime.UtcNow, UserIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestReactivateAsync),
+            "reactivating a hold request mutates patron hold state and a hard-coded request ID might exist in a live Polaris database",
+            "disposable patron credentials plus a configured disposable suspended hold request ID",
+            "call HoldRequestReactivateAsync only for the disposable hold and assert the documented response");
     }
 
     [TestMethod]
-    public async Task HoldRequestReplyAsync_WithEmptyGuid_ReturnsDocumentedError()
+    public void HoldRequestReplyAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePapiConfiguration();
-
-        var hold = new HoldRequestCreateResult { RequestGuid = Guid.Empty };
-        var response = await Papi.HoldRequestReplyAsync(hold, OrganizationIdOrConfigured, HoldRequestReplyAnswer.Yes, HoldRequestReplyState.AcceptEvenWithExistingHolds);
-
-        PapiIntegrationAssert.PapiError(response, -4101);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestReplyAsync),
+            "replying to a hold request can mutate hold state and should not be exercised by default with synthetic request identifiers",
+            "a disposable hold request fixture with a request GUID that is safe to reply to",
+            "call HoldRequestReplyAsync only for the disposable request and assert the documented response");
     }
 
     [TestMethod]
-    public async Task HoldRequestSuspendAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestSuspendAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.HoldRequestSuspendAsync(Settings.PatronBarcode, NonexistentRequestId, DateTime.UtcNow, Settings.PatronPin, UserIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestSuspendAsync),
+            "suspending a hold request mutates patron hold state and a hard-coded request ID might exist in a live Polaris database",
+            "disposable patron credentials plus a configured disposable active hold request ID",
+            "call HoldRequestSuspendAsync only for the disposable hold and assert the documented response");
     }
 
     [TestMethod]
-    public async Task UpdatePickupBranchIDAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void UpdatePickupBranchIDAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.UpdatePickupBranchIDAsync(Settings.PatronBarcode, NonexistentRequestId, BranchIdOrConfiguredOrganizationId, Settings.PatronPin, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.UpdatePickupBranchIDAsync),
+            "changing pickup branch mutates patron hold state and a hard-coded request ID might exist in a live Polaris database",
+            "disposable patron credentials, a configured disposable hold request ID, and a safe pickup branch ID",
+            "call UpdatePickupBranchIDAsync only for the disposable hold and assert the documented response");
     }
 
     [TestMethod]
-    public async Task ItemRenewAsync_WithNonexistentItem_ReturnsDocumentedError()
+    public void ItemRenewAsync_RequiresDisposableCheckoutFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.ItemRenewAsync(Settings.PatronBarcode, NonexistentItemRecordId, Settings.PatronPin);
-
-        PapiIntegrationAssert.PapiError(response, -6001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.ItemRenewAsync),
+            "renewing an item mutates circulation state and a hard-coded item ID might exist in a live Polaris database",
+            "disposable patron credentials plus a configured disposable checked-out item ID",
+            "call ItemRenewAsync only for the disposable item and assert success or documented item-level errors");
     }
 
     [TestMethod]
     public void ItemRenewAllForPatronAsync_RequiresScenarioDataAndIsDisabledByDefault()
     {
-        RequireScenarioDependentTestsEnabled(
+        DocumentScenarioDependentPlaceholder(
             nameof(Papi.ItemRenewAllForPatronAsync),
+            "renew-all mutates circulation state for every renewable item on the patron account",
             "TestSettings:PatronBarcode and TestSettings:PatronPin for a disposable patron with renewable checked-out items",
             "call ItemRenewAllForPatronAsync and assert a deserialized ItemRenewResultWrapper with either success item rows or documented item-level errors");
     }
 
     [TestMethod]
-    public async Task ItemUpdateBarcodeAsync_WithNonexistentItem_IsGatedAsMutatingReachabilityTest()
+    public void ItemUpdateBarcodeAsync_RequiresDisposableItemFixtureAndIsDisabledByDefault()
     {
-        RequireMutatingTestsEnabled();
-
-        var response = await Papi.ItemUpdateBarcodeAsync("PAPI-INTEGRATION-NONEXISTENT-BARCODE", NonexistentItemRecordId, BranchIdOrConfiguredOrganizationId);
-        var data = PapiIntegrationAssert.HasPapiData(response);
-
-        Assert.IsTrue(data.PAPIErrorCode < 0, "A nonexistent item/barcode update should reach PAPI and return a documented domain error instead of mutating real data.");
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.ItemUpdateBarcodeAsync),
+            "updating an item barcode mutates item data and must not target a hard-coded item ID that might exist in a live Polaris database",
+            "IntegrationTestOptions:EnableMutatingIntegrationTests=true plus TestSettings:ItemRecordId and TestSettings:ItemBarcode for a disposable item fixture",
+            "call ItemUpdateBarcodeAsync only with explicitly configured disposable item data and assert the documented PAPI response");
     }
 }
