@@ -21,7 +21,29 @@ namespace Clc.Polaris.Api
         /// <summary>
         /// Your PAPI Access Key
         /// </summary>
-        public string AccessKey { get; set; }
+        private string _accessKey;
+        private byte[] _accessKeyBytes;
+        private HMACSHA1 _hmac;
+        private readonly object _hmacLock = new object();
+
+        public string AccessKey
+        {
+            get => _accessKey;
+            set
+            {
+                _accessKey = value;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _accessKeyBytes = Encoding.UTF8.GetBytes(value);
+                    _hmac = new HMACSHA1(_accessKeyBytes);
+                }
+                else
+                {
+                    _accessKeyBytes = null;
+                    _hmac = null;
+                }
+            }
+        }
 
         /// <summary>
         /// The base URL of your PAPI service
@@ -122,7 +144,25 @@ namespace Clc.Polaris.Api
         private string GetPAPIHash(string httpMethod, string date, string uri, string password)
         {
             var hashString = httpMethod + uri + date + password;
-            byte[] computedHash = new HMACSHA1(Encoding.UTF8.GetBytes(AccessKey)).ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            byte[] computedHash;
+
+            if (_hmac != null)
+            {
+                lock (_hmacLock)
+                {
+                    computedHash = _hmac.ComputeHash(Encoding.UTF8.GetBytes(hashString));
+                }
+            }
+            else
+            {
+                // Fallback if AccessKey is somehow null or empty but we are still computing hash
+                var keyBytes = string.IsNullOrEmpty(AccessKey) ? new byte[0] : Encoding.UTF8.GetBytes(AccessKey);
+                using (var tempHmac = new HMACSHA1(keyBytes))
+                {
+                    computedHash = tempHmac.ComputeHash(Encoding.UTF8.GetBytes(hashString));
+                }
+            }
+
             return Convert.ToBase64String(computedHash);
         }
     }
