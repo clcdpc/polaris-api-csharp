@@ -33,7 +33,10 @@ public abstract class IntegrationTestBase
         Settings = LoadIntegrationScenarioSettings(config);
         Options = config.GetSection(nameof(IntegrationTestOptions)).Get<IntegrationTestOptions>() ?? new IntegrationTestOptions();
 
-        Papi = new PapiClient(PapiSettings);
+        Papi = new PapiClient(PapiSettings)
+        {
+            AllowStaffOverrideRequests = Options.EnableStaffProtectedTests && HasUsableStaffOverrideAccount(PapiSettings.PolarisOverrideAccount)
+        };
     }
 
     internal static IntegrationScenarioSettings LoadIntegrationScenarioSettings(IConfiguration config)
@@ -224,6 +227,15 @@ public abstract class IntegrationTestBase
             Assert.Inconclusive($"{MissingConfigurationMessage} Missing settings: {string.Join(", ", missing)}.");
         }
     }
+
+    private static bool HasUsableStaffOverrideAccount(PolarisUser? account) =>
+    account != null &&
+    HasValue(account.Domain) &&
+    !IsPlaceholder(account.Domain) &&
+    HasValue(account.Username) &&
+    !IsPlaceholder(account.Username) &&
+    HasValue(account.Password) &&
+    !IsPlaceholder(account.Password);
 
     private static bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
 
