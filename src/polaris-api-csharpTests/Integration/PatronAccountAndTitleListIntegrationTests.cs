@@ -128,7 +128,11 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
                 }
                 catch (Exception cleanupFailure) when (testFailure != null)
                 {
-                    Console.Error.WriteLine($"Cleanup failed for title list '{uniqueListName}' after the test had already failed: {cleanupFailure}");
+                    var message = $"The title-list test failed and cleanup also failed for generated title list '{uniqueListName}'. "
+                        + "Manual cleanup may be required. "
+                        + $"Original test failure: {testFailure} "
+                        + $"Cleanup failure: {cleanupFailure}";
+                    throw new AssertFailedException(message, new AggregateException(testFailure, cleanupFailure));
                 }
             }
         }
