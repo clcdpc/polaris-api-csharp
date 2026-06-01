@@ -32,7 +32,7 @@ Copy the example file and replace placeholders with values for a disposable/safe
 cp src/polaris-api-csharpTests/appsettings.Test.example.json src/polaris-api-csharpTests/appsettings.Test.json
 ```
 
-`appsettings.Test.json` is intentionally not committed. The test project copies it to the output directory only when the file exists. Integration-only fixture values are bound to `IntegrationScenarioSettings` from the existing `TestSettings` section so older local configuration files and environment-variable names continue to work.
+`appsettings.Test.json` is intentionally not committed. The test project copies it to the output directory only when the file exists. Integration-only fixture values are bound to `IntegrationScenarioSettings` from the `TestSettings` section when that section exists. Legacy local files that kept fixture fields such as `PatronId`, `PatronBarcode`, `PatronPin`, `FreeTextBlock`, `PatronListName`, and `OrgEmail` at the JSON root are still supported as a fallback, and `TestSettings__...` environment variables continue to override those root-level values.
 
 ## Environment variables
 
@@ -71,6 +71,9 @@ The integration fixture also loads environment variables using standard .NET con
 - `IntegrationTestOptions__EnableScenarioDependentTests`
 - `IntegrationTestOptions__EnableAuthenticationFailureTests`
 
+
+When configuring GitHub Actions secrets or local environment variables, omit optional numeric fixture values that are not configured instead of setting them to empty strings. Empty strings cannot be converted to integers by .NET configuration binding; omitted values remain at their safe default of `0` and the relevant integration tests call `Assert.Inconclusive(...)` when they need fixture data.
+
 ## Fixture data required
 
 Minimum live read-only configuration:
@@ -83,7 +86,7 @@ Additional success-path scenarios require:
 - Patron read tests: `TestSettings:PatronId`, `PatronBarcode`, and `PatronPin`
 - Catalog success tests: `TestSettings:BibId`
 - Branch-specific lookups: `TestSettings:BranchId`
-- Staff/protected endpoints: `PapiSettings:PolarisOverrideAccount:*` plus `IntegrationTestOptions:EnableStaffProtectedTests=true`
+- Staff/protected endpoints, including protected read routes such as patron barcode-from-ID, patron renew-blocks, patron search, synch bibs, hold request list, record-set reads, SA value lookup, notification queue, and remote storage: `PapiSettings:PolarisOverrideAccount:*` plus `IntegrationTestOptions:EnableStaffProtectedTests=true`
 - `SA_GetValueByOrgAsync`: `TestSettings:OrgEmail` matching the configured organization
 - Remote storage: `TestSettings:RemoteStorageBranchId`, `RemoteStorageStartDate`, and `RemoteStorageEndDate`, plus scenario-dependent tests enabled
 - Optional scenario fixtures for local extensions: `TestSettings:RecordSetId`, `ItemRecordId`, `ItemBarcode`, `PatronAccountTransactionId`, and `HoldRequestId`
@@ -108,7 +111,7 @@ Protected/staff tests are disabled by default because they require a staff overr
 IntegrationTestOptions__EnableStaffProtectedTests=true
 ```
 
-Read-only staff/protected reachability tests may use known-invalid sentinel IDs and assert documented negative `PAPIErrorCode` values. Record-set content add/remove/put tests are mutating and remain inconclusive placeholders until disposable record-set fixtures are configured and an executable cleanup strategy is implemented.
+Read-only staff/protected tests include protected patron, synch, circulation, record-set, SA, notification, and remote-storage routes; they must satisfy this gate even when they also require patron or scenario fixture settings. Read-only staff/protected reachability tests may use known-invalid sentinel IDs and assert documented negative `PAPIErrorCode` values. Record-set content add/remove/put tests are mutating and remain inconclusive placeholders until disposable record-set fixtures are configured and an executable cleanup strategy is implemented.
 
 ## Scenario-dependent placeholders
 
@@ -145,8 +148,8 @@ The guide was used selectively to confirm endpoint routes, response shapes, row-
 | API/version/authentication | API key validation, API version, patron auth, staff auth when enabled | None by default | None | Failed-auth testing is a placeholder because account lockout is a risk |
 | Bibliographic/catalog lookup | Bib get, branch-specific bib get, keyword/boolean search, holdings | None | None | `HeadingsSearchAsync` remains a client `NotImplementedException` check |
 | Reference data lookup | Collections, dates closed, item statuses, limit filters, MARC types, material types, organizations, patron codes, pickup branches, shelf locations | None | None | None |
-| Synch | synch bibs by ID | None | None | None |
-| Patron reads | validate, barcode-from-id, basic data, blocks, hold/ILL/items out, messages, preferences, reading history, renew blocks, saved searches, patron search | None | None | None |
+| Synch | synch bibs by ID (staff/protected-gated) | None | None | None |
+| Patron reads | validate, basic data, blocks, hold/ILL/items out, messages, preferences, reading history, saved searches; barcode-from-id, renew blocks, and patron search are staff/protected-gated | None | None | None |
 | Patron account/title lists | account get, title lists get | None by default for payment/refund/void/title-list mutations | unique create/delete title list, create credit, deposit credit | payment/refund/void and hard-coded title-list mutation reachability require disposable account/list fixtures |
 | Hold requests/circulation | hold request list (staff/protected-gated) | None by default for hold/item mutations | None without disposable fixtures | hold create/cancel/reactivate/suspend/reply/pickup updates, item renew, renew-all, and item barcode update require disposable fixtures |
 | Patron mutations/messages | None by default | None by default for patron message/reading-history/notification mutations | patron blocks, no-op patron update, username unauthorized check, notes update | patron message, reading-history, notification update, and registration v1/v2 require disposable fixtures |
