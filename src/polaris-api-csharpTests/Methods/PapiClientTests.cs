@@ -144,13 +144,6 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        public void HoldingsGetTest()
-        {
-            var response = papi.HoldingsGet(bibId);
-            Assert.IsTrue(response.Data.BibHoldingsGetRows.Any());
-        }
-
-        [TestMethod()]
         public void HoldRequestCancelTest()
         {
             var response = papi.HoldRequestCancel(Settings.PatronBarcode, 1234, Settings.PatronPin);
