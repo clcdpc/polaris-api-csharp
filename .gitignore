@@ -405,3 +405,5 @@ FodyWeavers.xsd
 ##################
 [Aa]pp[Ss]ettings.[Tt]est.json
 [Aa]pp[Ss]ettings.[Dd]evelopment.json
+# Local integration-test settings may contain live Polaris/PAPI secrets.
+src/polaris-api-csharpTests/appsettings.Test.json

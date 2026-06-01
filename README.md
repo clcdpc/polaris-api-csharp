@@ -75,30 +75,9 @@ Run integration tests only when you have local Polaris settings configured:
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration"
 ```
 
-Integration tests require local Polaris credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Do not commit real secrets; `appsettings.Test.json` is ignored by git.
+Integration tests require local Polaris credentials and fixture data in `src/polaris-api-csharpTests/appsettings.Test.json` or equivalent environment variables, so they are not run by default in CI. Do not commit real secrets; `src/polaris-api-csharpTests/appsettings.Test.json` is ignored by git.
 
-A local `appsettings.Test.json` follows this shape:
-
-```json
-{
-  "PapiSettings": {
-    "AccessId": "your-access-id",
-    "AccessKey": "your-access-key",
-    "Hostname": "https://polaris.example.org",
-    "PolarisOverrideAccount": {
-      "Domain": "LIBRARY",
-      "Username": "staff.user",
-      "Password": "staff-password"
-    }
-  },
-  "PatronId": 123456,
-  "PatronBarcode": "12345678901234",
-  "PatronPin": "1234",
-  "FreeTextBlock": "Local integration test block",
-  "PatronListName": "Local integration test list",
-  "OrgEmail": "library@example.org"
-}
-```
+Copy `src/polaris-api-csharpTests/appsettings.Test.example.json` to `src/polaris-api-csharpTests/appsettings.Test.json` for local runs, or set .NET-style environment variables such as `PapiSettings__Hostname`, `PapiSettings__AccessId`, `PapiSettings__AccessKey`, `TestSettings__PatronBarcode`, and `IntegrationTestOptions__EnableMutatingIntegrationTests`. See `src/polaris-api-csharpTests/README.md` for the full integration-test configuration guide and coverage map.
 
 ## Migration guide
 

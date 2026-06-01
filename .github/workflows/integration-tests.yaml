@@ -1,0 +1,84 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_mutating_tests:
+        description: "Run mutating integration tests against configured disposable fixtures"
+        type: boolean
+        default: false
+      enable_staff_protected_tests:
+        description: "Run staff/protected integration tests"
+        type: boolean
+        default: false
+      enable_scenario_dependent_tests:
+        description: "Run tests that require additional local scenario data"
+        type: boolean
+        default: false
+      enable_authentication_failure_tests:
+        description: "Run failed-authentication tests only with disposable credentials"
+        type: boolean
+        default: false
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    environment: integration-tests
+    env:
+      PapiSettings__Hostname: ${{ secrets.PAPI_HOSTNAME }}
+      PapiSettings__AccessId: ${{ secrets.PAPI_ACCESS_ID }}
+      PapiSettings__AccessKey: ${{ secrets.PAPI_ACCESS_KEY }}
+      PapiSettings__OrganizationId: ${{ secrets.PAPI_ORGANIZATION_ID }}
+      PapiSettings__UserId: ${{ secrets.PAPI_USER_ID }}
+      PapiSettings__WorkstationId: ${{ secrets.PAPI_WORKSTATION_ID }}
+      PapiSettings__PolarisOverrideAccount__Domain: ${{ secrets.PAPI_STAFF_DOMAIN }}
+      PapiSettings__PolarisOverrideAccount__Username: ${{ secrets.PAPI_STAFF_USERNAME }}
+      PapiSettings__PolarisOverrideAccount__Password: ${{ secrets.PAPI_STAFF_PASSWORD }}
+      TestSettings__PatronId: ${{ secrets.PAPI_TEST_PATRON_ID }}
+      TestSettings__PatronBarcode: ${{ secrets.PAPI_TEST_PATRON_BARCODE }}
+      TestSettings__PatronPin: ${{ secrets.PAPI_TEST_PATRON_PIN }}
+      TestSettings__BibId: ${{ secrets.PAPI_TEST_BIB_ID }}
+      TestSettings__BranchId: ${{ secrets.PAPI_TEST_BRANCH_ID }}
+      TestSettings__OrganizationId: ${{ secrets.PAPI_TEST_ORGANIZATION_ID }}
+      TestSettings__WorkstationId: ${{ secrets.PAPI_TEST_WORKSTATION_ID }}
+      TestSettings__UserId: ${{ secrets.PAPI_TEST_USER_ID }}
+      TestSettings__OrgEmail: ${{ secrets.PAPI_TEST_ORG_EMAIL }}
+      TestSettings__PatronListName: ${{ secrets.PAPI_TEST_PATRON_LIST_NAME }}
+      TestSettings__FreeTextBlock: ${{ secrets.PAPI_TEST_FREE_TEXT_BLOCK }}
+      TestSettings__RemoteStorageBranchId: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_BRANCH_ID }}
+      TestSettings__RemoteStorageStartDate: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_START_DATE }}
+      TestSettings__RemoteStorageEndDate: ${{ secrets.PAPI_TEST_REMOTE_STORAGE_END_DATE }}
+      IntegrationTestOptions__EnableMutatingIntegrationTests: ${{ inputs.enable_mutating_tests }}
+      IntegrationTestOptions__EnableStaffProtectedTests: ${{ inputs.enable_staff_protected_tests }}
+      IntegrationTestOptions__EnableScenarioDependentTests: ${{ inputs.enable_scenario_dependent_tests }}
+      IntegrationTestOptions__EnableAuthenticationFailureTests: ${{ inputs.enable_authentication_failure_tests }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore src/polaris-api-csharp.sln
+
+      - name: Build
+        run: dotnet build src/polaris-api-csharp.sln --configuration Release --no-restore -warnaserror
+
+      - name: Run integration tests
+        run: >-
+          dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj
+          --configuration Release
+          --no-build
+          --filter "TestCategory=Integration"
+          --logger "trx;LogFileName=integration-tests.trx"
+          --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: TestResults/*.trx
