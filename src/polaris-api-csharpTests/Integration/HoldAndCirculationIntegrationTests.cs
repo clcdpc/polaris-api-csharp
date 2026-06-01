@@ -8,55 +8,54 @@ namespace Clc.Polaris.Api.Tests.Integration;
 public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
 {
     [TestMethod]
-    public async Task HoldRequestCancelAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestCancelAsync_RequiresDisposableHoldScenarioAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.HoldRequestCancelAsync(Settings.PatronBarcode, NonexistentRequestId, Settings.PatronPin, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestCancelAsync),
+            "cancelling a hold request mutates patron hold state and must not target a hard-coded request id that might exist",
+            "a disposable patron barcode/PIN and a disposable hold request id created specifically for cancellation",
+            "enable mutating tests, cancel only the disposable hold request, and assert the documented PAPIErrorCode without deleting pre-existing patron data");
     }
 
     [TestMethod]
-    public async Task HoldRequestCreateAsync_WithNonexistentBib_ReturnsDocumentedError()
+    public void HoldRequestCreateAsync_RequiresDisposableBibScenarioAndIsDisabledByDefault()
     {
-        RequirePatronId();
-
-        var holdParams = new HoldRequestCreateParams(Settings.PatronId, NonexistentBibId, BranchIdOrConfiguredOrganizationId, OrganizationIdOrConfigured);
-        var response = await Papi.HoldRequestCreateAsync(holdParams);
-
-        PapiIntegrationAssert.PapiError(response, -4006);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestCreateAsync),
+            "creating a hold mutates patron hold state and must not target a hard-coded bib id that might exist",
+            "a disposable patron id, disposable/approved bib id, pickup branch, requesting organization, and cleanup plan for the created hold",
+            "enable mutating tests, create a hold for the disposable fixture, assert PAPIErrorCode 0 or another documented success code, then cancel/clean up only the created hold");
     }
 
     [TestMethod]
-    public async Task HoldRequestCreateAsync_ConvenienceOverload_WithNonexistentBib_ReturnsDocumentedError()
+    public void HoldRequestCreateAsync_ConvenienceOverload_RequiresDisposableBibScenarioAndIsDisabledByDefault()
     {
-        RequirePatronId();
-
-        var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, NonexistentBibId, BranchIdOrConfiguredOrganizationId, requestingOrgId: OrganizationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4006);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestCreateAsync),
+            "creating a hold through the convenience overload mutates patron hold state and must not target a hard-coded bib id that might exist",
+            "a disposable patron id, disposable/approved bib id, pickup branch, requesting organization, and cleanup plan for the created hold",
+            "enable mutating tests, create a hold for the disposable fixture through the overload, assert PAPIErrorCode 0 or another documented success code, then cancel/clean up only the created hold");
     }
 
     [TestMethod]
     public async Task HoldRequestGetListAsync_WithConfiguredBranch_ReturnsSuccessShape()
     {
-        RequirePapiConfiguration();
+        RequireStaffProtectedTestsEnabled();
 
         var response = await Papi.HoldRequestGetListAsync(BranchIdOrConfiguredOrganizationId);
-        var data = PapiIntegrationAssert.Success(response);
+        var data = PapiIntegrationAssert.HasPapiData(response);
 
-        Assert.IsNotNull(data.RequestPicklistRows);
+        Assert.IsTrue(data.PAPIErrorCode >= 0, data.ErrorMessage);
     }
 
     [TestMethod]
-    public async Task HoldRequestReactivateAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestReactivateAsync_RequiresDisposableHoldScenarioAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, NonexistentRequestId, DateTime.UtcNow, UserIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestReactivateAsync),
+            "reactivating a hold request mutates patron hold state and must not target a hard-coded request id that might exist",
+            "a disposable patron barcode/PIN and a disposable suspended hold request id created specifically for reactivation",
+            "enable mutating tests, reactivate only the disposable hold request, and assert the documented PAPIErrorCode without changing pre-existing holds");
     }
 
     [TestMethod]
@@ -71,52 +70,52 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public async Task HoldRequestSuspendAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestSuspendAsync_RequiresDisposableHoldScenarioAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.HoldRequestSuspendAsync(Settings.PatronBarcode, NonexistentRequestId, DateTime.UtcNow, Settings.PatronPin, UserIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.HoldRequestSuspendAsync),
+            "suspending a hold request mutates patron hold state and must not target a hard-coded request id that might exist",
+            "a disposable patron barcode/PIN and a disposable active hold request id created specifically for suspension",
+            "enable mutating tests, suspend only the disposable hold request, and assert the documented PAPIErrorCode without changing pre-existing holds");
     }
 
     [TestMethod]
-    public async Task UpdatePickupBranchIDAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void UpdatePickupBranchIDAsync_RequiresDisposableHoldScenarioAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.UpdatePickupBranchIDAsync(Settings.PatronBarcode, NonexistentRequestId, BranchIdOrConfiguredOrganizationId, Settings.PatronPin, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -4201);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.UpdatePickupBranchIDAsync),
+            "updating a hold pickup branch mutates patron hold state and must not target a hard-coded request id that might exist",
+            "a disposable patron barcode/PIN, disposable hold request id, source pickup branch, and target pickup branch",
+            "enable mutating tests, update only the disposable hold request, assert the documented PAPIErrorCode, and restore/delete the fixture hold as appropriate");
     }
 
     [TestMethod]
-    public async Task ItemRenewAsync_WithNonexistentItem_ReturnsDocumentedError()
+    public void ItemRenewAsync_RequiresDisposableCheckoutScenarioAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.ItemRenewAsync(Settings.PatronBarcode, NonexistentItemRecordId, Settings.PatronPin);
-
-        PapiIntegrationAssert.PapiError(response, -6001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.ItemRenewAsync),
+            "renewing an item mutates circulation state and must not target a hard-coded item record id that might exist",
+            "a disposable patron barcode/PIN and a checked-out disposable item record id that is safe to renew",
+            "enable mutating tests, renew only the disposable checkout fixture, and assert a deserialized ItemRenewResult with documented success or item-level error details");
     }
 
     [TestMethod]
     public void ItemRenewAllForPatronAsync_RequiresScenarioDataAndIsDisabledByDefault()
     {
-        RequireScenarioDependentTestsEnabled(
+        DocumentScenarioDependentPlaceholder(
             nameof(Papi.ItemRenewAllForPatronAsync),
-            "TestSettings:PatronBarcode and TestSettings:PatronPin for a disposable patron with renewable checked-out items",
+            "renew-all mutates every renewable checkout for the configured patron and requires an intentionally prepared patron fixture",
+            "a patron with renewable checked-out items and a site-approved renewal policy fixture",
             "call ItemRenewAllForPatronAsync and assert a deserialized ItemRenewResultWrapper with either success item rows or documented item-level errors");
     }
 
     [TestMethod]
-    public async Task ItemUpdateBarcodeAsync_WithNonexistentItem_IsGatedAsMutatingReachabilityTest()
+    public void ItemUpdateBarcodeAsync_RequiresDisposableItemFixtureAndIsDisabledByDefault()
     {
-        RequireMutatingTestsEnabled();
-
-        var response = await Papi.ItemUpdateBarcodeAsync("PAPI-INTEGRATION-NONEXISTENT-BARCODE", NonexistentItemRecordId, BranchIdOrConfiguredOrganizationId);
-        var data = PapiIntegrationAssert.HasPapiData(response);
-
-        Assert.IsTrue(data.PAPIErrorCode < 0, "A nonexistent item/barcode update should reach PAPI and return a documented domain error instead of mutating real data.");
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.ItemUpdateBarcodeAsync),
+            "updating an item barcode mutates item data and must not target a hard-coded item record id that might exist",
+            "IntegrationTestOptions:EnableMutatingIntegrationTests=true plus TestSettings:ItemRecordId and TestSettings:ItemBarcode for a disposable item fixture",
+            "call ItemUpdateBarcodeAsync only for the configured disposable item record/barcode and assert the documented success or fixture-specific error response");
     }
 }

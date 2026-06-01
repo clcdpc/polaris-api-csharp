@@ -18,53 +18,53 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
     }
 
     [TestMethod]
-    public async Task RecordSetContentAddAsync_WithSingleRecordAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentAddAsync_WithSingleRecord_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
-        RequireStaffProtectedTestsEnabled();
-
-        var response = await Papi.RecordSetContentAddAsync(NonexistentRecordSetId, NonexistentBibId, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -11001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.RecordSetContentAddAsync),
+            "adding a record to a record set mutates record-set content and must not target hard-coded record-set or bib ids that might exist",
+            "IntegrationTestOptions:EnableStaffProtectedTests=true, IntegrationTestOptions:EnableMutatingIntegrationTests=true, staff override credentials, and disposable TestSettings:RecordSetId/BibId fixture data",
+            "call RecordSetContentAddAsync only for the configured disposable record set and record, assert the documented PAPIErrorCode, and remove only content the test definitely added");
     }
 
     [TestMethod]
-    public async Task RecordSetContentAddAsync_WithRecordListAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentAddAsync_WithRecordList_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
-        RequireStaffProtectedTestsEnabled();
-
-        var response = await Papi.RecordSetContentAddAsync(NonexistentRecordSetId, new[] { NonexistentBibId }, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -11001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.RecordSetContentAddAsync),
+            "adding records to a record set mutates record-set content and must not target hard-coded record-set or bib ids that might exist",
+            "IntegrationTestOptions:EnableStaffProtectedTests=true, IntegrationTestOptions:EnableMutatingIntegrationTests=true, staff override credentials, and disposable TestSettings:RecordSetId/BibId fixture data",
+            "call the record-list overload only for the configured disposable record set and records, assert the documented PAPIErrorCode, and remove only content the test definitely added");
     }
 
     [TestMethod]
-    public async Task RecordSetContentRemoveAsync_WithSingleRecordAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentRemoveAsync_WithSingleRecord_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
-        RequireStaffProtectedTestsEnabled();
-
-        var response = await Papi.RecordSetContentRemoveAsync(NonexistentRecordSetId, NonexistentBibId, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -11001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.RecordSetContentRemoveAsync),
+            "removing a record from a record set mutates record-set content and must not target hard-coded record-set or bib ids that might exist",
+            "IntegrationTestOptions:EnableStaffProtectedTests=true, IntegrationTestOptions:EnableMutatingIntegrationTests=true, staff override credentials, and disposable TestSettings:RecordSetId/BibId fixture data preloaded by the test",
+            "call RecordSetContentRemoveAsync only for content the test definitely added to the disposable record set and assert the documented PAPIErrorCode");
     }
 
     [TestMethod]
-    public async Task RecordSetContentRemoveAsync_WithRecordListAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentRemoveAsync_WithRecordList_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
-        RequireStaffProtectedTestsEnabled();
-
-        var response = await Papi.RecordSetContentRemoveAsync(NonexistentRecordSetId, new[] { NonexistentBibId }, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -11001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.RecordSetContentRemoveAsync),
+            "removing records from a record set mutates record-set content and must not target hard-coded record-set or bib ids that might exist",
+            "IntegrationTestOptions:EnableStaffProtectedTests=true, IntegrationTestOptions:EnableMutatingIntegrationTests=true, staff override credentials, and disposable TestSettings:RecordSetId/BibId fixture data preloaded by the test",
+            "call the record-list overload only for content the test definitely added to the disposable record set and assert the documented PAPIErrorCode");
     }
 
     [TestMethod]
-    public async Task RecordSetContentPutAsync_WithNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentPutAsync_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
-        RequireStaffProtectedTestsEnabled();
-
-        var response = await Papi.RecordSetContentPutAsync(NonexistentRecordSetId, new[] { NonexistentBibId }, RecordSetContentPutActions.Add, UserIdOrConfigured, WorkstationIdOrConfigured);
-
-        PapiIntegrationAssert.PapiError(response, -11001);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.RecordSetContentPutAsync),
+            "putting record-set content mutates record-set content and must not target hard-coded record-set or bib ids that might exist",
+            "IntegrationTestOptions:EnableStaffProtectedTests=true, IntegrationTestOptions:EnableMutatingIntegrationTests=true, staff override credentials, and disposable TestSettings:RecordSetId/BibId fixture data",
+            "call RecordSetContentPutAsync only for the configured disposable record set and records, assert the documented PAPIErrorCode, and restore/remove only content the test definitely changed");
     }
 
     [TestMethod]

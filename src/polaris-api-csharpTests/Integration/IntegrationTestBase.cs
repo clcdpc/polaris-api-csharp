@@ -146,12 +146,17 @@ public abstract class IntegrationTestBase
 
     protected void RequireMutatingTestsEnabled()
     {
-        RequirePatronCredentials();
+        RequirePapiConfiguration();
 
         if (!Options.EnableMutatingIntegrationTests)
         {
             Assert.Inconclusive("Mutating integration tests are disabled. Set IntegrationTestOptions:EnableMutatingIntegrationTests=true only for safe test fixtures.");
         }
+    }
+
+    protected void DocumentScenarioDependentPlaceholder(string methodName, string reason, string requiredSettings, string assertionStrategy)
+    {
+        Assert.Inconclusive($"{methodName} is a documented scenario-dependent placeholder and has no executable fixture-backed implementation yet. Reason: {reason}. Required settings: {requiredSettings}. Intended assertion strategy: {assertionStrategy}. No live PAPI call was made.");
     }
 
     protected void RequireScenarioDependentTestsEnabled(string methodName, string requiredSettings, string assertionStrategy)

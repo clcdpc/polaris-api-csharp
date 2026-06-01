@@ -30,79 +30,76 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public async Task PatronAccountPayAsync_WithNonexistentCharge_ReturnsDocumentedError()
+    public void PatronAccountPayAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.PatronAccountPayAsync(Settings.PatronBarcode, NonexistentNotificationId, .01, PaymentMethod.Cash, note: "integration testing");
-
-        PapiIntegrationAssert.PapiError(response, -3600);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.PatronAccountPayAsync),
+            "paying a patron charge mutates account/payment state and must not target a hard-coded charge id that might exist",
+            "a disposable patron barcode/PIN, a disposable charge/fee id, payment method, and an approved cleanup/reversal plan",
+            "enable mutating tests, pay only the configured disposable charge fixture, and assert the documented PAPIErrorCode without affecting real patron balances");
     }
 
     [TestMethod]
-    public async Task PatronAccountPayAllAsync_WithExcessiveAmount_ReturnsDocumentedError()
+    public void PatronAccountPayAllAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.PatronAccountPayAllAsync(Settings.PatronBarcode, 999999.99, PaymentMethod.Cash, note: "integration testing");
-
-        PapiIntegrationAssert.PapiError(response, -3610);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.PatronAccountPayAllAsync),
+            "pay-all mutates patron account/payment state and an excessive amount is not a safe default reachability check",
+            "a disposable patron barcode/PIN with fixture charges and an approved payment/reversal plan",
+            "enable mutating tests, pay only the prepared disposable account fixture, and assert the documented PAPIErrorCode without affecting real patron balances");
     }
 
     [TestMethod]
-    public async Task PatronAccountRefundCreditAsync_WithExcessiveAmount_ReturnsDocumentedError()
+    public void PatronAccountRefundCreditAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.PatronAccountRefundCreditAsync(Settings.PatronBarcode, 999999.99, note: "integration testing");
-
-        PapiIntegrationAssert.PapiError(response, -3606);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.PatronAccountRefundCreditAsync),
+            "refunding credit mutates patron account/payment state and must not run as a default reachability check",
+            "a disposable patron barcode/PIN with disposable account credit and an approved fixture-specific refund plan",
+            "enable mutating tests, refund only the prepared disposable credit fixture, and assert the documented PAPIErrorCode without affecting real patron balances");
     }
 
     [TestMethod]
-    public async Task PatronAccountVoidAsync_WithNonexistentTransaction_ReturnsDocumentedError()
+    public void PatronAccountVoidAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        var response = await Papi.PatronAccountVoidAsync(Settings.PatronBarcode, NonexistentNotificationId, note: "integration testing");
-
-        PapiIntegrationAssert.PapiError(response, -3606);
+        DocumentScenarioDependentPlaceholder(
+            nameof(Papi.PatronAccountVoidAsync),
+            "voiding a transaction mutates patron account/payment state and must not target a hard-coded transaction id that might exist",
+            "a disposable patron barcode/PIN and disposable transaction id created specifically for a void test",
+            "enable mutating tests, void only the configured disposable transaction fixture, and assert the documented PAPIErrorCode without affecting real patron balances");
     }
 
     [TestMethod]
-    public async Task PatronTitleListMethods_WithNonexistentLists_ReturnDocumentedErrors()
+    public void PatronTitleListMutations_RequireDisposableTitleListFixturesAndAreDisabledByDefault()
     {
-        RequirePatronCredentials();
-
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListAddTitleAsync(Settings.PatronBarcode, NonexistentTitleListId, NonexistentBibId, Settings.PatronPin), -1);
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListCopyAllTitlesAsync(Settings.PatronBarcode, NonexistentTitleListId, NonexistentTitleListId + 1, Settings.PatronPin), -1);
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListCopyTitleAsync(Settings.PatronBarcode, NonexistentTitleListId, 1, NonexistentTitleListId + 1, Settings.PatronPin), -1);
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, NonexistentTitleListId, Settings.PatronPin), -1);
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListDeleteTitleAsync(Settings.PatronBarcode, NonexistentTitleListId, 1, Settings.PatronPin), -1);
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, NonexistentTitleListId, password: Settings.PatronPin), -1);
-        PapiIntegrationAssert.PapiError(await Papi.PatronTitleListMoveTitleAsync(Settings.PatronBarcode, NonexistentTitleListId, 1, NonexistentTitleListId + 1, Settings.PatronPin), -1);
+        DocumentScenarioDependentPlaceholder(
+            "PatronTitleList add/copy/delete/move methods",
+            "title-list add, copy, delete, and move operations mutate patron title-list data and must not target hard-coded list or bib ids that might exist",
+            "a disposable patron barcode/PIN, disposable source/destination title lists, and disposable/approved bib/title entries",
+            "enable mutating tests, mutate only lists created by the fixture/test, assert documented PAPIErrorCode values, and delete only data the test definitely created");
     }
 
     [TestMethod]
     public async Task PatronAccountCreateAndDeleteTitleListAsync_WhenMutatingTestsEnabled_CleansUpList()
     {
         RequireMutatingTestsEnabled();
+        RequirePatronCredentials();
         if (string.IsNullOrWhiteSpace(Settings.PatronListName))
         {
             Assert.Inconclusive("Mutating title-list flow requires TestSettings:PatronListName.");
         }
 
+        var uniqueListName = $"{Settings.PatronListName}-{Guid.NewGuid():N}";
         int? createdListId = null;
         try
         {
-            var createResponse = await Papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, Settings.PatronListName, Settings.PatronPin);
-            var createData = PapiIntegrationAssert.HasPapiData(createResponse);
-            Assert.IsTrue(createData.PAPIErrorCode == 0 || createData.PAPIErrorCode == -1, createData.ErrorMessage);
+            var createResponse = await Papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, uniqueListName, Settings.PatronPin);
+            PapiIntegrationAssert.ExactZeroSuccess(createResponse);
 
             var getResponse = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
             var getData = PapiIntegrationAssert.Success(getResponse);
-            var list = getData.PatronAccountTitleListsRows.SingleOrDefault(l => l.RecordStoreName == Settings.PatronListName);
-            Assert.IsNotNull(list, "The created or pre-existing test title list should be visible before cleanup.");
+            var list = getData.PatronAccountTitleListsRows.SingleOrDefault(l => l.RecordStoreName == uniqueListName);
+            Assert.IsNotNull(list, "The title list created by this test should be visible before cleanup.");
             createdListId = list.RecordStoreId;
         }
         finally
@@ -119,6 +116,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     public async Task PatronAccountCreateCreditAsync_WhenMutatingTestsEnabled_CreatesCredit()
     {
         RequireMutatingTestsEnabled();
+        RequirePatronCredentials();
 
         var response = await Papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash, WorkstationIdOrConfigured, UserIdOrConfigured, "integration testing");
 
@@ -129,6 +127,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     public async Task PatronAccountDepositCreditAsync_WhenMutatingTestsEnabled_DepositsCredit()
     {
         RequireMutatingTestsEnabled();
+        RequirePatronCredentials();
 
         var response = await Papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, WorkstationIdOrConfigured, UserIdOrConfigured, "integration testing");
 
