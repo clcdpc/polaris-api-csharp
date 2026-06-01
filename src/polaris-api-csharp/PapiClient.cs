@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api
         public int WorkstationId { get; set; } = 1;
         public int OrganizationId { get; set; } = 1;
 
-        public bool AllowStaffOverrideRequests { get; set; } = true;
+        public bool AllowStaffOverrideRequests { get; set; } = false;
 
         /// <summary>
         /// The staff credentials used for protected methods and public method overrides
