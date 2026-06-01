@@ -18,7 +18,7 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
     }
 
     [TestMethod]
-    public void RecordSetContentAddAsync_WithSingleRecordAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentAddAsync_WithSingleRecord_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.RecordSetContentAddAsync),
@@ -28,7 +28,7 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
     }
 
     [TestMethod]
-    public void RecordSetContentAddAsync_WithRecordListAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentAddAsync_WithRecordList_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.RecordSetContentAddAsync),
@@ -38,7 +38,7 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
     }
 
     [TestMethod]
-    public void RecordSetContentRemoveAsync_WithSingleRecordAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentRemoveAsync_WithSingleRecord_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.RecordSetContentRemoveAsync),
@@ -48,7 +48,7 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
     }
 
     [TestMethod]
-    public void RecordSetContentRemoveAsync_WithRecordListAndNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentRemoveAsync_WithRecordList_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.RecordSetContentRemoveAsync),
@@ -58,7 +58,7 @@ public sealed class StaffProtectedAndRecordSetIntegrationTests : IntegrationTest
     }
 
     [TestMethod]
-    public void RecordSetContentPutAsync_WithNonexistentRecordSet_ReturnsDocumentedError()
+    public void RecordSetContentPutAsync_RequiresDisposableRecordSetFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.RecordSetContentPutAsync),

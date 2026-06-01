@@ -30,7 +30,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public void PatronAccountPayAsync_WithNonexistentCharge_ReturnsDocumentedError()
+    public void PatronAccountPayAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronAccountPayAsync),
@@ -40,7 +40,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public void PatronAccountPayAllAsync_WithExcessiveAmount_ReturnsDocumentedError()
+    public void PatronAccountPayAllAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronAccountPayAllAsync),
@@ -50,7 +50,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public void PatronAccountRefundCreditAsync_WithExcessiveAmount_ReturnsDocumentedError()
+    public void PatronAccountRefundCreditAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronAccountRefundCreditAsync),
@@ -60,7 +60,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public void PatronAccountVoidAsync_WithNonexistentTransaction_ReturnsDocumentedError()
+    public void PatronAccountVoidAsync_RequiresDisposableAccountFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronAccountVoidAsync),
@@ -70,7 +70,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public void PatronTitleListMethods_WithNonexistentLists_ReturnDocumentedErrors()
+    public void PatronTitleListMethods_RequireDisposableTitleListFixturesAndAreDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             "PatronTitleList add/copy/delete/move methods",

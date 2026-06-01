@@ -49,7 +49,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void PatronMessageDeleteAsync_WithNonexistentMessage_ReturnsDocumentedError()
+    public void PatronMessageDeleteAsync_RequiresDisposableMessageFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronMessageDeleteAsync),
@@ -59,7 +59,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void PatronMessageUpdateStatusAsync_WithNonexistentMessage_ReturnsDocumentedError()
+    public void PatronMessageUpdateStatusAsync_RequiresDisposableMessageFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronMessageUpdateStatusAsync),
@@ -69,7 +69,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void PatronReadingHistoryClearAsync_WithNonexistentTitle_ReturnsDocumentedError()
+    public void PatronReadingHistoryClearAsync_RequiresDisposableReadingHistoryFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.PatronReadingHistoryClearAsync),
@@ -122,7 +122,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void NotificationUpdateAsync_WithNonexistentNotification_ReturnsDocumentedError()
+    public void NotificationUpdateAsync_RequiresDisposableNotificationFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.NotificationUpdateAsync),

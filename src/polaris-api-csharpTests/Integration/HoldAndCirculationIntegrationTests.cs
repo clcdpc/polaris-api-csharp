@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests.Integration;
 public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
 {
     [TestMethod]
-    public void HoldRequestCancelAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestCancelAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.HoldRequestCancelAsync),
@@ -18,7 +18,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void HoldRequestCreateAsync_WithNonexistentBib_ReturnsDocumentedError()
+    public void HoldRequestCreateAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.HoldRequestCreateAsync),
@@ -28,7 +28,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void HoldRequestCreateAsync_ConvenienceOverload_WithNonexistentBib_ReturnsDocumentedError()
+    public void HoldRequestCreateAsync_ConvenienceOverload_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(PapiClient.HoldRequestCreateAsync),
@@ -49,7 +49,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void HoldRequestReactivateAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestReactivateAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.HoldRequestReactivateAsync),
@@ -59,7 +59,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void HoldRequestReplyAsync_WithEmptyGuid_ReturnsDocumentedError()
+    public void HoldRequestReplyAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.HoldRequestReplyAsync),
@@ -69,7 +69,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void HoldRequestSuspendAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void HoldRequestSuspendAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.HoldRequestSuspendAsync),
@@ -79,7 +79,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void UpdatePickupBranchIDAsync_WithNonexistentRequest_ReturnsDocumentedError()
+    public void UpdatePickupBranchIDAsync_RequiresDisposableHoldFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.UpdatePickupBranchIDAsync),
@@ -89,7 +89,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void ItemRenewAsync_WithNonexistentItem_ReturnsDocumentedError()
+    public void ItemRenewAsync_RequiresDisposableCheckoutFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.ItemRenewAsync),
@@ -109,7 +109,7 @@ public sealed class HoldAndCirculationIntegrationTests : IntegrationTestBase
     }
 
     [TestMethod]
-    public void ItemUpdateBarcodeAsync_WithNonexistentItem_IsGatedAsMutatingReachabilityTest()
+    public void ItemUpdateBarcodeAsync_RequiresDisposableItemFixtureAndIsDisabledByDefault()
     {
         DocumentScenarioDependentPlaceholder(
             nameof(Papi.ItemUpdateBarcodeAsync),
