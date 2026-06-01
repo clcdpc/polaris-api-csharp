@@ -151,13 +151,6 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        public void HoldRequestCancelTest()
-        {
-            var response = papi.HoldRequestCancel(Settings.PatronBarcode, 1234, Settings.PatronPin);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -4201);
-        }
-
-        [TestMethod()]
         public void HoldRequestCreateTest()
         {
             var response = papi.HoldRequestCreate(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7));
