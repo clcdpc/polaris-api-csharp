@@ -70,17 +70,8 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public void PatronTitleListMethods_RequireDisposableTitleListFixturesAndAreDisabledByDefault()
-    {
-        DocumentScenarioDependentPlaceholder(
-            "PatronTitleList add/copy/delete/move methods",
-            "most title-list operations mutate patron title-list content and hard-coded list or bib IDs might exist in a live Polaris database",
-            "IntegrationTestOptions:EnableMutatingIntegrationTests=true, disposable patron credentials, and configured disposable source/destination title-list plus bib fixtures",
-            "call each title-list method only against disposable title lists and assert documented PAPIErrorCode values while preserving pre-existing lists");
-    }
-
-    [TestMethod]
-    public async Task PatronAccountCreateAndDeleteTitleListAsync_WhenMutatingTestsEnabled_CleansUpList()
+    [DoNotParallelize]
+    public async Task PatronTitleListSurface_WhenMutatingTestsEnabled_CleansUpCreatedLists()
     {
         RequireMutatingTestsEnabled();
         RequirePatronCredentials();
@@ -89,56 +80,98 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
             Assert.Inconclusive("Mutating title-list flow requires TestSettings:PatronListName.");
         }
 
-        var uniqueListName = $"{Settings.PatronListName}-{Guid.NewGuid():N}";
-        var createSucceeded = false;
-        int? createdListId = null;
-        Exception? testFailure = null;
+        if (Settings.BibId <= 0)
+        {
+            Assert.Inconclusive("Mutating title-list item coverage requires TestSettings:BibId because PatronTitleListAddTitleAsync needs a real bibliographic record. No live API call was made.");
+        }
+
+        var cleanup = new IntegrationCleanup();
+        var runId = Guid.NewGuid().ToString("N");
+        var sourceListName = $"{Settings.PatronListName}-{runId}-source";
+        var destinationListName = $"{Settings.PatronListName}-{runId}-destination";
 
         try
         {
-            var createResponse = await Papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, uniqueListName, Settings.PatronPin);
-            PapiIntegrationAssert.ExactZeroSuccess(createResponse);
-            createSucceeded = true;
+            var sourceListId = await CreateDisposableTitleListAsync(sourceListName, cleanup);
+            var destinationListId = await CreateDisposableTitleListAsync(destinationListName, cleanup);
 
-            createdListId = await TryFindTitleListIdAsync(uniqueListName);
-            Assert.IsTrue(createdListId.HasValue, "The title list created by this test should be visible before cleanup.");
-        }
-        catch (Exception ex)
-        {
-            testFailure = ex;
-            throw;
+            var addResponse = await Papi.PatronTitleListAddTitleAsync(Settings.PatronBarcode, sourceListId, Settings.BibId, Settings.PatronPin);
+            var addedTitle = PapiIntegrationAssert.Success(addResponse);
+            Assert.IsTrue(addedTitle.Position > 0, "Adding a title should return a positive source-list position.");
+
+            var sourceTitlesResponse = await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, sourceListId, password: Settings.PatronPin);
+            var sourceTitles = PapiIntegrationAssert.Success(sourceTitlesResponse);
+            Assert.IsTrue(
+                sourceTitles.PatronTitleListTitleRows.Any(t => t.Position == addedTitle.Position && t.LocalControlNumber == Settings.BibId),
+                "The title added by this workflow should be visible in the disposable source list.");
+
+            var copyAllResponse = await Papi.PatronTitleListCopyAllTitlesAsync(Settings.PatronBarcode, sourceListId, destinationListId, Settings.PatronPin);
+            PapiIntegrationAssert.Success(copyAllResponse);
+
+            var destinationTitlesAfterCopyAll = await GetTitleListTitlesAsync(destinationListId);
+            Assert.AreEqual(1, destinationTitlesAfterCopyAll.Count(t => t.LocalControlNumber == Settings.BibId), "Copy-all should place the generated title in the disposable destination list.");
+
+            var deleteAllCopiedTitlesResponse = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, destinationListId, Settings.PatronPin);
+            PapiIntegrationAssert.Success(deleteAllCopiedTitlesResponse);
+
+            var copyResponse = await Papi.PatronTitleListCopyTitleAsync(Settings.PatronBarcode, sourceListId, addedTitle.Position, destinationListId, Settings.PatronPin);
+            PapiIntegrationAssert.Success(copyResponse);
+
+            var destinationTitlesAfterCopy = await GetTitleListTitlesAsync(destinationListId);
+            Assert.AreEqual(1, destinationTitlesAfterCopy.Count(t => t.LocalControlNumber == Settings.BibId), "Copying the generated title should place it in the disposable destination list.");
+
+            var moveResponse = await Papi.PatronTitleListMoveTitleAsync(Settings.PatronBarcode, sourceListId, addedTitle.Position, destinationListId, Settings.PatronPin);
+            PapiIntegrationAssert.Success(moveResponse);
+
+            var sourceTitlesAfterMove = await GetTitleListTitlesAsync(sourceListId);
+            Assert.IsFalse(sourceTitlesAfterMove.Any(t => t.LocalControlNumber == Settings.BibId), "Moving the generated title should remove it from the disposable source list.");
+
+            var destinationTitlesAfterMove = await GetTitleListTitlesAsync(destinationListId);
+            var copiedOrMovedTitle = destinationTitlesAfterMove.FirstOrDefault(t => t.LocalControlNumber == Settings.BibId);
+            Assert.IsNotNull(copiedOrMovedTitle, "The disposable destination list should contain generated title-list content before delete coverage runs.");
+
+            var deleteTitleResponse = await Papi.PatronTitleListDeleteTitleAsync(Settings.PatronBarcode, destinationListId, copiedOrMovedTitle!.Position, Settings.PatronPin);
+            PapiIntegrationAssert.Success(deleteTitleResponse);
+
+            var deleteAllTitlesResponse = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, destinationListId, Settings.PatronPin);
+            PapiIntegrationAssert.Success(deleteAllTitlesResponse);
         }
         finally
         {
-            if (createSucceeded)
-            {
-                try
-                {
-                    createdListId ??= await TryFindTitleListIdAsync(uniqueListName);
-
-                    if (createdListId.HasValue)
-                    {
-                        var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdListId.Value, Settings.PatronPin);
-                        PapiIntegrationAssert.Success(deleteResponse);
-                    }
-                    else
-                    {
-                        Assert.Fail($"Cleanup could not find title list '{uniqueListName}' created by this test.");
-                    }
-                }
-                catch (Exception cleanupFailure) when (testFailure != null)
-                {
-                    var message = $"The title-list test failed and cleanup also failed for generated title list '{uniqueListName}'. "
-                        + "Manual cleanup may be required. "
-                        + $"Original test failure: {testFailure} "
-                        + $"Cleanup failure: {cleanupFailure}";
-                    throw new AssertFailedException(message, new AggregateException(testFailure, cleanupFailure));
-                }
-            }
+            await cleanup.RunAsync();
         }
     }
 
-    private async Task<int?> TryFindTitleListIdAsync(string uniqueListName)
+    private async Task<int> CreateDisposableTitleListAsync(string uniqueListName, IntegrationCleanup cleanup)
+    {
+        var createResponse = await Papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, uniqueListName, Settings.PatronPin);
+        PapiIntegrationAssert.ExactZeroSuccess(createResponse);
+
+        cleanup.Add($"delete generated title list '{uniqueListName}'", async () =>
+        {
+            var listId = await FindUniqueGeneratedTitleListIdAsync(uniqueListName);
+            if (!listId.HasValue)
+            {
+                Assert.Fail($"Cleanup could not find the generated title list '{uniqueListName}' by exact name. Manual cleanup may be required.");
+            }
+
+            var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, listId.Value, Settings.PatronPin);
+            PapiIntegrationAssert.Success(deleteResponse);
+        });
+
+        var createdListId = await FindUniqueGeneratedTitleListIdAsync(uniqueListName);
+        Assert.IsTrue(createdListId.HasValue, $"The generated title list '{uniqueListName}' should be visible before cleanup.");
+        return createdListId.Value;
+    }
+
+    private async Task<IReadOnlyCollection<PatronTitleListTitleRow>> GetTitleListTitlesAsync(int listId)
+    {
+        var response = await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, listId, password: Settings.PatronPin);
+        var data = PapiIntegrationAssert.Success(response);
+        return data.PatronTitleListTitleRows;
+    }
+
+    private async Task<int?> FindUniqueGeneratedTitleListIdAsync(string uniqueListName)
     {
         var getResponse = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
         var getData = PapiIntegrationAssert.Success(getResponse);
@@ -150,26 +183,12 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
     }
 
     [TestMethod]
-    public async Task PatronAccountCreateCreditAsync_WhenMutatingTestsEnabled_CreatesCredit()
+    public void PatronAccountCreditSurface_RequiresReliableCleanupPathAndIsDisabledByDefault()
     {
-        RequireStaffProtectedTestsEnabled();
-        RequireMutatingTestsEnabled();
-        RequirePatronCredentials();
-
-        var response = await Papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash, WorkstationIdOrConfigured, UserIdOrConfigured, "integration testing");
-
-        PapiIntegrationAssert.Success(response);
-    }
-
-    [TestMethod]
-    public async Task PatronAccountDepositCreditAsync_WhenMutatingTestsEnabled_DepositsCredit()
-    {
-        RequireStaffProtectedTestsEnabled();
-        RequireMutatingTestsEnabled();
-        RequirePatronCredentials();
-
-        var response = await Papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, WorkstationIdOrConfigured, UserIdOrConfigured, "integration testing");
-
-        PapiIntegrationAssert.Success(response);
+        DocumentScenarioDependentPlaceholder(
+            "PatronAccountCreateCreditAsync and PatronAccountDepositCreditAsync",
+            "these endpoints mutate durable patron account state. An executable account-credit workflow must first create a uniquely noted tiny credit or deposit, read the generated patron account row, identify that exact generated transaction or credit row, and reverse it with a reliable cleanup API such as refund or void. The current client surface does not prove a safe end-to-end cleanup path for generated credit/deposit artifacts, so no live API call is made",
+            "IntegrationTestOptions:EnableMutatingIntegrationTests=true, IntegrationTestOptions:EnableStaffProtectedTests=true, disposable patron credentials, staff override credentials, and response models/API methods that can uniquely identify and reverse the generated account artifact",
+            "remain inconclusive until generated account-credit artifacts can be uniquely identified and reversed without leaving durable patron account rows");
     }
 }
