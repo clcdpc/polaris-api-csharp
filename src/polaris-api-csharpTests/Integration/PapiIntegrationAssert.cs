@@ -26,7 +26,15 @@ internal static class PapiIntegrationAssert
     {
         var data = HasPapiData(response);
         var errorCode = GetPapiErrorCode(data);
-        Assert.AreEqual(0, errorCode, $"Expected PAPI success but received {errorCode}: {GetErrorMessage(data)}");
+        Assert.IsTrue(errorCode >= 0, $"Expected PAPI success/no error but received {errorCode}: {GetErrorMessage(data)}");
+        return data;
+    }
+
+    public static T ExactZeroSuccess<T>(IRestResponse<T> response)
+    {
+        var data = HasPapiData(response);
+        var errorCode = GetPapiErrorCode(data);
+        Assert.AreEqual(0, errorCode, $"Expected PAPIErrorCode 0 but received {errorCode}: {GetErrorMessage(data)}");
         return data;
     }
 
@@ -41,7 +49,9 @@ internal static class PapiIntegrationAssert
     public static void RowCountMatchesPapiCode<T>(IRestResponse<T> response, int rowCount)
     {
         var data = HasPapiData(response);
-        Assert.AreEqual(rowCount, GetPapiErrorCode(data), "For list endpoints, the Polaris guide documents the PAPIErrorCode as the returned row count on success.");
+        var errorCode = GetPapiErrorCode(data);
+        Assert.IsTrue(errorCode >= 0, $"Expected non-negative row-count PAPI code but received {errorCode}: {GetErrorMessage(data)}");
+        Assert.AreEqual(rowCount, errorCode, "For list endpoints, the Polaris guide documents the PAPIErrorCode as the returned row count on success.");
     }
 
     public static void RequestUriContains<T>(IRestResponse<T> response, string expectedSegment)

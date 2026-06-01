@@ -120,9 +120,9 @@ IntegrationTestOptions__EnableScenarioDependentTests=true
 
 ## Known-error reachability tests
 
-PAPI often returns HTTP 200 with a negative `PAPIErrorCode` for domain-level failures. The integration tests intentionally prefer stable nonexistent IDs over dangerous repeated bad credentials. For example, invalid hold request IDs, bibliographic IDs, item IDs, transaction IDs, and record-set IDs exercise the route, authentication, deserialization, and documented PAPI error-code behavior without relying on fragile success state.
+PAPI often returns HTTP 200 with a `PAPIErrorCode` carrying endpoint-level status. Negative `PAPIErrorCode` values represent PAPI/domain errors. Zero and positive values are no-error success codes; positive values commonly represent rows returned or rows affected. The integration success helper therefore treats any non-negative `PAPIErrorCode` as success, and list/read tests keep stronger row-count assertions where the response collection has stable row-count semantics.
 
-The tests assert exact `PAPIErrorCode` values only when the Polaris API Reference Guide 8.0 documents the code or the previous integration suite already used that stable code. They avoid asserting exact `ErrorMessage` text unless it is needed and stable.
+The integration tests intentionally prefer stable nonexistent IDs over dangerous repeated bad credentials. For example, invalid hold request IDs, bibliographic IDs, item IDs, transaction IDs, and record-set IDs exercise the route, authentication, deserialization, and documented PAPI error-code behavior without relying on fragile success state. Known-error reachability tests still assert exact negative `PAPIErrorCode` values only when the Polaris API Reference Guide 8.0 documents the code or the previous integration suite already used that stable code. They avoid asserting exact `ErrorMessage` text unless it is needed and stable.
 
 ## Failed authentication tests
 

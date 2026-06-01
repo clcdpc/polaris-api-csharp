@@ -54,14 +54,14 @@ public abstract class IntegrationTestBase
     {
         RequirePapiConfiguration();
         InconclusiveIfMissing(MissingScenarioSettings(
-            (Settings.PatronBarcode, "TestSettings:PatronBarcode"),
-            (Settings.PatronPin, "TestSettings:PatronPin")));
+            (Settings.PatronBarcode, SettingName(nameof(IntegrationScenarioSettings.PatronBarcode))),
+            (Settings.PatronPin, SettingName(nameof(IntegrationScenarioSettings.PatronPin)))));
     }
 
     protected void RequirePatronId()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.PatronId, "TestSettings:PatronId", "a patron record that can be safely read by the integration suite");
+        RequirePositiveScenarioId(Settings.PatronId, SettingName(nameof(IntegrationScenarioSettings.PatronId)), "a patron record that can be safely read by the integration suite");
     }
 
     protected void RequireBibId() => RequireBibScenario();
@@ -69,7 +69,7 @@ public abstract class IntegrationTestBase
     protected void RequireBibScenario()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.BibId, "TestSettings:BibId", "a bibliographic record that can be safely read by the integration suite");
+        RequirePositiveScenarioId(Settings.BibId, SettingName(nameof(IntegrationScenarioSettings.BibId)), "a bibliographic record that can be safely read by the integration suite");
     }
 
     protected void RequireBranchId() => RequireBranchScenario();
@@ -77,46 +77,46 @@ public abstract class IntegrationTestBase
     protected void RequireBranchScenario()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.BranchId, "TestSettings:BranchId", "a branch/organization ID that can be safely read by the integration suite");
+        RequirePositiveScenarioId(Settings.BranchId, SettingName(nameof(IntegrationScenarioSettings.BranchId)), "a branch/organization ID that can be safely read by the integration suite");
     }
 
     protected void RequireRecordSetId()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.RecordSetId, "TestSettings:RecordSetId", "a real record set intended for scenario-dependent assertions");
+        RequirePositiveScenarioId(Settings.RecordSetId, SettingName(nameof(IntegrationScenarioSettings.RecordSetId)), "a real record set intended for scenario-dependent assertions");
     }
 
     protected void RequireItemRecordId()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.ItemRecordId, "TestSettings:ItemRecordId", "an item record intended for scenario-dependent assertions");
+        RequirePositiveScenarioId(Settings.ItemRecordId, SettingName(nameof(IntegrationScenarioSettings.ItemRecordId)), "an item record intended for scenario-dependent assertions");
     }
 
     protected void RequireItemBarcode()
     {
         RequirePapiConfiguration();
-        InconclusiveIfMissing(MissingScenarioSettings((Settings.ItemBarcode, "TestSettings:ItemBarcode")));
+        InconclusiveIfMissing(MissingScenarioSettings((Settings.ItemBarcode, SettingName(nameof(IntegrationScenarioSettings.ItemBarcode)))));
     }
 
     protected void RequirePatronAccountTransactionId()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.PatronAccountTransactionId, "TestSettings:PatronAccountTransactionId", "a patron account transaction intended for scenario-dependent assertions");
+        RequirePositiveScenarioId(Settings.PatronAccountTransactionId, SettingName(nameof(IntegrationScenarioSettings.PatronAccountTransactionId)), "a patron account transaction intended for scenario-dependent assertions");
     }
 
     protected void RequireHoldRequestId()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.HoldRequestId, "TestSettings:HoldRequestId", "a hold request intended for scenario-dependent assertions");
+        RequirePositiveScenarioId(Settings.HoldRequestId, SettingName(nameof(IntegrationScenarioSettings.HoldRequestId)), "a hold request intended for scenario-dependent assertions");
     }
 
     protected void RequireRemoteStorageScenario()
     {
         RequirePapiConfiguration();
-        RequirePositiveScenarioId(Settings.RemoteStorageBranchId, "TestSettings:RemoteStorageBranchId", "a branch with remote-storage activity for the configured date range");
+        RequirePositiveScenarioId(Settings.RemoteStorageBranchId, SettingName(nameof(IntegrationScenarioSettings.RemoteStorageBranchId)), "a branch with remote-storage activity for the configured date range");
         InconclusiveIfMissing(MissingScenarioSettings(
-            (Settings.RemoteStorageStartDate, "TestSettings:RemoteStorageStartDate"),
-            (Settings.RemoteStorageEndDate, "TestSettings:RemoteStorageEndDate")));
+            (Settings.RemoteStorageStartDate, SettingName(nameof(IntegrationScenarioSettings.RemoteStorageStartDate))),
+            (Settings.RemoteStorageEndDate, SettingName(nameof(IntegrationScenarioSettings.RemoteStorageEndDate)))));
     }
 
     protected void RequireStaffProtectedTestsEnabled()
@@ -175,13 +175,15 @@ public abstract class IntegrationTestBase
     protected void RequireOrgEmailScenario()
     {
         RequirePapiConfiguration();
-        InconclusiveIfMissing(MissingScenarioSettings((Settings.OrgEmail, "TestSettings:OrgEmail")));
+        InconclusiveIfMissing(MissingScenarioSettings((Settings.OrgEmail, SettingName(nameof(IntegrationScenarioSettings.OrgEmail)))));
     }
 
     protected int BranchIdOrConfiguredOrganizationId => Settings.EffectiveBranchId(PapiSettings.OrganizationId);
     protected int OrganizationIdOrConfigured => Settings.EffectiveOrganizationId(PapiSettings.OrganizationId);
     protected int UserIdOrConfigured => Settings.EffectiveUserId(PapiSettings.UserId);
     protected int WorkstationIdOrConfigured => Settings.EffectiveWorkstationId(PapiSettings.WorkstationId);
+
+    private static string SettingName(string propertyName) => $"{IntegrationScenarioSettings.SectionName}:{propertyName}";
 
     private static void RequirePositiveScenarioId(int value, string settingName, string reason)
     {

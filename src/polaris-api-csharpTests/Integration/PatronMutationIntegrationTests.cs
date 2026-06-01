@@ -102,7 +102,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
         RequireScenarioDependentTestsEnabled(
             nameof(Papi.PatronRegistrationCreateAsync),
             "a complete PatronRegistrationParams fixture for a disposable patron registration profile",
-            "create a disposable patron, assert PAPIErrorCode=0 and returned patron id/barcode, then clean up manually if the site supports it");
+            "create a disposable patron, assert a non-negative PAPIErrorCode and returned patron id/barcode, then clean up manually if the site supports it");
     }
 
     [TestMethod]
@@ -111,7 +111,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
         RequireScenarioDependentTestsEnabled(
             nameof(Papi.PatronRegistrationCreateV2Async),
             "a complete PatronRegistrationData fixture for a disposable patron registration profile",
-            "create a disposable patron with the v2 payload and assert PAPIErrorCode=0 plus returned patron id/barcode");
+            "create a disposable patron with the v2 payload and assert a non-negative PAPIErrorCode plus returned patron id/barcode");
     }
 
     [TestMethod]
@@ -140,8 +140,7 @@ public sealed class PatronMutationIntegrationTests : IntegrationTestBase
         RequireMutatingTestsEnabled();
 
         var response = await Papi.UpdatePatronNotesDataAsync(Settings.PatronBarcode, nonBlockingNote: "PAPI integration test note", updateMode: UpdateNoteMode.Prepend, workstationId: WorkstationIdOrConfigured);
-        var data = PapiIntegrationAssert.HasPapiData(response);
 
-        Assert.IsTrue(data.PAPIErrorCode == 0 || data.PAPIErrorCode < 0, data.ErrorMessage);
+        PapiIntegrationAssert.Success(response);
     }
 }
