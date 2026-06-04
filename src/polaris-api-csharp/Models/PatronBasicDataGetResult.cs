@@ -88,7 +88,23 @@ namespace Clc.Polaris.Api.Models
         public PatronNotes? PatronNotes { get; set; }
         public PatronSystemBlock[] PatronSystemBlocks { get; set; }
 
-        string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());
+        // Optimized phone number cleaning method to extract only digits.
+        // Uses a loop over a character array to avoid memory allocations and iterator overhead associated with LINQ's .Where().
+        string fixpn(string pn)
+        {
+            if (string.IsNullOrEmpty(pn)) return string.Empty;
+
+            var chars = new char[pn.Length];
+            int len = 0;
+            for (int i = 0; i < pn.Length; i++)
+            {
+                if (char.IsDigit(pn[i]))
+                {
+                    chars[len++] = pn[i];
+                }
+            }
+            return new string(chars, 0, len);
+        }
 
         public string TxtDeliveryPhoneNumber => TxtPhoneNumber == 1 ? fixpn(PhoneNumber) : TxtPhoneNumber == 2 ? fixpn(PhoneNumber2) : TxtPhoneNumber == 3 ? fixpn(PhoneNumber3) : "";
 
