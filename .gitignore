@@ -403,5 +403,8 @@ FodyWeavers.xsd
 ##################
 # CLC CUSTOM
 ##################
-[Aa]pp[Ss]ettings.[Tt]est.json
+# Local integration test settings can contain Polaris credentials.
+# Keep example/template config files trackable by only ignoring the real local file name.
+src/polaris-api-csharpTests/appsettings.Test.json
+**/appsettings.Test.json
 [Aa]pp[Ss]ettings.[Dd]evelopment.json
