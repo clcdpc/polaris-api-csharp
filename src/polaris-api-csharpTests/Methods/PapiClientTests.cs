@@ -115,6 +115,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task AuthenticateStaffUserTest()
         {
             var staffOverrideAccount = papi.StaffOverrideAccount;
@@ -238,6 +239,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task HoldRequestGetListTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -322,6 +324,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task Patron_GetBarcodeFromIdTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -527,6 +530,7 @@ namespace Clc.Polaris.Api.Tests
         //}
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task PatronRenewBlocksGetTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -543,6 +547,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task PatronSearchTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -687,6 +692,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task RecordSetRecordsGetTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -703,6 +709,7 @@ namespace Clc.Polaris.Api.Tests
         //}
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task SA_GetValueByOrgTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -719,6 +726,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("ProtectedIntegration")]
         public async Task Synch_BibsByIdGetTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
