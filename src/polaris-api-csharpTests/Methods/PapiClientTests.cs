@@ -146,7 +146,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_FreeTextBlock()
         {
@@ -155,7 +155,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_SystemBlock()
         {
@@ -164,7 +164,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_LibraryAssignedBlock()
         {
@@ -278,7 +278,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task NotificationUpdateTest()
         {
@@ -301,7 +301,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountCreateCreditTest()
         {
@@ -310,7 +310,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task TestTitleListCreate_Get_Delete()
         {
@@ -324,7 +324,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountDepositCreditTest()
         {
@@ -341,7 +341,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountPayTest()
         {
@@ -350,7 +350,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountPayAllTest()
         {
@@ -359,7 +359,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountRefundCreditTest()
         {
@@ -368,7 +368,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountVoidTest()
         {
@@ -425,7 +425,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronMessageDeleteTest()
         {
@@ -441,7 +441,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronMessageUpdateStatusTest()
         {
@@ -457,7 +457,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronReadingHistoryClearTest()
         {
@@ -501,7 +501,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListAddTitleTest()
         {
@@ -510,7 +510,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListCopyAllTitlesTest()
         {
@@ -519,7 +519,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListCopyTitleTest()
         {
@@ -528,7 +528,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListDeleteAllTitlesTest()
         {
@@ -537,7 +537,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListDeleteTitleTest()
         {
@@ -553,7 +553,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListMoveTitleTest()
         {
@@ -562,7 +562,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronUpdateTest()
         {
@@ -592,7 +592,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentAddTest()
         {
@@ -601,7 +601,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentAddTest_List()
         {
@@ -610,7 +610,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentRemoveTest()
         {
@@ -619,7 +619,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [TestCategory("DisposableIntegration")]
+        [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentRemoveTest_List()
         {
