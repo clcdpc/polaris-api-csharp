@@ -219,13 +219,14 @@ namespace Clc.Polaris.Api
         {
             if (StaffOverrideAccount == null ||
                 string.IsNullOrWhiteSpace(Hostname) ||
+                string.IsNullOrWhiteSpace(AccessID) ||
                 string.IsNullOrWhiteSpace(StaffOverrideAccount.Domain) ||
                 string.IsNullOrWhiteSpace(StaffOverrideAccount.Username))
             {
                 return null;
             }
 
-            return $"{Hostname}|{StaffOverrideAccount.Domain}|{StaffOverrideAccount.Username}";
+            return $"{Hostname.Trim()}|{AccessID.Trim()}|{StaffOverrideAccount.Domain.Trim()}|{StaffOverrideAccount.Username.Trim()}";
         }
 
         private static bool IsProtectedTokenMissingOrExpired(ProtectedToken? token)
