@@ -71,10 +71,16 @@ dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "T
 
 Integration tests require live Polaris dev credentials and local test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
 
-Run read-only integration tests only when you have local Polaris dev settings configured:
+Run basic read-only integration tests only when you have local Polaris dev settings configured. This excludes protected read-only tests that require staff override credentials:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration&TestCategory!=MutatingIntegration"
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration&TestCategory!=MutatingIntegration&TestCategory!=ProtectedIntegration"
+```
+
+Run protected read-only integration tests only when `PapiSettings.PolarisOverrideAccount` is configured with staff override credentials:
+
+```bash
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ProtectedIntegration&TestCategory!=MutatingIntegration"
 ```
 
 Run mutating/destructive integration tests only against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty:
