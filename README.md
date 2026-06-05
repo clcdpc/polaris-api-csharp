@@ -69,9 +69,15 @@ Run non-integration tests from the repository root:
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory!=Integration"
 ```
 
-Integration tests require live Polaris dev credentials and local test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
+Integration tests require a live Polaris dev environment plus local dev credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
 
-Run basic read-only integration tests only when you have local Polaris dev settings configured. This excludes protected read-only tests that require staff override credentials:
+The live-test tiers are:
+
+- `Integration`: basic read-only tests that require only the live Polaris dev environment and standard local dev settings.
+- `ProtectedIntegration`: protected read-only tests that require staff override credentials in `PapiSettings.PolarisOverrideAccount`.
+- `MutatingIntegration`: mutating/destructive tests that may create or modify data and should only run against disposable or nightly-refreshed Polaris dev environments. Mutating tests may leave artifacts behind.
+
+Run basic read-only integration tests when you have local Polaris dev settings configured. This command excludes staff-required protected read-only tests and mutating tests:
 
 ```bash
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration&TestCategory!=MutatingIntegration&TestCategory!=ProtectedIntegration"
@@ -89,7 +95,7 @@ Run mutating/destructive integration tests only against a disposable Polaris dev
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=MutatingIntegration"
 ```
 
-`MutatingIntegration` tests may create or modify patron blocks, title lists, account entries, record-set entries, notes, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Protected or destructive tests require staff override credentials in `PapiSettings.PolarisOverrideAccount`.
+`MutatingIntegration` tests may create or modify patron blocks, title lists, account entries, record-set entries, notes, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed.
 
 A local `appsettings.Test.json` follows this shape:
 
