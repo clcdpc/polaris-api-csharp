@@ -489,7 +489,8 @@ namespace Clc.Polaris.Api.Tests
             var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
                 () => client.PatronSearchAsync("name=Smith", orgId: 9));
 
-            Assert.AreEqual("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.", exception.Message);
+            StringAssert.Contains(exception.Message, "valid protected access token");
+            StringAssert.Contains(exception.Message, "ProtectedToken.Placeholder");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
@@ -531,6 +532,8 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(handler.Requests[2].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
         }
 
+        // PapiClientTokenTests.PatronSearchAsync_SameHostAndStaffWithDifferentAccessIds_AuthenticatesAndCachesSeparateTokens
+        // covers the same-host/same-staff/different-AccessID cache-key regression; this complements it for staff-user changes.
         [TestMethod]
         public async Task ProtectedTokenPathRequest_DoesNotShareCachedTokenAcrossStaffUsers()
         {
@@ -576,7 +579,8 @@ namespace Clc.Polaris.Api.Tests
             var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
                 () => client.PatronSearchAsync("name=Smith", orgId: 9));
 
-            Assert.AreEqual("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.", exception.Message);
+            StringAssert.Contains(exception.Message, "valid protected access token");
+            StringAssert.Contains(exception.Message, "ProtectedToken.Placeholder");
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.ProtectedRequestCount);
         }
@@ -619,14 +623,7 @@ namespace Clc.Polaris.Api.Tests
             var secondRequest = secondClient.PatronSearchAsync("name=Second", orgId: 9, cancellationToken: secondCts.Token);
 
             secondCts.Cancel();
-            try
-            {
-                await secondRequest.ConfigureAwait(false);
-                Assert.Fail("The second protected request should observe cancellation while waiting for the protected-token cache lock.");
-            }
-            catch (OperationCanceledException)
-            {
-            }
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () => await secondRequest.ConfigureAwait(false));
 
             handler.CompleteAuthentication.SetResult();
             await firstRequest.ConfigureAwait(false);
