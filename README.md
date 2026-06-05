@@ -69,13 +69,21 @@ Run non-integration tests from the repository root:
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory!=Integration"
 ```
 
-Run integration tests only when you have local Polaris settings configured:
+Run read-only integration tests only when you have live Polaris dev credentials and local Polaris settings configured:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration"
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration&TestCategory!=DisposableIntegration"
 ```
 
-Integration tests require local Polaris credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Do not commit real secrets; `appsettings.Test.json` is ignored by git.
+Integration tests require live Polaris dev credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Keep `appsettings.Test.json` local only: do not commit real secrets or environment-specific test settings. The file is ignored by git.
+
+Run disposable/destructive integration tests separately, and only against a disposable or nightly-refreshed Polaris dev environment:
+
+```bash
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=DisposableIntegration"
+```
+
+`DisposableIntegration` tests may create or modify patron blocks, title lists, account entries, record-set entries, notes, or similar Polaris artifacts. These tests are intended for disposable dev data only, artifacts may be left behind, and cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes rather than by assuming that prior artifacts were removed. Staff override credentials in `PapiSettings.PolarisOverrideAccount` are required for protected or destructive tests.
 
 A local `appsettings.Test.json` follows this shape:
 
