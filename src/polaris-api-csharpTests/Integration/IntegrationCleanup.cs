@@ -14,7 +14,7 @@ internal sealed class IntegrationCleanup
         _cleanupActions.Push((description, cleanup));
     }
 
-    public async Task RunAsync()
+    public async Task RunAsync(Exception? testFailure = null)
     {
         var failures = new List<Exception>();
 
@@ -32,11 +32,23 @@ internal sealed class IntegrationCleanup
             }
         }
 
-        if (failures.Count > 0)
+        if (failures.Count == 0)
         {
-            throw new AssertFailedException(
-                $"One or more integration-test cleanup actions failed. Manual cleanup may be required. Failed cleanup action count: {failures.Count}.",
-                new AggregateException(failures));
+            return;
         }
+
+        if (testFailure != null)
+        {
+            var allFailures = new List<Exception> { testFailure };
+            allFailures.AddRange(failures);
+
+            throw new AssertFailedException(
+                $"The integration test failed and cleanup also failed. Manual cleanup may be required. Failed cleanup action count: {failures.Count}.",
+                new AggregateException(allFailures));
+        }
+
+        throw new AssertFailedException(
+            $"One or more integration-test cleanup actions failed. Manual cleanup may be required. Failed cleanup action count: {failures.Count}.",
+            new AggregateException(failures));
     }
 }

@@ -1,5 +1,6 @@
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Runtime.ExceptionServices;
 
 namespace Clc.Polaris.Api.Tests.Integration;
 
@@ -86,6 +87,7 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
         }
 
         var cleanup = new IntegrationCleanup();
+        ExceptionDispatchInfo? testFailure = null;
         var runId = Guid.NewGuid().ToString("N");
         var sourceListName = $"{Settings.PatronListName}-{runId}-source";
         var destinationListName = $"{Settings.PatronListName}-{runId}-destination";
@@ -136,10 +138,16 @@ public sealed class PatronAccountAndTitleListIntegrationTests : IntegrationTestB
             var deleteAllTitlesResponse = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, destinationListId, Settings.PatronPin);
             PapiIntegrationAssert.Success(deleteAllTitlesResponse);
         }
+        catch (Exception ex)
+        {
+            testFailure = ExceptionDispatchInfo.Capture(ex);
+        }
         finally
         {
-            await cleanup.RunAsync();
+            await cleanup.RunAsync(testFailure?.SourceException);
         }
+
+        testFailure?.Throw();
     }
 
     private async Task<int> CreateDisposableTitleListAsync(string uniqueListName, IntegrationCleanup cleanup)
