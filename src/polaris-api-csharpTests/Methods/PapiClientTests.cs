@@ -21,6 +21,7 @@ namespace Clc.Polaris.Api.Tests
     public class PapiClientTests
     {
         private const string MissingIntegrationConfigurationMessage = "Integration test configuration is missing. Provide appsettings.Test.json or environment variables to run integration tests.";
+        private const string TestArtifactPrefix = "PAPI_TEST_";
 
         TestSettings Settings = null!;
 
@@ -74,8 +75,45 @@ namespace Clc.Polaris.Api.Tests
                 && !string.IsNullOrWhiteSpace(settings.PatronBarcode)
                 && !string.IsNullOrWhiteSpace(settings.PatronPin)
                 && !string.IsNullOrWhiteSpace(settings.FreeTextBlock)
-                && !string.IsNullOrWhiteSpace(settings.PatronListName)
                 && !string.IsNullOrWhiteSpace(settings.OrgEmail);
+        }
+
+        private static string CreateUniqueTestArtifactText(string? baseName = null, int maxLength = 80)
+        {
+            var sanitizedBaseName = SanitizeArtifactBaseName(baseName);
+            var uniqueSuffix = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}";
+            var suffixWithPrefix = $"{TestArtifactPrefix}{uniqueSuffix}";
+
+            if (string.IsNullOrWhiteSpace(sanitizedBaseName))
+            {
+                return suffixWithPrefix;
+            }
+
+            var baseNameBudget = maxLength - suffixWithPrefix.Length - 1;
+            if (baseNameBudget <= 0)
+            {
+                return suffixWithPrefix;
+            }
+
+            var trimmedBaseName = sanitizedBaseName.Length <= baseNameBudget
+                ? sanitizedBaseName
+                : sanitizedBaseName[..baseNameBudget];
+
+            return $"{TestArtifactPrefix}{trimmedBaseName}_{uniqueSuffix}";
+        }
+
+        private static string SanitizeArtifactBaseName(string? baseName)
+        {
+            if (string.IsNullOrWhiteSpace(baseName))
+            {
+                return string.Empty;
+            }
+
+            var sanitized = new string(baseName
+                .Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_')
+                .ToArray());
+
+            return sanitized.Trim('_', '-');
         }
 
         [TestMethod()]
@@ -282,7 +320,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task NotificationUpdateTest()
         {
-            var response = (await papi.NotificationUpdateAsync(new NotificationUpdateParams { PatronId = Settings.PatronId, DeliveryString = "test@test.test", ReportingOrgID = 7, NotificationDeliveryDate = DateTime.Now, DeliveryOptionId = 2, Details = "test", NotificationStatusId = NotificationStatus.EmailCompleted, NotificationTypeId = 1 })).Data;
+            var response = (await papi.NotificationUpdateAsync(new NotificationUpdateParams { PatronId = Settings.PatronId, DeliveryString = "test@test.test", ReportingOrgID = 7, NotificationDeliveryDate = DateTime.Now, DeliveryOptionId = 2, Details = CreateUniqueTestArtifactText(maxLength: 80), NotificationStatusId = NotificationStatus.EmailCompleted, NotificationTypeId = 1 })).Data;
             Assert.IsTrue(response.PAPIErrorCode == -1);
         }
 
@@ -305,7 +343,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountCreateCreditTest()
         {
-            var response = await papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash);
+            var response = await papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
@@ -314,11 +352,16 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task TestTitleListCreate_Get_Delete()
         {
-            var createResponse = await papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, Settings.PatronListName, Settings.PatronPin);
-            Assert.IsTrue(createResponse.Data.PAPIErrorCode == 0 || createResponse.Data.PAPIErrorCode == -1);
+            var listName = CreateUniqueTestArtifactText(Settings.PatronListName);
+
+            var createResponse = await papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, listName, Settings.PatronPin);
+            Assert.AreEqual(0, createResponse.Data.PAPIErrorCode);
 
             var getResponse = await papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin);
-            var list = getResponse.Data.PatronAccountTitleListsRows.Single(l => l.RecordStoreName == Settings.PatronListName);
+            var list = getResponse.Data.PatronAccountTitleListsRows.FirstOrDefault(l => l.RecordStoreName == listName);
+
+            Assert.IsNotNull(list, $"Expected to find uniquely named title list '{listName}'.");
+
             var deleteResponse = await papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, list.RecordStoreId, Settings.PatronPin);
             Assert.IsTrue(deleteResponse.Data.PAPIErrorCode == 0);
         }
@@ -328,7 +371,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountDepositCreditTest()
         {
-            var response = await papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, note: "integration testing");
+            var response = await papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
 
@@ -345,7 +388,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountPayTest()
         {
-            var response = (await papi.PatronAccountPayAsync(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: "integration testing")).Data;
+            var response = (await papi.PatronAccountPayAsync(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80))).Data;
             Assert.IsTrue(response.PAPIErrorCode == -3600);
         }
 
@@ -354,7 +397,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountPayAllTest()
         {
-            var response = await papi.PatronAccountPayAllAsync(Settings.PatronBarcode, 999999.99, PaymentMethod.Cash, note: "integration testing");
+            var response = await papi.PatronAccountPayAllAsync(Settings.PatronBarcode, 999999.99, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == -3610);
         }
 
@@ -363,7 +406,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountRefundCreditTest()
         {
-            var response = await papi.PatronAccountRefundCreditAsync(Settings.PatronBarcode, 999999.99, note: "integration testing");
+            var response = await papi.PatronAccountRefundCreditAsync(Settings.PatronBarcode, 999999.99, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == -3606);
         }
 
@@ -372,7 +415,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountVoidTest()
         {
-            var response = await papi.PatronAccountVoidAsync(Settings.PatronBarcode, 1234, note: "integration testing");
+            var response = await papi.PatronAccountVoidAsync(Settings.PatronBarcode, 1234, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == -3606);
         }
 
