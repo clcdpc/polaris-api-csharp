@@ -20,10 +20,10 @@ namespace Clc.Polaris.Api.Tests
     [TestCategory("Integration")]
     public class PapiClientTests
     {
-        private const string MissingIntegrationConfigurationMessage = "Integration test configuration is missing. Provide appsettings.Test.json or environment variables to run integration tests.";
         private const string TestArtifactPrefix = "PAPI_TEST_";
 
         TestSettings Settings = null!;
+        PapiSettings PapiSettings = null!;
 
         protected static IConfiguration InitConfiguration()
         {
@@ -51,31 +51,14 @@ namespace Clc.Polaris.Api.Tests
             var papiSettings = config.GetSection(PapiSettings.SECTION_NAME).Get<PapiSettings>();
             var testSettings = config.Get<TestSettings>();
 
-            if (!HasRequiredPapiSettings(papiSettings) || !HasRequiredTestSettings(testSettings))
+            if (!IntegrationTestRequirements.HasRequiredPapiSettings(papiSettings) || !IntegrationTestRequirements.HasRequiredTestSettings(testSettings))
             {
-                Assert.Inconclusive(MissingIntegrationConfigurationMessage);
+                Assert.Inconclusive(IntegrationTestRequirements.MissingIntegrationConfigurationMessage);
             }
 
             papi = new PapiClient(papiSettings!);
+            PapiSettings = papiSettings!;
             Settings = testSettings!;
-        }
-
-        private static bool HasRequiredPapiSettings(PapiSettings? settings)
-        {
-            return settings != null
-                && !string.IsNullOrWhiteSpace(settings.AccessId)
-                && !string.IsNullOrWhiteSpace(settings.AccessKey)
-                && !string.IsNullOrWhiteSpace(settings.Hostname);
-        }
-
-        private static bool HasRequiredTestSettings(TestSettings? settings)
-        {
-            return settings != null
-                && settings.PatronId > 0
-                && !string.IsNullOrWhiteSpace(settings.PatronBarcode)
-                && !string.IsNullOrWhiteSpace(settings.PatronPin)
-                && !string.IsNullOrWhiteSpace(settings.FreeTextBlock)
-                && !string.IsNullOrWhiteSpace(settings.OrgEmail);
         }
 
         private static string CreateUniqueTestArtifactText(string? baseName = null, int maxLength = 80)
@@ -135,10 +118,7 @@ namespace Clc.Polaris.Api.Tests
         public async Task AuthenticateStaffUserTest()
         {
             var staffOverrideAccount = papi.StaffOverrideAccount;
-            if (staffOverrideAccount == null)
-            {
-                Assert.Inconclusive(MissingIntegrationConfigurationMessage);
-            }
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
             var response = await papi.AuthenticateStaffUserAsync(staffOverrideAccount!);
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
@@ -188,6 +168,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_FreeTextBlock()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.FreeText, Settings.FreeTextBlock);
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
@@ -197,6 +179,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_SystemBlock()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.System, "128");
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
@@ -206,6 +190,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_LibraryAssignedBlock()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.LibraryAssigned, "1");
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
@@ -254,6 +240,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task HoldRequestGetListTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.HoldRequestGetListAsync(7);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
@@ -320,6 +308,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task NotificationUpdateTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = (await papi.NotificationUpdateAsync(new NotificationUpdateParams { PatronId = Settings.PatronId, DeliveryString = "test@test.test", ReportingOrgID = 7, NotificationDeliveryDate = DateTime.Now, DeliveryOptionId = 2, Details = CreateUniqueTestArtifactText(maxLength: 80), NotificationStatusId = NotificationStatus.EmailCompleted, NotificationTypeId = 1 })).Data;
             Assert.IsTrue(response.PAPIErrorCode == -1);
         }
@@ -334,6 +324,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task Patron_GetBarcodeFromIdTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.Patron_GetBarcodeFromIdAsync(Settings.PatronId);
             Assert.IsTrue(response.Data.Barcode == Settings.PatronBarcode);
         }
@@ -343,6 +335,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountCreateCreditTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
@@ -371,6 +365,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountDepositCreditTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronAccountDepositCreditAsync(Settings.PatronBarcode, .01, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
@@ -388,6 +384,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountPayTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = (await papi.PatronAccountPayAsync(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80))).Data;
             Assert.IsTrue(response.PAPIErrorCode == -3600);
         }
@@ -397,6 +395,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountPayAllTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronAccountPayAllAsync(Settings.PatronBarcode, 999999.99, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == -3610);
         }
@@ -406,6 +406,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountRefundCreditTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronAccountRefundCreditAsync(Settings.PatronBarcode, 999999.99, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == -3606);
         }
@@ -415,6 +417,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronAccountVoidTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronAccountVoidAsync(Settings.PatronBarcode, 1234, note: CreateUniqueTestArtifactText(maxLength: 80));
             Assert.IsTrue(response.Data.PAPIErrorCode == -3606);
         }
@@ -525,6 +529,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task PatronRenewBlocksGetTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronRenewBlocksGetAsync(Settings.PatronId);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
@@ -539,6 +545,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task PatronSearchTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.PatronSearchAsync($"PRID={Settings.PatronId}");
             Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.PatronSearchRows.Count);
         }
@@ -639,6 +647,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task RecordSetContentAddTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.RecordSetContentAddAsync(1234, 1234);
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
@@ -648,6 +658,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task RecordSetContentAddTest_List()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.RecordSetContentAddAsync(1234, new[] { 1234 });
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
@@ -657,6 +669,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task RecordSetContentRemoveTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.RecordSetContentRemoveAsync(1234, 1234);
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
@@ -666,6 +680,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task RecordSetContentRemoveTest_List()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.RecordSetContentRemoveAsync(1234, new[] { 1234 });
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
@@ -673,6 +689,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task RecordSetRecordsGetTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.RecordSetRecordsGetAsync(1234);
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
@@ -687,6 +705,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task SA_GetValueByOrgTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.SA_GetValueByOrgAsync("ORGEMAIL");
             Assert.IsTrue(response.Data.Value == Settings.OrgEmail);
         }
@@ -701,6 +721,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod()]
         public async Task Synch_BibsByIdGetTest()
         {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
             var response = await papi.Synch_BibsByIdGetAsync(bibId);
             Assert.IsTrue(response.Response.IsSuccessStatusCode);
         }
