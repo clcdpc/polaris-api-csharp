@@ -20,7 +20,8 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/readinghistory";
             var request = PapiRestRequest.Delete(url, password: password ?? string.Empty);
-            if (ids.Any()) { request.QueryParameters.Add("ids", string.Join(",", ids)); }
+            var idList = ids?.ToArray() ?? Array.Empty<int>();
+            if (idList.Length > 0) { request.QueryParameters.Add("ids", string.Join(",", idList)); }
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -18,6 +18,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     [DoNotParallelize]
     [TestCategory("RestClientMigration")]
+    [TestCategory("Unit")]
     public class PapiClientTokenTests
     {
         [TestInitialize]
@@ -217,6 +218,85 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(8, handler.ProtectedRequestCount);
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("protected-token", client.Token.AccessToken);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ProtectedPlaceholderWithoutTokenOrStaffOverride_ThrowsBeforeProtectedRequest()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            client.Token = null;
+            client.StaffOverrideAccount = null;
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => client.PatronSearchAsync("name=Smith"));
+
+            StringAssert.Contains(exception.Message, "valid protected access token");
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_WithPatronPasswordAndStaffOverride_DoesNotAuthenticateStaffOrSendOverrideHeader()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            client.AllowStaffOverrideRequests = true;
+            client.UseProtectedTokenCache = true;
+            client.StaffOverrideAccount = CreateStaffUser();
+
+            await client.PatronAccountGetAsync("ABC123", "patron-password");
+
+            Assert.AreEqual(1, handler.RequestCount);
+            Assert.IsNotNull(handler.LastRequest);
+            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/patron/ABC123/account");
+            Assert.IsFalse(handler.LastRequest.RequestUri.AbsolutePath.Contains("/authenticator/staff"));
+            Assert.IsFalse(handler.LastRequest.Headers.Contains("X-PAPI-AccessToken"));
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CancelledWaiterDuringProtectedTokenAuthentication_DoesNotHoldCacheLock()
+        {
+            var handler = new ControllableProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+
+            var firstRequest = client.PatronSearchAsync("name=first");
+            await handler.WaitForAuthenticationStartedAsync();
+
+            using var waiterCancellation = new CancellationTokenSource();
+            var cancelledWaiter = client.PatronSearchAsync("name=cancelled", cancellationToken: waiterCancellation.Token);
+            await Task.Delay(50);
+            waiterCancellation.Cancel();
+
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () => await cancelledWaiter);
+
+            handler.ReleaseAuthentication();
+            await firstRequest;
+
+            client.Token = null;
+            RemoveCachedToken(client.Hostname, client.AccessID, client.StaffOverrideAccount);
+
+            var laterRequest = client.PatronSearchAsync("name=later");
+            var completed = await Task.WhenAny(laterRequest, Task.Delay(TimeSpan.FromSeconds(2)));
+
+            Assert.AreSame(laterRequest, completed, "The protected-token cache lock should be released after a cancelled waiter.");
+            await laterRequest;
+            Assert.AreEqual(2, handler.AuthenticationRequestCount);
+            Assert.AreEqual(2, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronReadingHistoryClearAsync_EnumeratesIdsOnceAndAddsCommaSeparatedIdsQueryParameter()
+        {
+            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var client = CreateClient(handler);
+            var ids = new ThrowOnSecondEnumeration<int>(new[] { 4, 5, 6 });
+
+            await client.PatronReadingHistoryClearAsync("ABC123", ids);
+
+            Assert.AreEqual(1, handler.RequestCount);
+            Assert.IsNotNull(handler.LastRequest);
+            var query = handler.LastRequest.RequestUri!.Query;
+            Assert.IsTrue(query.Contains("ids=4,5,6") || query.Contains("ids=4%2C5%2C6"), $"Unexpected query string: {query}");
         }
 
         [TestMethod]
@@ -503,7 +583,7 @@ namespace Clc.Polaris.Api.Tests
             };
         }
 
-        private static PapiClient CreateProtectedClient(ProtectedTokenHttpMessageHandler handler)
+        private static PapiClient CreateProtectedClient(HttpMessageHandler handler)
         {
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var httpClient = new HttpClient(handler)
@@ -576,6 +656,64 @@ namespace Clc.Polaris.Api.Tests
             }
         }
 
+        private sealed class ControllableProtectedTokenHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly TaskCompletionSource _authenticationStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource _releaseAuthentication = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            private int _authenticationRequestCount;
+            private int _protectedRequestCount;
+
+            public int AuthenticationRequestCount => _authenticationRequestCount;
+            public int ProtectedRequestCount => _protectedRequestCount;
+
+            public Task WaitForAuthenticationStartedAsync() => _authenticationStarted.Task;
+
+            public void ReleaseAuthentication() => _releaseAuthentication.TrySetResult();
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff"))
+                {
+                    Interlocked.Increment(ref _authenticationRequestCount);
+                    _authenticationStarted.TrySetResult();
+                    await _releaseAuthentication.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(CreateProtectedTokenJson($"protected-token-{_authenticationRequestCount}", "protected-secret", DateTime.Now.AddHours(1)), Encoding.UTF8, "application/json")
+                    };
+                }
+
+                Interlocked.Increment(ref _protectedRequestCount);
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                };
+            }
+        }
+
+        private sealed class ThrowOnSecondEnumeration<T> : IEnumerable<T>
+        {
+            private readonly IEnumerable<T> _items;
+            private int _enumerationCount;
+
+            public ThrowOnSecondEnumeration(IEnumerable<T> items)
+            {
+                _items = items;
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                if (Interlocked.Increment(ref _enumerationCount) > 1)
+                {
+                    throw new InvalidOperationException("Sequence was enumerated more than once.");
+                }
+
+                return _items.GetEnumerator();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
         private sealed class ProtectedTokenHttpMessageHandler : HttpMessageHandler
         {
             private readonly HttpStatusCode _authenticationStatusCode;
@@ -629,6 +767,15 @@ namespace Clc.Polaris.Api.Tests
         {
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
             cache?.TryAdd(BuildCacheKey(hostname, accessId, staffUser), token);
+        }
+
+        private static void RemoveCachedToken(string hostname, string accessId, PolarisUser? staffUser)
+        {
+            var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
+            if (staffUser != null)
+            {
+                cache?.TryRemove(BuildCacheKey(hostname, accessId, staffUser), out _);
+            }
         }
 
         private static bool TryGetCachedToken(string hostname, string accessId, PolarisUser? staffUser, out ProtectedToken? token)
