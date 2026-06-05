@@ -346,8 +346,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task TestTitleListCreate_Get_Delete()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var listName = CreateUniqueTestArtifactText(Settings.PatronListName);
 
             var createResponse = await papi.PatronAccountCreateTitleListAsync(Settings.PatronBarcode, listName, Settings.PatronPin);
@@ -478,8 +476,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronMessageDeleteTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronMessageDeleteAsync(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -496,8 +492,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronMessageUpdateStatusTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronMessageUpdateStatusAsync(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -514,8 +508,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronReadingHistoryClearTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronReadingHistoryClearAsync(Settings.PatronBarcode, new[] { 1234 });
             Assert.IsTrue(response.Data.PAPIErrorCode == -10);
         }
@@ -564,8 +556,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronTitleListAddTitleTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronTitleListAddTitleAsync(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -575,8 +565,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronTitleListCopyAllTitlesTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronTitleListCopyAllTitlesAsync(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -586,8 +574,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronTitleListCopyTitleTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronTitleListCopyTitleAsync(Settings.PatronBarcode, 1234, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -597,8 +583,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronTitleListDeleteAllTitlesTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -608,8 +592,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronTitleListDeleteTitleTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronTitleListDeleteTitleAsync(Settings.PatronBarcode, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -626,8 +608,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronTitleListMoveTitleTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronTitleListMoveTitleAsync(Settings.PatronBarcode, 1234, 1234, 1234, Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == -1);
         }
@@ -637,8 +617,6 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronUpdateTest()
         {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
             var response = await papi.PatronUpdateAsync(Settings.PatronBarcode, new PatronUpdateParams(), Settings.PatronPin);
             Assert.IsTrue(response.Data.PAPIErrorCode == 0);
         }
