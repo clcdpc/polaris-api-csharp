@@ -74,16 +74,16 @@ Integration tests require live Polaris dev credentials and local test data in `s
 Run read-only integration tests only when you have local Polaris dev settings configured:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration&TestCategory!=DisposableIntegration"
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Integration&TestCategory!=MutatingIntegration"
 ```
 
-Run disposable/destructive integration tests only against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty:
+Run mutating/destructive integration tests only against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=DisposableIntegration"
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=MutatingIntegration"
 ```
 
-`DisposableIntegration` tests may create patron blocks, title lists, account entries, record-set entries, notes, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Protected or destructive tests require staff override credentials in `PapiSettings.PolarisOverrideAccount`.
+`MutatingIntegration` tests may create or modify patron blocks, title lists, account entries, record-set entries, notes, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Protected or destructive tests require staff override credentials in `PapiSettings.PolarisOverrideAccount`.
 
 A local `appsettings.Test.json` follows this shape:
 
