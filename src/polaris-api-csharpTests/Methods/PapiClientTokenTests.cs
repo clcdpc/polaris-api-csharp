@@ -356,6 +356,53 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithBlankAccessToken_IsRemovedAndNewTokenIsUsed()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
+            {
+                AccessToken = " ",
+                AccessSecret = "cached-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            });
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("new-token", client.Token?.AccessToken);
+            Assert.AreNotEqual(" ", client.Token?.AccessToken);
+            Assert.IsTrue(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out var cachedToken));
+            Assert.IsNotNull(cachedToken);
+            Assert.AreEqual("new-token", cachedToken.AccessToken);
+            Assert.AreEqual("new-secret", cachedToken.AccessSecret);
+            StringAssert.Contains(handler.RequestPaths.Last(), "/protected/v1/1033/100/1/new-token/search/patrons/Boolean");
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithBlankAccessSecret_IsRemovedAndNotUsedWhenAuthenticationFails()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
+            {
+                AccessToken = "cached-token",
+                AccessSecret = " ",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            });
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
+            Assert.IsNull(client.Token);
+        }
+
+        [TestMethod]
         public void BuildProtectedTokenCacheKey_UsesCredentialFingerprintWithoutRawSecrets()
         {
             var client = CreateProtectedClient(new ProtectedTokenHttpMessageHandler());
@@ -446,10 +493,10 @@ namespace Clc.Polaris.Api.Tests
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
             var client = CreateProtectedClient(handler);
 
-            var response = await client.PatronAccountGetAsync("ABC123");
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
-            Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -460,10 +507,10 @@ namespace Clc.Polaris.Api.Tests
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
             var client = CreateProtectedClient(handler);
 
-            var response = await client.PatronAccountGetAsync("ABC123");
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
-            Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -480,10 +527,10 @@ namespace Clc.Polaris.Api.Tests
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            var response = await client.PatronAccountGetAsync("ABC123");
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
-            Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -500,10 +547,10 @@ namespace Clc.Polaris.Api.Tests
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            var response = await client.PatronAccountGetAsync("ABC123");
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
-            Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -523,13 +570,158 @@ namespace Clc.Polaris.Api.Tests
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            var response = await client.PatronAccountGetAsync("ABC123");
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
-            Assert.IsNotNull(response);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_FailedStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_NullDataStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "null");
+            var client = CreateProtectedClient(handler);
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            StringAssert.Contains(exception.Message, "did not return a usable protected access token");
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_BlankAccessTokenStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson(" ", "protected-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_BlankAccessSecretStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("protected-token", " ", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ExpiredTokenStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("protected-token", "protected-secret", DateTime.Now.AddMinutes(-1)));
+            var client = CreateProtectedClient(handler);
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ProtectedTokenPlaceholder_ThrowsBeforeFinalRequestWhenTokenAcquisitionFails()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.IsFalse(handler.RequestPaths.Any(path => path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal)));
+        }
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_PublicStaffOverride_FailedStaffAuthentication_ThrowsBeforeFinalRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+
+            StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_PublicRequestWithoutStaffOverrideAccount_ContinuesAsOrdinaryPublicRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            client.StaffOverrideAccount = null;
+            client.AllowStaffOverrideRequests = true;
+
+            var response = await client.PatronAccountGetAsync("ABC123");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
+        }
+
+        [TestMethod]
+        public async Task PatronAccountGetAsync_PublicRequestWithExplicitPassword_DoesNotRequireStaffOverrideToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+
+            var response = await client.PatronAccountGetAsync("ABC123", password: "patron-password");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CancellationDuringProtectedTokenAuthentication_PropagatesCancellation()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(10));
+
+            try
+            {
+                await client.PatronSearchAsync("name=Smith", cancellationToken: cancellationTokenSource.Token);
+                Assert.Fail("Expected cancellation to propagate.");
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+        }
+
 
         [TestMethod]
         public void PreformatRestRequest_ExpiredProtectedToken_DoesNotUseSecretForProtectedMethodSigning()
