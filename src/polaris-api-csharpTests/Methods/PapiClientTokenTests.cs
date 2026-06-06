@@ -356,6 +356,53 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithBlankAccessToken_IsRemovedAndNewTokenIsUsed()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
+            {
+                AccessToken = " ",
+                AccessSecret = "cached-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            });
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("new-token", client.Token?.AccessToken);
+            Assert.AreNotEqual(" ", client.Token?.AccessToken);
+            Assert.IsTrue(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out var cachedToken));
+            Assert.IsNotNull(cachedToken);
+            Assert.AreEqual("new-token", cachedToken.AccessToken);
+            Assert.AreEqual("new-secret", cachedToken.AccessSecret);
+            StringAssert.Contains(handler.RequestPaths.Last(), "/protected/v1/1033/100/1/new-token/search/patrons/Boolean");
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithBlankAccessSecret_IsRemovedAndNotUsedWhenAuthenticationFails()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
+            {
+                AccessToken = "cached-token",
+                AccessSecret = " ",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            });
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
+            Assert.IsNull(client.Token);
+        }
+
+        [TestMethod]
         public void BuildProtectedTokenCacheKey_UsesCredentialFingerprintWithoutRawSecrets()
         {
             var client = CreateProtectedClient(new ProtectedTokenHttpMessageHandler());

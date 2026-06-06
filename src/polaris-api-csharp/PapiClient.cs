@@ -339,18 +339,20 @@ namespace Clc.Polaris.Api
                 return false;
             }
 
-            if (ProtectedTokenCache.TryGetValue(cacheKey, out var cachedToken))
+            if (!ProtectedTokenCache.TryGetValue(cacheKey, out var cachedToken))
             {
-                if (!IsProtectedTokenMissingOrExpired(cachedToken))
-                {
-                    _token = new ProtectedToken(cachedToken);
-                    return true;
-                }
-
-                ProtectedTokenCache.TryRemove(cacheKey, out _);
+                return false;
             }
 
-            return false;
+            if (!IsProtectedTokenUsable(cachedToken))
+            {
+                ProtectedTokenCache.TryRemove(cacheKey, out _);
+                _token = null;
+                return false;
+            }
+
+            _token = new ProtectedToken(cachedToken);
+            return true;
         }
 
         private async Task<ProtectedTokenAcquisitionResult> AuthenticateAndLoadProtectedTokenAsync(string? cacheKey, CancellationToken cancellationToken)
