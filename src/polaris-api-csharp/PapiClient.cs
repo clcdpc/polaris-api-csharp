@@ -220,13 +220,47 @@ namespace Clc.Polaris.Api
             if (StaffOverrideAccount == null ||
                 string.IsNullOrWhiteSpace(Hostname) ||
                 string.IsNullOrWhiteSpace(AccessID) ||
+                string.IsNullOrWhiteSpace(AccessKey) ||
                 string.IsNullOrWhiteSpace(StaffOverrideAccount.Domain) ||
-                string.IsNullOrWhiteSpace(StaffOverrideAccount.Username))
+                string.IsNullOrWhiteSpace(StaffOverrideAccount.Username) ||
+                string.IsNullOrWhiteSpace(StaffOverrideAccount.Password))
             {
                 return null;
             }
 
-            return $"{Hostname.Trim()}|{AccessID.Trim()}|{StaffOverrideAccount.Domain.Trim()}|{StaffOverrideAccount.Username.Trim()}";
+            var normalizedHostname = Hostname.Trim();
+            var normalizedAccessId = AccessID.Trim();
+            var normalizedDomain = StaffOverrideAccount.Domain.Trim();
+            var normalizedUsername = StaffOverrideAccount.Username.Trim();
+            var credentialFingerprint = BuildProtectedTokenCredentialFingerprint(
+                normalizedHostname,
+                normalizedAccessId,
+                AccessKey,
+                normalizedDomain,
+                normalizedUsername,
+                StaffOverrideAccount.Password);
+
+            return $"{normalizedHostname}|{normalizedAccessId}|{normalizedDomain}|{normalizedUsername}|{credentialFingerprint}";
+        }
+
+        private static string BuildProtectedTokenCredentialFingerprint(
+            string normalizedHostname,
+            string normalizedAccessId,
+            string accessKey,
+            string normalizedDomain,
+            string normalizedUsername,
+            string password)
+        {
+            var credentialMaterial = string.Join(
+                "\u001F",
+                normalizedHostname,
+                normalizedAccessId,
+                accessKey,
+                normalizedDomain,
+                normalizedUsername,
+                password);
+            var credentialHash = SHA256.HashData(Encoding.UTF8.GetBytes(credentialMaterial));
+            return Convert.ToHexString(credentialHash);
         }
 
         private static bool IsProtectedTokenMissingOrExpired(ProtectedToken? token)
@@ -241,13 +275,19 @@ namespace Clc.Polaris.Api
                 return false;
             }
 
-            if (ProtectedTokenCache.TryGetValue(cacheKey, out var cachedToken) && !IsProtectedTokenMissingOrExpired(cachedToken))
+            if (!ProtectedTokenCache.TryGetValue(cacheKey, out var cachedToken))
             {
-                _token = new ProtectedToken(cachedToken);
-                return true;
+                return false;
             }
 
-            return false;
+            if (IsProtectedTokenMissingOrExpired(cachedToken))
+            {
+                ProtectedTokenCache.TryRemove(cacheKey, out _);
+                return false;
+            }
+
+            _token = new ProtectedToken(cachedToken);
+            return true;
         }
 
         private async Task<ProtectedToken?> AuthenticateAndLoadProtectedTokenAsync(string? cacheKey, CancellationToken cancellationToken)
@@ -268,6 +308,11 @@ namespace Clc.Polaris.Api
                 string.IsNullOrWhiteSpace(responseData.AccessToken) ||
                 string.IsNullOrWhiteSpace(responseData.AccessSecret))
             {
+                if (!string.IsNullOrWhiteSpace(cacheKey))
+                {
+                    ProtectedTokenCache.TryRemove(cacheKey, out _);
+                }
+
                 _token = currentToken;
                 return _token;
             }

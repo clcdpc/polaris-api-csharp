@@ -238,6 +238,159 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual("cached-token", client.Token?.AccessToken);
         }
 
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithSameStaffButBlankPassword_DoesNotReuseOrWriteCache()
+        {
+            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            var staffA = CreateStaffUser("correct-1");
+            var clientA = CreateProtectedClient(new ProtectedTokenHttpMessageHandler());
+            clientA.Hostname = hostname;
+            clientA.StaffOverrideAccount = staffA;
+            SetCachedToken(hostname, clientA.AccessID, clientA.AccessKey, staffA, new ProtectedToken
+            {
+                AccessToken = "cached-token-a",
+                AccessSecret = "cached-secret-a",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            });
+
+            var handlerB = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var clientB = CreateProtectedClient(handlerB);
+            clientB.Hostname = hostname;
+            clientB.StaffOverrideAccount = CreateStaffUser(string.Empty);
+
+            await clientB.PatronSearchAsync("name=Jones");
+
+            Assert.AreEqual(1, handlerB.AuthenticationRequestCount);
+            Assert.AreEqual(1, handlerB.ProtectedRequestCount);
+            Assert.AreEqual("token-b", clientB.Token?.AccessToken);
+            Assert.IsTrue(TryGetCachedToken(hostname, clientA.AccessID, clientA.AccessKey, staffA, out var cachedTokenA));
+            Assert.IsNotNull(cachedTokenA);
+            Assert.AreEqual("cached-token-a", cachedTokenA.AccessToken);
+            Assert.AreEqual(1, ProtectedTokenCacheCount());
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithSameStaffButDifferentPassword_DoesNotReuseCache()
+        {
+            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            var staffA = CreateStaffUser("correct-1");
+            var handlerA = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var clientA = CreateProtectedClient(handlerA);
+            clientA.Hostname = hostname;
+            clientA.StaffOverrideAccount = staffA;
+
+            await clientA.PatronSearchAsync("name=Smith");
+
+            var handlerB = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var clientB = CreateProtectedClient(handlerB);
+            clientB.Hostname = hostname;
+            clientB.StaffOverrideAccount = CreateStaffUser("different-2");
+
+            await clientB.PatronSearchAsync("name=Jones");
+
+            Assert.AreEqual(1, handlerA.AuthenticationRequestCount);
+            Assert.AreEqual(1, handlerB.AuthenticationRequestCount);
+            Assert.AreEqual("token-b", clientB.Token?.AccessToken);
+            Assert.AreNotEqual("token-a", clientB.Token?.AccessToken);
+            Assert.AreEqual(2, ProtectedTokenCacheCount());
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CachedTokenWithDifferentAccessKey_DoesNotReuseCache()
+        {
+            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            var staff = CreateStaffUser("correct-1");
+            var handlerA = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var clientA = CreateProtectedClient(handlerA);
+            clientA.Hostname = hostname;
+            clientA.StaffOverrideAccount = staff;
+            clientA.AccessKey = "access-key-a";
+
+            await clientA.PatronSearchAsync("name=Smith");
+
+            var handlerB = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var clientB = CreateProtectedClient(handlerB);
+            clientB.Hostname = hostname;
+            clientB.StaffOverrideAccount = staff;
+            clientB.AccessKey = "access-key-b";
+
+            await clientB.PatronSearchAsync("name=Jones");
+
+            Assert.AreEqual(1, handlerA.AuthenticationRequestCount);
+            Assert.AreEqual(1, handlerB.AuthenticationRequestCount);
+            Assert.AreEqual("token-b", clientB.Token?.AccessToken);
+            Assert.AreNotEqual("token-a", clientB.Token?.AccessToken);
+            Assert.AreEqual(2, ProtectedTokenCacheCount());
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_BlankStaffPassword_DoesNotReadFromOrWriteToProtectedTokenCache()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("blank-password-token", "blank-password-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            client.StaffOverrideAccount = CreateStaffUser(" ");
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("blank-password-token", client.Token?.AccessToken);
+            Assert.AreEqual(0, ProtectedTokenCacheCount());
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ExpiredCachedToken_RemovesExpiredEntry()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.Now.AddMinutes(-1)
+            });
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.IsNull(client.Token);
+            Assert.AreEqual(0, ProtectedTokenCacheCount());
+        }
+
+        [TestMethod]
+        public void BuildProtectedTokenCacheKey_DoesNotExposeRawStaffPasswordOrAccessKey()
+        {
+            const string rawPassword = " correct-1 ";
+            const string rawAccessKey = " access-key-secret ";
+            var client = new PapiClient
+            {
+                Hostname = " https://example.test ",
+                AccessID = " access-id ",
+                AccessKey = rawAccessKey,
+                StaffOverrideAccount = CreateStaffUser(rawPassword)
+            };
+
+            var cacheKey = BuildCacheKey(client);
+
+            Assert.IsNotNull(cacheKey);
+            Assert.IsFalse(cacheKey!.Contains(rawPassword, StringComparison.Ordinal), "Cache key exposed the raw staff password.");
+            Assert.IsFalse(cacheKey.Contains(rawAccessKey, StringComparison.Ordinal), "Cache key exposed the raw access key.");
+            StringAssert.Contains(cacheKey, "https://example.test|access-id|domain|user|");
+        }
+
         [TestMethod]
         public async Task PatronSearchAsync_SameHostAndStaffWithDifferentAccessIds_AuthenticatesAndCachesSeparateTokens()
         {
@@ -523,13 +676,13 @@ namespace Clc.Polaris.Api.Tests
             };
         }
 
-        private static PolarisUser CreateStaffUser()
+        private static PolarisUser CreateStaffUser(string password = "password")
         {
             return new PolarisUser
             {
                 Domain = "domain",
                 Username = "user",
-                Password = "password"
+                Password = password
             };
         }
 
@@ -627,15 +780,38 @@ namespace Clc.Polaris.Api.Tests
 
         private static void SetCachedToken(string hostname, string accessId, PolarisUser? staffUser, ProtectedToken token)
         {
+            SetCachedToken(hostname, accessId, "access-key", staffUser, token);
+        }
+
+        private static void SetCachedToken(string hostname, string accessId, string accessKey, PolarisUser? staffUser, ProtectedToken token)
+        {
+            var cacheKey = BuildCacheKey(hostname, accessId, accessKey, staffUser);
+            if (cacheKey == null)
+            {
+                return;
+            }
+
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
-            cache?.TryAdd(BuildCacheKey(hostname, accessId, staffUser), token);
+            cache?.TryAdd(cacheKey, token);
         }
 
         private static bool TryGetCachedToken(string hostname, string accessId, PolarisUser? staffUser, out ProtectedToken? token)
         {
+            return TryGetCachedToken(hostname, accessId, "access-key", staffUser, out token);
+        }
+
+        private static bool TryGetCachedToken(string hostname, string accessId, string accessKey, PolarisUser? staffUser, out ProtectedToken? token)
+        {
             token = null;
+            var cacheKey = BuildCacheKey(hostname, accessId, accessKey, staffUser);
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
-            return staffUser != null && cache?.TryGetValue(BuildCacheKey(hostname, accessId, staffUser), out token) == true;
+            return cacheKey != null && cache?.TryGetValue(cacheKey, out token) == true;
+        }
+
+        private static int ProtectedTokenCacheCount()
+        {
+            var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
+            return cache?.Count ?? 0;
         }
 
         private static T? GetPrivateStaticProperty<T>(string propertyName) where T : class
@@ -644,10 +820,23 @@ namespace Clc.Polaris.Api.Tests
             return cacheProperty?.GetValue(null) as T;
         }
 
-        private static string BuildCacheKey(string hostname, string accessId, PolarisUser? staffUser)
+        private static string? BuildCacheKey(string hostname, string accessId, string accessKey, PolarisUser? staffUser)
         {
-            if (staffUser == null) { throw new ArgumentNullException(nameof(staffUser)); }
-            return $"{hostname.Trim()}|{accessId.Trim()}|{staffUser.Domain.Trim()}|{staffUser.Username.Trim()}";
+            var client = new PapiClient
+            {
+                Hostname = hostname,
+                AccessID = accessId,
+                AccessKey = accessKey,
+                StaffOverrideAccount = staffUser
+            };
+
+            return BuildCacheKey(client);
+        }
+
+        private static string? BuildCacheKey(PapiClient client)
+        {
+            var buildCacheKeyMethod = typeof(PapiClient).GetMethod("BuildProtectedTokenCacheKey", BindingFlags.NonPublic | BindingFlags.Instance);
+            return buildCacheKeyMethod?.Invoke(client, null) as string;
         }
     }
 }
