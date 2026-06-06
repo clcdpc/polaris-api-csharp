@@ -219,6 +219,176 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual("protected-token", client.Token.AccessToken);
         }
 
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ConcurrentProtectedRequestsAcrossClientsForSameCacheKey_AuthenticateOnceAndUseSharedToken()
+        {
+            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            var staff = CreateStaffUser(password: "shared-password");
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("shared-token", "shared-secret", DateTime.Now.AddHours(1)));
+            var clients = Enumerable.Range(0, 6)
+                .Select(_ => CreateProtectedClient(handler, hostname, staff))
+                .ToArray();
+
+            await Task.WhenAll(clients.Select((client, index) => client.PatronSearchAsync($"name=shared-{index}")));
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(clients.Length, handler.ProtectedRequestCount);
+            Assert.IsTrue(clients.All(client => client.Token?.AccessToken == "shared-token"));
+            var finalRequests = handler.CapturedRequests.Where(request => !request.IsStaffAuthenticationRequest).ToArray();
+            Assert.AreEqual(clients.Length, finalRequests.Length);
+            foreach (var request in finalRequests)
+            {
+                StringAssert.Contains(request.Path, "/protected/v1/1033/100/1/shared-token/search/patrons/Boolean");
+                Assert.IsFalse(request.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+                AssertAuthorizationHash(request, "shared-secret", "access-key", "access-id");
+            }
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ConcurrentProtectedRequestsAcrossClientsForDifferentPasswords_AuthenticateAndCacheSeparately()
+        {
+            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            var passwordAToken = new ProtectedToken
+            {
+                AccessToken = "token-for-password-a",
+                AccessSecret = "secret-for-password-a",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+            var passwordBToken = new ProtectedToken
+            {
+                AccessToken = "token-for-password-b",
+                AccessSecret = "secret-for-password-b",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+            var handler = new ProtectedTokenHttpMessageHandler(request =>
+            {
+                if (request.Body.Contains("password-a", StringComparison.Ordinal))
+                {
+                    return (HttpStatusCode.OK, CreateProtectedTokenJson(passwordAToken));
+                }
+
+                if (request.Body.Contains("password-b", StringComparison.Ordinal))
+                {
+                    return (HttpStatusCode.OK, CreateProtectedTokenJson(passwordBToken));
+                }
+
+                return (HttpStatusCode.BadRequest, "{\"PAPIErrorCode\":1}");
+            });
+            var clients = new[]
+            {
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a")),
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b")),
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a")),
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b"))
+            };
+
+            await Task.WhenAll(
+                clients[0].PatronSearchAsync("name=alpha-0"),
+                clients[1].PatronSearchAsync("name=bravo-0"),
+                clients[2].PatronSearchAsync("name=alpha-1"),
+                clients[3].PatronSearchAsync("name=bravo-1"));
+
+            Assert.AreEqual(2, handler.AuthenticationRequestCount);
+            Assert.AreEqual(4, handler.ProtectedRequestCount);
+            Assert.AreEqual("token-for-password-a", clients[0].Token?.AccessToken);
+            Assert.AreEqual("token-for-password-b", clients[1].Token?.AccessToken);
+            Assert.AreEqual("token-for-password-a", clients[2].Token?.AccessToken);
+            Assert.AreEqual("token-for-password-b", clients[3].Token?.AccessToken);
+            AssertFinalRequestsUseExpectedToken(handler, "alpha-", "token-for-password-a", "secret-for-password-a");
+            AssertFinalRequestsUseExpectedToken(handler, "bravo-", "token-for-password-b", "secret-for-password-b");
+
+            var passwordAReuseClient = CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a"));
+            var passwordBReuseClient = CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b"));
+
+            await Task.WhenAll(
+                passwordAReuseClient.PatronSearchAsync("name=reuse-a"),
+                passwordBReuseClient.PatronSearchAsync("name=reuse-b"));
+
+            Assert.AreEqual(2, handler.AuthenticationRequestCount);
+            Assert.AreEqual(6, handler.ProtectedRequestCount);
+            Assert.AreEqual("token-for-password-a", passwordAReuseClient.Token?.AccessToken);
+            Assert.AreEqual("token-for-password-b", passwordBReuseClient.Token?.AccessToken);
+            AssertFinalRequestsUseExpectedToken(handler, "reuse-a", "token-for-password-a", "secret-for-password-a");
+            AssertFinalRequestsUseExpectedToken(handler, "reuse-b", "token-for-password-b", "secret-for-password-b");
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_WhenProtectedTokenCacheDisabled_IgnoresStaticCachedTokenAndUsesNewAuthenticationToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("fresh-token", "fresh-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            client.UseProtectedTokenCache = false;
+            SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
+            {
+                AccessToken = "cached-token",
+                AccessSecret = "cached-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            });
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("fresh-token", client.Token?.AccessToken);
+            var finalRequest = handler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest);
+            StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/fresh-token/search/patrons/Boolean");
+            Assert.IsFalse(finalRequest.Path.Contains("cached-token", StringComparison.Ordinal));
+            AssertAuthorizationHash(finalRequest, "fresh-secret", client.AccessKey, client.AccessID);
+            AssertAuthorizationHashDoesNotMatch(finalRequest, "cached-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_WithExpiredInstanceToken_ReauthenticatesAndUsesNewTokenForRequestSigning()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("new-protected-token", "new-protected-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            client.Token = new ProtectedToken
+            {
+                AccessToken = "expired-token",
+                AccessSecret = "expired-secret",
+                ExpirationDate = DateTime.Now.AddMinutes(-1)
+            };
+
+            await client.PatronSearchAsync("name=Smith");
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("new-protected-token", client.Token?.AccessToken);
+            var finalRequest = handler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest);
+            StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/new-protected-token/search/patrons/Boolean");
+            Assert.IsFalse(finalRequest.Path.Contains("expired-token", StringComparison.Ordinal));
+            AssertAuthorizationHash(finalRequest, "new-protected-secret", client.AccessKey, client.AccessID);
+            AssertAuthorizationHashDoesNotMatch(finalRequest, "expired-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_ProtectedTokenPlaceholder_ReplacesPlaceholderAfterSuccessfulTokenAcquisitionAndSignsFinalPath()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("placeholder-token", "placeholder-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+
+            await client.PatronSearchAsync("name=Smith");
+
+            var capturedRequests = handler.CapturedRequests;
+            Assert.AreEqual(2, capturedRequests.Length);
+            Assert.IsTrue(capturedRequests[0].IsStaffAuthenticationRequest);
+            Assert.IsFalse(capturedRequests[1].IsStaffAuthenticationRequest);
+            Assert.IsFalse(capturedRequests.Any(request => request.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal)));
+            StringAssert.Contains(capturedRequests[1].Path, "/protected/v1/1033/100/1/placeholder-token/search/patrons/Boolean");
+            AssertAuthorizationHash(capturedRequests[1], "placeholder-secret", client.AccessKey, client.AccessID);
+            var placeholderUri = capturedRequests[1].AbsoluteUri.Replace("placeholder-token", ProtectedToken.Placeholder, StringComparison.Ordinal);
+            AssertAuthorizationHashDoesNotMatch(capturedRequests[1], "placeholder-secret", client.AccessKey, client.AccessID, placeholderUri);
+        }
+
         [TestMethod]
         public async Task PatronSearchAsync_WithCachedValidToken_AvoidsStaffAuthentication()
         {
@@ -649,11 +819,23 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public async Task PatronSearchAsync_ProtectedTokenPlaceholder_ThrowsBeforeFinalRequestWhenTokenAcquisitionFails()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
+            var returnedToken = new ProtectedToken
+            {
+                AccessToken = "failed-token",
+                AccessSecret = "failed-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, CreateProtectedTokenJson(returnedToken));
             var client = CreateProtectedClient(handler);
+            client.AccessKey = "failure-access-key";
+            client.StaffOverrideAccount = CreateStaffUser(password: "failure-password");
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
+            Assert.IsFalse(exception.Message.Contains(client.StaffOverrideAccount.Password, StringComparison.Ordinal));
+            Assert.IsFalse(exception.Message.Contains(client.AccessKey, StringComparison.Ordinal));
+            Assert.IsFalse(exception.Message.Contains(returnedToken.AccessToken, StringComparison.Ordinal));
+            Assert.IsFalse(exception.Message.Contains(returnedToken.AccessSecret, StringComparison.Ordinal));
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsFalse(handler.RequestPaths.Any(path => path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal)));
@@ -832,7 +1014,11 @@ namespace Clc.Polaris.Api.Tests
 
         private static PapiClient CreateProtectedClient(ProtectedTokenHttpMessageHandler handler)
         {
-            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            return CreateProtectedClient(handler, $"https://example-{Guid.NewGuid():N}.test", CreateStaffUser());
+        }
+
+        private static PapiClient CreateProtectedClient(ProtectedTokenHttpMessageHandler handler, string hostname, PolarisUser staffUser)
+        {
             var httpClient = new HttpClient(handler)
             {
                 BaseAddress = new Uri($"{hostname}/")
@@ -846,7 +1032,7 @@ namespace Clc.Polaris.Api.Tests
                 OrganizationId = 1,
                 UseProtectedTokenCache = true,
                 AllowStaffOverrideRequests = true,
-                StaffOverrideAccount = CreateStaffUser()
+                StaffOverrideAccount = staffUser
             };
         }
 
@@ -869,6 +1055,39 @@ namespace Clc.Polaris.Api.Tests
                 $"\"AccessSecret\":\"{accessSecret}\"," +
                 $"\"AuthExpDate\":\"{expirationDate:O}\"" +
                 "}";
+        }
+
+        private static string CreateProtectedTokenJson(ProtectedToken token)
+        {
+            return CreateProtectedTokenJson(token.AccessToken!, token.AccessSecret!, token.ExpirationDate!.Value);
+        }
+
+        private static void AssertFinalRequestsUseExpectedToken(ProtectedTokenHttpMessageHandler handler, string queryMarker, string expectedToken, string expectedSecret)
+        {
+            var matchingRequests = handler.CapturedRequests
+                .Where(request => !request.IsStaffAuthenticationRequest && request.AbsoluteUri.Contains(queryMarker, StringComparison.Ordinal))
+                .ToArray();
+            Assert.IsTrue(matchingRequests.Length > 0, $"Expected at least one final request containing '{queryMarker}'.");
+            foreach (var request in matchingRequests)
+            {
+                StringAssert.Contains(request.Path, $"/protected/v1/1033/100/1/{expectedToken}/search/patrons/Boolean");
+                Assert.IsFalse(request.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+                AssertAuthorizationHash(request, expectedSecret, "access-key", "access-id");
+            }
+        }
+
+        private static void AssertAuthorizationHash(CapturedPapiRequest request, string secret, string accessKey, string accessId, string? absoluteUri = null)
+        {
+            Assert.IsTrue(request.Headers.TryGetValue("PolarisDate", out var date), "The request did not include a PolarisDate header.");
+            Assert.IsTrue(request.Headers.TryGetValue("Authorization", out var authorization), "The request did not include an Authorization header.");
+            Assert.AreEqual($"PWS {accessId}:{ComputePapiHash(request.Method, absoluteUri ?? request.AbsoluteUri, date, secret, accessKey)}", authorization);
+        }
+
+        private static void AssertAuthorizationHashDoesNotMatch(CapturedPapiRequest request, string secret, string accessKey, string accessId, string? absoluteUri = null)
+        {
+            Assert.IsTrue(request.Headers.TryGetValue("PolarisDate", out var date), "The request did not include a PolarisDate header.");
+            Assert.IsTrue(request.Headers.TryGetValue("Authorization", out var authorization), "The request did not include an Authorization header.");
+            Assert.AreNotEqual($"PWS {accessId}:{ComputePapiHash(request.Method, absoluteUri ?? request.AbsoluteUri, date, secret, accessKey)}", authorization);
         }
 
         private static string ComputePapiHash(string httpMethod, string uri, string date, string password, string accessKey)
@@ -903,17 +1122,41 @@ namespace Clc.Polaris.Api.Tests
             }
         }
 
+        private sealed class CapturedPapiRequest
+        {
+            public CapturedPapiRequest(HttpRequestMessage request, string body)
+            {
+                Method = request.Method.ToString();
+                AbsoluteUri = request.RequestUri!.AbsoluteUri;
+                Path = request.RequestUri.AbsolutePath;
+                Body = body;
+                IsStaffAuthenticationRequest = Path.Contains("/authenticator/staff", StringComparison.Ordinal);
+                Headers = request.Headers
+                    .ToDictionary(header => header.Key, header => string.Join(",", header.Value), StringComparer.OrdinalIgnoreCase);
+            }
+
+            public string Method { get; }
+            public string AbsoluteUri { get; }
+            public string Path { get; }
+            public string Body { get; }
+            public bool IsStaffAuthenticationRequest { get; }
+            public IReadOnlyDictionary<string, string> Headers { get; }
+        }
+
         private sealed class ProtectedTokenHttpMessageHandler : HttpMessageHandler
         {
             private readonly HttpStatusCode _authenticationStatusCode;
             private readonly string _authenticationResponseJson;
+            private readonly Func<CapturedPapiRequest, (HttpStatusCode StatusCode, string ResponseJson)>? _authenticationResponseFactory;
             private int _authenticationRequestCount;
             private int _protectedRequestCount;
             private readonly ConcurrentQueue<string> _requestPaths = new ConcurrentQueue<string>();
+            private readonly ConcurrentQueue<CapturedPapiRequest> _capturedRequests = new ConcurrentQueue<CapturedPapiRequest>();
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
             public int ProtectedRequestCount => _protectedRequestCount;
             public string[] RequestPaths => _requestPaths.ToArray();
+            public CapturedPapiRequest[] CapturedRequests => _capturedRequests.ToArray();
 
             public ProtectedTokenHttpMessageHandler(HttpStatusCode authenticationStatusCode = HttpStatusCode.OK, string? authenticationResponseJson = null)
             {
@@ -921,17 +1164,27 @@ namespace Clc.Polaris.Api.Tests
                 _authenticationResponseJson = authenticationResponseJson ?? CreateProtectedTokenJson("protected-token", "protected-secret", DateTime.Now.AddHours(1));
             }
 
+            public ProtectedTokenHttpMessageHandler(Func<CapturedPapiRequest, (HttpStatusCode StatusCode, string ResponseJson)> authenticationResponseFactory)
+                : this()
+            {
+                _authenticationResponseFactory = authenticationResponseFactory;
+            }
+
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                _requestPaths.Enqueue(request.RequestUri!.AbsolutePath);
+                var body = request.Content == null ? string.Empty : await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var capturedRequest = new CapturedPapiRequest(request, body);
+                _requestPaths.Enqueue(capturedRequest.Path);
+                _capturedRequests.Enqueue(capturedRequest);
 
-                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff"))
+                if (capturedRequest.IsStaffAuthenticationRequest)
                 {
                     Interlocked.Increment(ref _authenticationRequestCount);
                     await Task.Delay(50, cancellationToken).ConfigureAwait(false);
-                    return new HttpResponseMessage(_authenticationStatusCode)
+                    var authenticationResponse = _authenticationResponseFactory?.Invoke(capturedRequest) ?? (_authenticationStatusCode, _authenticationResponseJson);
+                    return new HttpResponseMessage(authenticationResponse.StatusCode)
                     {
-                        Content = new StringContent(_authenticationResponseJson, Encoding.UTF8, "application/json")
+                        Content = new StringContent(authenticationResponse.ResponseJson, Encoding.UTF8, "application/json")
                     };
                 }
 
