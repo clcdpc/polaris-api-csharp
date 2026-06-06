@@ -220,13 +220,22 @@ namespace Clc.Polaris.Api
             if (StaffOverrideAccount == null ||
                 string.IsNullOrWhiteSpace(Hostname) ||
                 string.IsNullOrWhiteSpace(AccessID) ||
+                string.IsNullOrWhiteSpace(AccessKey) ||
                 string.IsNullOrWhiteSpace(StaffOverrideAccount.Domain) ||
-                string.IsNullOrWhiteSpace(StaffOverrideAccount.Username))
+                string.IsNullOrWhiteSpace(StaffOverrideAccount.Username) ||
+                string.IsNullOrWhiteSpace(StaffOverrideAccount.Password))
             {
                 return null;
             }
 
-            return $"{Hostname.Trim()}|{AccessID.Trim()}|{StaffOverrideAccount.Domain.Trim()}|{StaffOverrideAccount.Username.Trim()}";
+            return $"{Hostname.Trim()}|{AccessID.Trim()}|{StaffOverrideAccount.Domain.Trim()}|{StaffOverrideAccount.Username.Trim()}|{BuildProtectedTokenCredentialFingerprint(AccessKey, StaffOverrideAccount.Password)}";
+        }
+
+        private static string BuildProtectedTokenCredentialFingerprint(string accessKey, string staffPassword)
+        {
+            var credentialMaterial = $"access-key:{accessKey.Length}:{accessKey}|staff-password:{staffPassword.Length}:{staffPassword}";
+            var hash = SHA256.HashData(Encoding.UTF8.GetBytes(credentialMaterial));
+            return Convert.ToHexString(hash);
         }
 
         private static bool IsProtectedTokenMissingOrExpired(ProtectedToken? token)
@@ -241,10 +250,15 @@ namespace Clc.Polaris.Api
                 return false;
             }
 
-            if (ProtectedTokenCache.TryGetValue(cacheKey, out var cachedToken) && !IsProtectedTokenMissingOrExpired(cachedToken))
+            if (ProtectedTokenCache.TryGetValue(cacheKey, out var cachedToken))
             {
-                _token = new ProtectedToken(cachedToken);
-                return true;
+                if (!IsProtectedTokenMissingOrExpired(cachedToken))
+                {
+                    _token = new ProtectedToken(cachedToken);
+                    return true;
+                }
+
+                ProtectedTokenCache.TryRemove(cacheKey, out _);
             }
 
             return false;
@@ -268,6 +282,11 @@ namespace Clc.Polaris.Api
                 string.IsNullOrWhiteSpace(responseData.AccessToken) ||
                 string.IsNullOrWhiteSpace(responseData.AccessSecret))
             {
+                if (!string.IsNullOrWhiteSpace(cacheKey))
+                {
+                    ProtectedTokenCache.TryRemove(cacheKey, out _);
+                }
+
                 _token = currentToken;
                 return _token;
             }
