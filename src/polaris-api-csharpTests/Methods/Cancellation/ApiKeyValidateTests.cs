@@ -1,11 +1,8 @@
-using Clc.Polaris.Api;
-using Clc.Polaris.Api.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Clc.Polaris.Api.Tests.Methods.Cancellation
+namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitCategory]
