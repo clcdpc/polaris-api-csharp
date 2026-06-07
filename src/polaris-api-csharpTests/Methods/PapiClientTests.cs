@@ -100,6 +100,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task ApiKeyValidateTest()
         {
             var response = await papi.ApiKeyValidateAsync();
@@ -107,6 +109,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task ApiVersionGetTest()
         {
             var response = await papi.ApiVersionGetAsync();
@@ -115,6 +119,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task AuthenticateStaffUserTest()
         {
@@ -128,6 +134,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task BibGetTest()
         {
             var response = await papi.BibGetAsync(478907);
@@ -138,6 +146,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task BibGetTest_PassBranchId()
         {
             var response = await papi.BibGetAsync(bibId, 7);
@@ -147,6 +157,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task BibSearchTest()
         {
             var response = await papi.BibSearchAsync(new BibSearchOptions { Term = "dogs", PageSize = 10 });
@@ -156,6 +168,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task CollectionsGetTest()
         {
             var response = await papi.CollectionsGetAsync();
@@ -165,6 +179,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_FreeTextBlock()
@@ -177,6 +193,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_SystemBlock()
@@ -188,6 +206,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_LibraryAssignedBlock()
@@ -199,6 +219,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task DatesClosedGetTest()
         {
             var response = await papi.DatesClosedGetAsync(7);
@@ -212,6 +234,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task HoldingsGetTest()
         {
             var response = await papi.HoldingsGetAsync(bibId);
@@ -219,6 +243,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task HoldRequestCancelTest()
         {
             var response = await papi.HoldRequestCancelAsync(Settings.PatronBarcode, 1234, Settings.PatronPin);
@@ -226,6 +253,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task HoldRequestCreateTest()
         {
             var response = await papi.HoldRequestCreateAsync(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7));
@@ -233,6 +263,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task HoldRequestCreateTest2()
         {
             var response = await ((PapiClient)papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
@@ -240,6 +273,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task HoldRequestGetListTest()
         {
@@ -250,6 +285,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task HoldRequestReactivateTest()
         {
             var response = await papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, 1234, DateTime.Now);
@@ -257,6 +295,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task HoldRequestReplyTest()
         {
             var hold = new HoldRequestCreateResult { RequestGuid = new Guid() };
@@ -265,6 +306,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task HoldRequestSuspendTest()
         {
             var response = await papi.HoldRequestSuspendAsync(Settings.PatronBarcode, 1234, DateTime.Now, Settings.PatronPin);
@@ -272,6 +316,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task ItemRenewTest()
         {
             var response = await papi.ItemRenewAsync(Settings.PatronBarcode, 1234, Settings.PatronPin);
@@ -279,6 +326,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task ItemStatusesGetAsyncTest()
         {
             var response = await papi.ItemStatusesGetAsync(7);
@@ -293,6 +342,8 @@ namespace Clc.Polaris.Api.Tests
         //}
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task LimitFiltersGetTest()
         {
             var response = (await papi.LimitFiltersGetAsync()).Data;
@@ -300,6 +351,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task MARCTypeOfMaterialsGetAsyncTest()
         {
             var response = (await papi.MARCTypeOfMaterialsGetAsync()).Data;
@@ -307,6 +360,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task NotificationUpdateTest()
@@ -318,6 +373,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task OrganizationsGetTest()
         {
             var response = await papi.OrganizationsGetAsync();
@@ -325,6 +382,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task Patron_GetBarcodeFromIdTest()
         {
@@ -335,6 +394,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountCreateCreditTest()
@@ -346,6 +407,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task TestTitleListCreate_Get_Delete()
@@ -365,6 +427,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountDepositCreditTest()
@@ -376,6 +440,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronAccountGetTest()
         {
             var response = await papi.PatronAccountGetAsync(Settings.PatronBarcode, Settings.PatronPin);
@@ -384,6 +450,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountPayTest()
@@ -395,6 +463,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountPayAllTest()
@@ -406,6 +476,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountRefundCreditTest()
@@ -417,6 +489,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronAccountVoidTest()
@@ -428,6 +502,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronBasicDataGetTest()
         {
             var response = await papi.PatronBasicDataGetAsync(Settings.PatronBarcode, Settings.PatronPin, true);
@@ -437,6 +513,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronCirculateBlocksGetTest()
         {
             var response = await papi.PatronCirculateBlocksGetAsync(Settings.PatronBarcode, Settings.PatronPin);
@@ -444,6 +522,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronCodesGetTest()
         {
             var response = await papi.PatronCodesGetAsync();
@@ -452,6 +532,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronHoldRequestsGetTest()
         {
             var response = await papi.PatronHoldRequestsGetAsync(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin);
@@ -460,6 +542,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronILLRequestsGetTest()
         {
             var response = await papi.PatronILLRequestsGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
@@ -468,6 +552,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronItemsOutGetTest()
         {
             var response = await papi.PatronItemsOutGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
@@ -476,6 +562,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronMessageDeleteTest()
@@ -485,6 +572,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronMessagesGetTest()
         {
             var response = await papi.PatronMessagesGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
@@ -492,6 +581,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronMessageUpdateStatusTest()
@@ -501,6 +591,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronPreferencesGetTest()
         {
             var response = await papi.PatronPreferencesGetAsync(Settings.PatronBarcode, Settings.PatronPin);
@@ -508,6 +600,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronReadingHistoryClearTest()
@@ -517,6 +610,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronReadingHistoryGetTest()
         {
             var response = await papi.PatronReadingHistoryGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
@@ -531,6 +626,8 @@ namespace Clc.Polaris.Api.Tests
         //}
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task PatronRenewBlocksGetTest()
         {
@@ -541,6 +638,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronSavedSearchesGetTest()
         {
             var response = await papi.PatronSavedSearchesGetAsync(Settings.PatronBarcode, Settings.PatronPin);
@@ -548,6 +647,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task PatronSearchTest()
         {
@@ -558,6 +659,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListAddTitleTest()
@@ -567,6 +669,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListCopyAllTitlesTest()
@@ -576,6 +679,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListCopyTitleTest()
@@ -585,6 +689,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListDeleteAllTitlesTest()
@@ -594,6 +699,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListDeleteTitleTest()
@@ -603,6 +709,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronTitleListGetTitlesTest()
         {
             var response = await papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, 1234, password: Settings.PatronPin);
@@ -610,6 +718,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronTitleListMoveTitleTest()
@@ -619,6 +728,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task PatronUpdateTest()
@@ -628,6 +738,9 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("MutatingIntegration")]
+        [DoNotParallelize]
         public async Task PatronUpdateUserNameTest()
         {
             var response = await papi.PatronUpdateUserNameAsync(Settings.PatronBarcode + "1234", Settings.PatronPin, Settings.PatronPin);
@@ -635,6 +748,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PatronValidateTest()
         {
             var response = await papi.PatronValidateAsync(Settings.PatronBarcode, Settings.PatronPin);
@@ -642,6 +757,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task PickupBranchesGetTest()
         {
             var response = await papi.PickupBranchesGetAsync();
@@ -649,6 +766,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentAddTest()
@@ -660,6 +779,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentAddTest_List()
@@ -671,6 +792,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentRemoveTest()
@@ -682,6 +805,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ProtectedIntegration")]
         [TestCategory("MutatingIntegration")]
         [DoNotParallelize]
         public async Task RecordSetContentRemoveTest_List()
@@ -693,6 +818,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task RecordSetRecordsGetTest()
         {
@@ -710,6 +837,8 @@ namespace Clc.Polaris.Api.Tests
         //}
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task SA_GetValueByOrgTest()
         {
@@ -720,6 +849,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         public async Task ShelfLocationsGetTest()
         {
             var response = await papi.ShelfLocationsGetAsync(7);
@@ -727,6 +858,8 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
+        [TestCategory("Integration")]
+        [TestCategory("ReadOnlyIntegration")]
         [TestCategory("ProtectedIntegration")]
         public async Task Synch_BibsByIdGetTest()
         {
