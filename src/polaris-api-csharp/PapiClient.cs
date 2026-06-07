@@ -152,8 +152,25 @@ namespace Clc.Polaris.Api
             public bool HasValidToken => Status == ProtectedTokenAcquisitionStatus.ValidTokenAvailable && IsProtectedTokenUsable(Token);
         }
 
-        private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Executes a caller-supplied <see cref="PapiRestRequest"/> through the normal PAPI pipeline as an
+        /// escape hatch for unsupported or custom PAPI endpoints. Callers must pass a PAPI request whose
+        /// path is a relative PAPI path, such as <c>/public/v1/1033/100/1/...</c> or
+        /// <c>/protected/v1/1033/100/1/...</c>. Absolute URLs and protocol-relative URLs are rejected.
+        /// Requests executed by this method still use the standard <see cref="PapiClient"/> processing,
+        /// including protected-token acquisition, <see cref="ProtectedToken.Placeholder"/> replacement,
+        /// staff override behavior, PolarisDate, Authorization signing, and URL construction/path prefix behavior.
+        /// </summary>
+        /// <typeparam name="T">The response data type.</typeparam>
+        /// <param name="request">The custom PAPI request to execute.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+        /// <returns>The REST response returned by the PAPI endpoint.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="request"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="request"/> has an invalid custom PAPI path.</exception>
+        public async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default)
         {
+            ValidateCustomPapiRequest(request);
+
             var pathContainsProtectedTokenPlaceholder = RequestPathContainsProtectedTokenPlaceholder(request);
             var requiresProtectedToken = RequiresProtectedToken(request, pathContainsProtectedTokenPlaceholder);
 
@@ -173,6 +190,41 @@ namespace Clc.Polaris.Api
             }
 
             return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static void ValidateCustomPapiRequest(PapiRestRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Path))
+            {
+                throw new ArgumentException("PAPI request path must not be null, empty, or whitespace.", nameof(request));
+            }
+
+            if (request.Path.Contains("://", StringComparison.Ordinal))
+            {
+                throw new ArgumentException("PAPI request path must be a relative path, not an absolute URL.", nameof(request));
+            }
+
+            if (request.Path.StartsWith("//", StringComparison.Ordinal))
+            {
+                throw new ArgumentException("PAPI request path must not be a protocol-relative URL.", nameof(request));
+            }
+
+            if (!request.Path.StartsWith("/", StringComparison.Ordinal))
+            {
+                throw new ArgumentException("PAPI request path must begin with '/'.", nameof(request));
+            }
+
+            if (request.AuthRequired &&
+                !request.Path.StartsWith("/public/", StringComparison.OrdinalIgnoreCase) &&
+                !request.Path.StartsWith("/protected/", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("Authenticated custom PAPI request paths must begin with '/public/' or '/protected/'.", nameof(request));
+            }
         }
 
         private bool RequiresProtectedToken(PapiRestRequest request, bool pathContainsProtectedTokenPlaceholder)

@@ -245,6 +245,168 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public void ExecutePapiAsync_IsPublicOnPapiClientOnly()
+        {
+            var papiClientMethod = typeof(PapiClient)
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .SingleOrDefault(method => method.Name == nameof(PapiClient.ExecutePapiAsync) && method.IsGenericMethodDefinition);
+            var interfaceMethod = typeof(IPapiClient)
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .SingleOrDefault(method => method.Name == nameof(PapiClient.ExecutePapiAsync));
+
+            Assert.IsNotNull(papiClientMethod);
+            Assert.IsNull(interfaceMethod);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_NullRequest_ThrowsBeforeSendingHttpRequest()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => client.ExecutePapiAsync<PapiResponseCommon>(null!));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public async Task ExecutePapiAsync_NullEmptyOrWhitespacePath_ThrowsBeforeSendingHttpRequest(string? path)
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom");
+            request.Path = path!;
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        [DataRow("https://example.com/PAPIService/REST/public/v1/1033/100/1/custom")]
+        [DataRow("//example.com/foo")]
+        [DataRow("public/v1/1033/100/1/custom")]
+        public async Task ExecutePapiAsync_InvalidCustomPath_ThrowsBeforeSendingHttpRequest(string path)
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            var request = PapiRestRequest.Get(path);
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_AuthenticatedPathOutsidePublicOrProtected_ThrowsBeforeSendingHttpRequest()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            var request = PapiRestRequest.Get("/other/v1/1033/100/1/custom");
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicGet_SendsThroughPapiPipelineWithDateAndAuthorizationHeaders()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            client.StaffOverrideAccount = null;
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.AreEqual("GET", finalRequest.Method);
+            StringAssert.Contains(finalRequest.Path, "/public/v1/1033/100/1/custom/unsupported");
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicPost_SerializesBodyAndSignsRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            client.StaffOverrideAccount = null;
+            var request = PapiRestRequest.Post(
+                "/public/v1/1033/100/1/custom/unsupported",
+                body: new { Message = "custom-body", Count = 3 });
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.AreEqual("POST", finalRequest.Method);
+            StringAssert.Contains(finalRequest.Body, "custom-body");
+            StringAssert.Contains(finalRequest.Body, "3");
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_AcquiresAndReplacesProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
+            StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/custom-placeholder-token/custom/unsupported");
+            Assert.IsFalse(finalRequest.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+            AssertAuthorizationHash(finalRequest, "custom-placeholder-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicRequest_UsesStaffOverrideTokenWhenAllowed()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("override-token", "override-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
+            Assert.IsTrue(finalRequest.Headers.TryGetValue("X-PAPI-AccessToken", out var accessToken));
+            Assert.AreEqual("override-token", accessToken);
+            AssertAuthorizationHash(finalRequest, "override-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicRequestWithBlockStaffOverride_DoesNotSendStaffOverrideToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+            request.BlockStaffOverride = true;
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
         public void IsStaffAuthenticatorRequest_InvalidOrMissingPath_ReturnsFalse()
         {
             Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(null));
@@ -1057,12 +1219,7 @@ namespace Clc.Polaris.Api.Tests
 
         private static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
         {
-            var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .MakeGenericMethod(typeof(PapiResponseCommon));
-
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
-            await task.ConfigureAwait(false);
+            await client.ExecutePapiAsync<PapiResponseCommon>(request).ConfigureAwait(false);
         }
 
         private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
