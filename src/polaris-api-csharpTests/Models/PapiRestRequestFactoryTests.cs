@@ -3,7 +3,7 @@ using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
 
-namespace Clc.Polaris.Api.Tests.Models
+namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitCategory]
