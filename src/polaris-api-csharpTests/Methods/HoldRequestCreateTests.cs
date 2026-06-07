@@ -1,0 +1,31 @@
+﻿using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+
+namespace Clc.Polaris.Api.Tests
+{
+    [TestClass]
+    public sealed class HoldRequestCreateTests : IntegrationTestBase
+    {
+        [TestMethod]
+        [MutatingIntegrationCategory]
+        [DoNotParallelize]
+        public async Task HoldRequestCreateTest()
+        {
+            var response = await Papi.HoldRequestCreateAsync(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7));
+            Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
+        }
+
+        [TestMethod]
+        [MutatingIntegrationCategory]
+        [DoNotParallelize]
+        public async Task HoldRequestCreateTest2()
+        {
+            var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
+            Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
+        }
+    }
+}
