@@ -2,8 +2,6 @@ using System;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
