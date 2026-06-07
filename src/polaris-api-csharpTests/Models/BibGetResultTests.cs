@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
