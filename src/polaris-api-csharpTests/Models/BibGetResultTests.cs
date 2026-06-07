@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests.Models
 {
     [TestClass]
+    [TestCategory("Unit")]
     public class BibGetResultTests
     {
         [TestMethod]
