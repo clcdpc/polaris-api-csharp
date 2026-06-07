@@ -1,4 +1,5 @@
 using System;
+using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

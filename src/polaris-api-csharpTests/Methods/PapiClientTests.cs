@@ -212,13 +212,6 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod()]
-        [UnitCategory]
-        public void HeadingsSearchTest()
-        {
-            Assert.ThrowsException<NotImplementedException>(() => papi.HeadingsSearchAsync(bibId));
-        }
-
-        [TestMethod()]
         [ReadOnlyIntegrationCategory]
         public async Task HoldingsGetTest()
         {

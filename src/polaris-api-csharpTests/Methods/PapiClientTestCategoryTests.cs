@@ -125,14 +125,7 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public void LivePapiClientTestsHaveExactlyOneIntegrationCategory()
         {
-            var documentedExceptions = new[]
-            {
-                // This test only asserts the client method is not implemented and does not execute a live API request.
-                nameof(PapiClientTests.HeadingsSearchTest),
-            };
-
             var incorrectlyCategorized = GetPapiClientTestMethods()
-                .Where(method => !documentedExceptions.Contains(method.Name))
                 .Select(method => new
                 {
                     method.Name,
