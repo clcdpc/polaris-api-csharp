@@ -27,15 +27,5 @@ namespace Clc.Polaris.Api
 
             return await ExecutePapiAsync<BibSearchResult>(request, cancellationToken).ConfigureAwait(false);
         }
-
-        public async Task<IRestResponse<BibSearchResult>> BibKeywordSearchAsync(string keyword, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default)
-        {
-            return await BibSearchAsync(new BibSearchOptions { Term = keyword, Branch = branchId ?? OrganizationId, Page = page, PageSize = pageSize, SortOption = sortBy }, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<IRestResponse<BibSearchResult>> BibBooleanSearchAsync(string ccl, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default)
-        {
-            return await BibSearchAsync(new BibSearchOptions { SearchType = BibSearchTypes.boolean, Term = ccl, Branch = branchId ?? OrganizationId, Page = page, PageSize = pageSize, SortOption = sortBy }, cancellationToken).ConfigureAwait(false);
-        }
     }
 }

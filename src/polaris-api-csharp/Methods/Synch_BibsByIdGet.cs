@@ -22,7 +22,5 @@ namespace Clc.Polaris.Api
             }
             return await ExecutePapiAsync<Sync_BibsByIdGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
-
-        public Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int bibId, bool includeItems = false, CancellationToken cancellationToken = default) => Synch_BibsByIdGetAsync(new int[] { bibId }, includeItems, cancellationToken);
     }
 }
