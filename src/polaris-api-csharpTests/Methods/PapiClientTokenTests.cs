@@ -199,6 +199,67 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNull(client.Token);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.ProtectedRequestCount);
+            var request = handler.CapturedRequests.Single();
+            Assert.IsTrue(request.IsStaffAuthenticationRequest);
+            Assert.AreEqual("POST", request.Method);
+            StringAssert.EndsWith(request.Path, "/protected/v1/1033/100/1/authenticator/staff");
+            AssertAuthorizationHash(request, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_ProtectedRequestWithoutPlaceholderOrPassword_AcquiresProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("route-token", "route-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/protected/v1/1033/100/1/patron/ABC123/account/outstanding");
+
+            await ExecuteRawPapiRequestAsync(client, request);
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("route-token", client.Token?.AccessToken);
+            var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
+            StringAssert.EndsWith(finalRequest.Path, "/protected/v1/1033/100/1/patron/ABC123/account/outstanding");
+            AssertAuthorizationHash(finalRequest, "route-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_ProtectedPathEndingDifferentlyThanStaffAuthenticator_AcquiresProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("malformed-token", "malformed-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff/extra");
+
+            await ExecuteRawPapiRequestAsync(client, request);
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual("malformed-token", client.Token?.AccessToken);
+            var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
+            StringAssert.EndsWith(finalRequest.Path, "/protected/v1/1033/100/1/authenticator/staff/extra");
+            AssertAuthorizationHash(finalRequest, "malformed-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public void IsStaffAuthenticatorRequest_InvalidOrMissingPath_ReturnsFalse()
+        {
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(null));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath(null)));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath(string.Empty)));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath("   ")));
+        }
+
+        [TestMethod]
+        public void IsStaffAuthenticatorRequest_RequiresExactProtectedPostStaffRouteWithoutPlaceholder()
+        {
+            Assert.IsTrue(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath("/protected/v1/1033/100/1/authenticator/staff")));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Get("/protected/v1/1033/100/1/authenticator/staff")));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff/extra")));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Post($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/authenticator/staff")));
         }
 
         [TestMethod]
@@ -994,6 +1055,32 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(protectedRequest.Headers.ContainsKey("Authorization"));
         }
 
+        private static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
+        {
+            var executePapiAsync = typeof(PapiClient)
+                .GetMethod("ExecutePapiAsync", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .MakeGenericMethod(typeof(PapiResponseCommon));
+
+            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
+            await task.ConfigureAwait(false);
+        }
+
+        private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
+        {
+            var isStaffAuthenticatorRequest = typeof(PapiClient)
+                .GetMethod("IsStaffAuthenticatorRequest", BindingFlags.Static | BindingFlags.NonPublic)!;
+
+            return (bool)isStaffAuthenticatorRequest.Invoke(null, new object?[] { request })!;
+        }
+
+        private static PapiRestRequest CreateStaffAuthenticatorRequestWithPath(string? path)
+        {
+            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff");
+            request.Path = path!;
+
+            return request;
+        }
+
         private static PapiClient CreateClient(CapturingHttpMessageHandler handler)
         {
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
@@ -1130,7 +1217,9 @@ namespace Clc.Polaris.Api.Tests
                 AbsoluteUri = request.RequestUri!.AbsoluteUri;
                 Path = request.RequestUri.AbsolutePath;
                 Body = body;
-                IsStaffAuthenticationRequest = Path.Contains("/authenticator/staff", StringComparison.Ordinal);
+                IsStaffAuthenticationRequest = request.Method == HttpMethod.Post &&
+                    Path.EndsWith("/authenticator/staff", StringComparison.OrdinalIgnoreCase) &&
+                    Path.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) < 0;
                 Headers = request.Headers
                     .ToDictionary(header => header.Key, header => string.Join(",", header.Value), StringComparer.OrdinalIgnoreCase);
             }
