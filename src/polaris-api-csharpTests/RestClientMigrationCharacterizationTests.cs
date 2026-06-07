@@ -1089,11 +1089,7 @@ namespace Clc.Polaris.Api.Tests
 
         private static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
         {
-            var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
-                .MakeGenericMethod(typeof(PapiResponseCommon));
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
-            await task.ConfigureAwait(false);
+            await client.ExecutePapiAsync<PapiResponseCommon>(request).ConfigureAwait(false);
         }
 
         private static void AssertAuthorizationHashesSentUri(HttpRequestMessage request, string password)
