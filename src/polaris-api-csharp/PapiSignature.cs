@@ -15,8 +15,9 @@ namespace Clc.Polaris.Api
         {
             var hashString = httpMethod + uri + date + password;
 
-            using var hmac = new HMACSHA1(Encoding.UTF8.GetBytes(accessKey));
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            var computedHash = HMACSHA1.HashData(
+                Encoding.UTF8.GetBytes(accessKey),
+                Encoding.UTF8.GetBytes(hashString));
 
             return Convert.ToBase64String(computedHash);
         }
