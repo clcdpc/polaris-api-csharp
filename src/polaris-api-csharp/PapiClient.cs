@@ -122,7 +122,7 @@ namespace Clc.Polaris.Api
 
                 var date = DateTime.Now.ToUniversalTime().ToString("R");
                 var requestUri = BuildRequestUri(papiRequest);
-                var hash = GetPAPIHash(papiRequest.Method.ToString(), date, requestUri.AbsoluteUri, password);
+                var hash = PapiSignature.ComputeHash(AccessKey, papiRequest.Method.ToString(), requestUri.AbsoluteUri, date, password);
                 papiRequest.Headers["PolarisDate"] = date;
                 papiRequest.Headers["Authorization"] = string.Format("PWS {0}:{1}", AccessID, hash);
             }
@@ -453,14 +453,6 @@ namespace Clc.Polaris.Api
             }
 
             _token = null;
-        }
-
-        private string GetPAPIHash(string httpMethod, string date, string uri, string password)
-        {
-            var hashString = httpMethod + uri + date + password;
-            using var hmac = new HMACSHA1(Encoding.UTF8.GetBytes(AccessKey));
-            byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(hashString));
-            return Convert.ToBase64String(computedHash);
         }
     }
 }
