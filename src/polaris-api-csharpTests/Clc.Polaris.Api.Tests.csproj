@@ -5,6 +5,7 @@
     <RootNamespace>Clc.Polaris.Api</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS8602</NoWarn>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

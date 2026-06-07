@@ -1,0 +1,21 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Clc.Polaris.Api.Tests
+{
+    [TestClass]
+    public sealed class AuthenticateStaffUserTests : IntegrationTestBase
+    {
+        [TestMethod]
+        [ProtectedReadOnlyIntegrationCategory]
+        public async Task AuthenticateStaffUserTest()
+        {
+            var staffOverrideAccount = Papi.StaffOverrideAccount;
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
+            var response = await Papi.AuthenticateStaffUserAsync(staffOverrideAccount!);
+            Assert.AreEqual(response.Data.PAPIErrorCode, 0);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessToken));
+        }
+    }
+}
