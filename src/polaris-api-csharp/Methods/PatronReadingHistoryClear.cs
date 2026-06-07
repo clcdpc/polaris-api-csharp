@@ -13,9 +13,6 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default)
-            => PatronReadingHistoryClearAsync(barcode, null, ids, cancellationToken);
-
         public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string? password, IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/readinghistory";

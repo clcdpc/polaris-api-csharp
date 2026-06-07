@@ -23,26 +23,5 @@ namespace Clc.Polaris.Api
 
             return await ExecutePapiAsync<CreatePatronBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }
-
-
-
-        public async Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronFreeTextBlockAsync(string barcode, string blockText, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
-        {
-            return await CreatePatronBlocksAsync(barcode, BlockType.FreeText, blockText, userId ?? UserId, workstationId ?? WorkstationId, cancellationToken).ConfigureAwait(false);
-        }
-
-
-
-        public async Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronLibraryAssignedBlockAsync(string barcode, int blockId, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
-        {
-            return await CreatePatronBlocksAsync(barcode, BlockType.LibraryAssigned, blockId.ToString(), userId ?? UserId, workstationId ?? WorkstationId, cancellationToken).ConfigureAwait(false);
-        }
-
-
-
-        public async Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronSystemBlockAsync(string barcode, SystemBlocks systemBlock, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
-        {
-            return await CreatePatronBlocksAsync(barcode, BlockType.System, ((int)systemBlock).ToString(), userId ?? UserId, workstationId ?? WorkstationId, cancellationToken).ConfigureAwait(false);
-        }
     }
 }

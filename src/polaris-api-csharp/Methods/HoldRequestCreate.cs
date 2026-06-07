@@ -18,20 +18,5 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Post(url, body: holdParams);
             return await ExecutePapiAsync<HoldRequestCreateResult>(request, cancellationToken).ConfigureAwait(false);
         }
-        public async Task<IRestResponse<HoldRequestCreateResult>> HoldRequestCreateAsync(int patronId, int bibId, int pickupBranchId = 0, DateTime? activationDate = null, int? userId = null, int? workstationId = null, int? requestingOrgId = null, CancellationToken cancellationToken = default)
-        {
-            var holdParams = new HoldRequestCreateParams
-            {
-                PatronID = patronId,
-                BibID = bibId,
-                ActivationDate = activationDate,
-                PickupOrgID = pickupBranchId,
-                UserID = userId ?? UserId,
-                WorkstationID = workstationId ?? WorkstationId,
-                RequestingOrgID = requestingOrgId ?? OrganizationId
-            };
-
-            return await HoldRequestCreateAsync(holdParams, cancellationToken).ConfigureAwait(false);
-        }
     }
 }

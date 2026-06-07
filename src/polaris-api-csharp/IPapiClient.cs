@@ -40,8 +40,6 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<ProtectedToken>> AuthenticateStaffUserAsync(PolarisUser staffUser, CancellationToken cancellationToken = default);
         Task<IRestResponse<BibGetResult>> BibGetAsync(int bibId, int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<BibSearchResult>> BibSearchAsync(BibSearchOptions options, CancellationToken cancellationToken = default);
-        Task<IRestResponse<BibSearchResult>> BibKeywordSearchAsync(string keyword, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default);
-        Task<IRestResponse<BibSearchResult>> BibBooleanSearchAsync(string ccl, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default);
         Task<IRestResponse<CollectionsGetResult>> CollectionsGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronBlocksAsync(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<DatesClosedGetResult>> DatesClosedGetAsync(int organizationId, CancellationToken cancellationToken = default);
@@ -54,7 +52,6 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<HoldRequestReplyResult>> HoldRequestReplyAsync(HoldRequestCreateResult holdCreateResult, int requestingOrgId, HoldRequestReplyAnswer answer, HoldRequestReplyState state, CancellationToken cancellationToken = default);
         Task<IRestResponse<HoldRequestActivationResult>> HoldRequestSuspendAsync(string barcode, int requestId, DateTime activationDate, string password = "", int? userId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAsync(string barcode, int itemId, string password = "", ItemRenewOptions? renewOptions = null, CancellationToken cancellationToken = default);
-        Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAllForPatronAsync(string barcode, string password = "", ItemRenewOptions? renewOptions = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<ItemStatusesGetResult>> ItemStatusesGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> ItemUpdateBarcodeAsync(string newBarcode, int? itemRecordId = null, int? transactionBranchId = null, string oldBarcode = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<LimitFiltersGetResult>> LimitFiltersGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
@@ -84,7 +81,6 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<PapiResponseCommon>> PatronMessageUpdateStatusAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronPreferencesGetResult>> PatronPreferencesGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string? password, IEnumerable<int> ids, CancellationToken cancellationToken = default);
-        Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronReadingHistoryGetResult>> PatronReadingHistoryGetAsync(string barcode, int page = 1, int rowsPerPage = 50, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateAsync(PatronRegistrationParams _params, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateV2Async(PatronRegistrationData _params, CancellationToken cancellationToken = default);
@@ -104,16 +100,11 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<GetBarcodeAndPatronIDResult>> Patron_GetBarcodeFromIdAsync(int patronId, CancellationToken cancellationToken = default);
         Task<IRestResponse<PickupBranchesGetResult>> PickupBranchesGetAsync(int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> RecordSetContentPutAsync(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
-        Task<IRestResponse<PapiResponseCommon>> RecordSetContentAddAsync(int recordSetId, int recordId, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default);
-        Task<IRestResponse<PapiResponseCommon>> RecordSetContentAddAsync(int recordSetId, IEnumerable<int> records, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default);
-        Task<IRestResponse<PapiResponseCommon>> RecordSetContentRemoveAsync(int recordSetId, int recordId, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default);
-        Task<IRestResponse<PapiResponseCommon>> RecordSetContentRemoveAsync(int recordSetId, IEnumerable<int> records, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default);
         Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int userId = 1, int workstationId = 1, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default);
         Task<IRestResponse<RemoteStorageItemsGetResult>> RemoteStorageItemsGetAsync(int branchId, string startDate, string endDate, int maxItems, int listType, int? startItemRecordId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<StringResult>> SA_GetValueByOrgAsync(string attribute, int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<ShelfLocationsGetResult>> ShelfLocationsGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int[] bibIds, bool includeItems = false, CancellationToken cancellationToken = default);
-        Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int bibId, bool includeItems = false, CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> UpdatePickupBranchIDAsync(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> UpdatePatronNotesDataAsync(string barcode, string? nonBlockingNote = null, string? blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default);
     }
