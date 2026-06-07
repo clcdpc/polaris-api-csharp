@@ -8,9 +8,17 @@ namespace Clc.Polaris.Api
 {
     public static class PatronReadingHistoryClearExtensions
     {
-        public static Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(this IPapiClient client, string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        public static Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(
+            this IPapiClient client,
+            string barcode,
+            IEnumerable<int> ids,
+            CancellationToken cancellationToken = default)
         {
-            return client.PatronReadingHistoryClearAsync(barcode, null, ids, cancellationToken);
+            return client.PatronReadingHistoryClearAsync(
+                barcode,
+                null,
+                ids,
+                cancellationToken);
         }
     }
 }
