@@ -1,0 +1,20 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+
+namespace Clc.Polaris.Api.Tests
+{
+    [TestClass]
+    public sealed class Synch_BibsByIdGetTests : IntegrationTestBase
+    {
+        [TestMethod()]
+        [ProtectedReadOnlyIntegrationCategory]
+        public async Task Synch_BibsByIdGetTest()
+        {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
+            var response = await Papi.Synch_BibsByIdGetAsync(478907);
+            Assert.IsTrue(response.Response.IsSuccessStatusCode);
+        }
+    }
+}
