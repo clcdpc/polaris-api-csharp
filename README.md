@@ -63,7 +63,7 @@ Protected-token-in-path endpoints use `ProtectedToken.Placeholder` internally. M
 
 ## Local tests
 
-Run non-integration tests from the repository root:
+Run non-live/unit tests from the repository root:
 
 ```bash
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory!=Integration"

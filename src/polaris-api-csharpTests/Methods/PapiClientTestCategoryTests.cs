@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace Clc.Polaris.Api.Tests
@@ -102,6 +103,27 @@ namespace Clc.Polaris.Api.Tests
         };
 
         [TestMethod]
+        public void AllPapiClientIntegrationTestsAreClassifiedOrDocumentedExceptions()
+        {
+            var documentedExceptions = new[]
+            {
+                nameof(PapiClientTests.HeadingsSearchTest),
+            };
+
+            var unclassified = GetPapiClientTestMethods()
+                .Where(method => !documentedExceptions.Contains(method.Name))
+                .Where(method => MethodOrClassHasCategory(method, IntegrationCategory))
+                .Where(method => !MethodHasCategory(method, ReadOnlyIntegrationCategory))
+                .Where(method => !MethodHasCategory(method, MutatingIntegrationCategory))
+                .Select(method => method.Name)
+                .ToArray();
+
+            Assert.IsFalse(
+                unclassified.Any(),
+                $@"Expected all PapiClient integration tests to be marked with TestCategory(""{ReadOnlyIntegrationCategory}""), TestCategory(""{MutatingIntegrationCategory}""), or documented in {nameof(documentedExceptions)}: {string.Join(", ", unclassified)}");
+        }
+
+        [TestMethod]
         public void SpecializedIntegrationCategoriesRequireIntegrationCategory()
         {
             var missingIntegration = GetPapiClientTestMethods()
@@ -149,8 +171,8 @@ namespace Clc.Polaris.Api.Tests
         public void StaffOverrideIntegrationTestsHaveProtectedIntegrationCategory()
         {
             var methodsRequiringStaffOverride = PapiClientTestSourceMethods()
-                .Where(method => method.Body.Contains("IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings)"))
-                .Select(method => method.Name)
+                .Where(method => method.Value.Contains("IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings)"))
+                .Select(method => method.Key)
                 .ToArray();
 
             AssertMethodsHaveCategory(methodsRequiringStaffOverride, ProtectedIntegrationCategory);
@@ -230,22 +252,26 @@ namespace Clc.Polaris.Api.Tests
                     .Contains(expectedCategory);
         }
 
-        private static IEnumerable<(string Name, string Body)> PapiClientTestSourceMethods()
+        private static Dictionary<string, string> PapiClientTestSourceMethods([CallerFilePath] string categoryTestSourcePath = "")
         {
-            var source = File.ReadAllText(FindPapiClientTestsSourcePath());
+            var testSourcePath = Path.Combine(Path.GetDirectoryName(categoryTestSourcePath)!, "PapiClientTests.cs");
+            var source = File.ReadAllText(testSourcePath);
+            var sourceMethods = new Dictionary<string, string>();
             var methodMatches = Regex.Matches(
                 source,
-                @"public\s+async\s+Task\s+(?<name>\w+)\s*\(",
+                @"public\s+(?:async\s+)?(?:Task|void)\s+(?<name>\w+)\s*\([^)]*\)\s*\{",
                 RegexOptions.CultureInvariant);
 
             foreach (Match methodMatch in methodMatches)
             {
-                var openingBraceIndex = source.IndexOf('{', methodMatch.Index + methodMatch.Length);
+                var openingBraceIndex = source.IndexOf('{', methodMatch.Index + methodMatch.Length - 1);
                 Assert.AreNotEqual(-1, openingBraceIndex, $"Expected to find opening brace for {methodMatch.Groups["name"].Value}.");
 
                 var closingBraceIndex = FindClosingBrace(source, openingBraceIndex);
-                yield return (methodMatch.Groups["name"].Value, source.Substring(openingBraceIndex, closingBraceIndex - openingBraceIndex + 1));
+                sourceMethods[methodMatch.Groups["name"].Value] = source[methodMatch.Index..(closingBraceIndex + 1)];
             }
+
+            return sourceMethods;
         }
 
         private static int FindClosingBrace(string source, int openingBraceIndex)
@@ -273,29 +299,5 @@ namespace Clc.Polaris.Api.Tests
             return -1;
         }
 
-        private static string FindPapiClientTestsSourcePath()
-        {
-            var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-            while (directory != null)
-            {
-                var candidate = Path.Combine(directory.FullName, "Methods", "PapiClientTests.cs");
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-
-                candidate = Path.Combine(directory.FullName, "src", "polaris-api-csharpTests", "Methods", "PapiClientTests.cs");
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-
-                directory = directory.Parent;
-            }
-
-            Assert.Fail("Expected to find Methods/PapiClientTests.cs while walking up from the test output directory.");
-            return string.Empty;
-        }
     }
 }
