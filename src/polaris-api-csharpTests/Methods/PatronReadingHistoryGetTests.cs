@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class PatronReadingHistoryGetTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ReadOnlyIntegrationCategory]
         public async Task PatronReadingHistoryGetTest()
         {

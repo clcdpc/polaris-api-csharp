@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class CollectionsGetTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ReadOnlyIntegrationCategory]
         public async Task CollectionsGetTest()
         {

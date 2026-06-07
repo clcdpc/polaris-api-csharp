@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitCategory]
-    public class PapiClientTestCategoryTests
+    public class PapiClientIntegrationTestCategoryTests
     {
         private const string LegacyIntegrationCategory = "Integration";
         private const string LegacyProtectedIntegrationCategory = "ProtectedIntegration";

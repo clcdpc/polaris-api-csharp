@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class PatronAccountVoidTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ProtectedMutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task PatronAccountVoidTest()

@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class RecordSetContentAddTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ProtectedMutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task RecordSetContentAddTest()
@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
         }
 
-        [TestMethod()]
+        [TestMethod]
         [ProtectedMutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task RecordSetContentAddTest_List()

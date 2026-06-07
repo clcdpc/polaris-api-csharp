@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class ApiKeyValidateTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ReadOnlyIntegrationCategory]
         public async Task ApiKeyValidateTest()
         {

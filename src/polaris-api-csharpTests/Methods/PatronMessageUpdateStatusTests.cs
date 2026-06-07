@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class PatronMessageUpdateStatusTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [MutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task PatronMessageUpdateStatusTest()

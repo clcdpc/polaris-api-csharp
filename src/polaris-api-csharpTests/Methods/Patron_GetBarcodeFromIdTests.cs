@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class Patron_GetBarcodeFromIdTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ProtectedReadOnlyIntegrationCategory]
         public async Task Patron_GetBarcodeFromIdTest()
         {

@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class CreatePatronBlocksTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ProtectedMutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_FreeTextBlock()
@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
 
-        [TestMethod()]
+        [TestMethod]
         [ProtectedMutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_SystemBlock()
@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
         }
 
-        [TestMethod()]
+        [TestMethod]
         [ProtectedMutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_LibraryAssignedBlock()

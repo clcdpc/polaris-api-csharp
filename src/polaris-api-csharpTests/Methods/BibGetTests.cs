@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class BibGetTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [ReadOnlyIntegrationCategory]
         public async Task BibGetTest()
         {
@@ -15,10 +15,9 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(response.Data.PAPIErrorCode, 0);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("100/1/bib"));
-
         }
 
-        [TestMethod()]
+        [TestMethod]
         [ReadOnlyIntegrationCategory]
         public async Task BibGetTest_PassBranchId()
         {

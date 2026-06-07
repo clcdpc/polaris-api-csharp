@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class ItemRenewTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [MutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task ItemRenewTest()

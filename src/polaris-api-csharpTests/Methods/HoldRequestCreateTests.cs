@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class HoldRequestCreateTests : IntegrationTestBase
     {
-        [TestMethod()]
+        [TestMethod]
         [MutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task HoldRequestCreateTest()
@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
         }
 
-        [TestMethod()]
+        [TestMethod]
         [MutatingIntegrationCategory]
         [DoNotParallelize]
         public async Task HoldRequestCreateTest2()
