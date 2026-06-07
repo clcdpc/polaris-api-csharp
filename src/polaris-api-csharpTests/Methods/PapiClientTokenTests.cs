@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1145,8 +1144,8 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"].ToString();
             var uri = client.BuildRequestUri(formatted).AbsoluteUri;
-            Assert.AreEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, string.Empty, "access-key")}", formatted.Headers["Authorization"]);
-            Assert.AreNotEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, "expired-secret", "access-key")}", formatted.Headers["Authorization"]);
+            Assert.AreEqual($"PWS access-id:{PapiSignature.ComputeHash("access-key", "GET", uri, date, string.Empty)}", formatted.Headers["Authorization"]);
+            Assert.AreNotEqual($"PWS access-id:{PapiSignature.ComputeHash("access-key", "GET", uri, date, "expired-secret")}", formatted.Headers["Authorization"]);
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
             Assert.IsNull(client.Token);
         }
@@ -1171,8 +1170,8 @@ namespace Clc.Polaris.Api.Tests
             var date = formatted.Headers["PolarisDate"].ToString();
             var uri = client.BuildRequestUri(formatted).AbsoluteUri;
             var authorization = formatted.Headers["Authorization"];
-            Assert.AreEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, string.Empty, "access-key")}", authorization);
-            Assert.AreNotEqual($"PWS access-id:{ComputePapiHash("GET", uri, date, "expired-secret", "access-key")}", authorization);
+            Assert.AreEqual($"PWS access-id:{PapiSignature.ComputeHash("access-key", "GET", uri, date, string.Empty)}", authorization);
+            Assert.AreNotEqual($"PWS access-id:{PapiSignature.ComputeHash("access-key", "GET", uri, date, "expired-secret")}", authorization);
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
             Assert.IsNull(client.Token);
         }
@@ -1324,22 +1323,16 @@ namespace Clc.Polaris.Api.Tests
         {
             Assert.IsTrue(request.Headers.TryGetValue("PolarisDate", out var date), "The request did not include a PolarisDate header.");
             Assert.IsTrue(request.Headers.TryGetValue("Authorization", out var authorization), "The request did not include an Authorization header.");
-            Assert.AreEqual($"PWS {accessId}:{ComputePapiHash(request.Method, absoluteUri ?? request.AbsoluteUri, date, secret, accessKey)}", authorization);
+            Assert.AreEqual($"PWS {accessId}:{PapiSignature.ComputeHash(accessKey, request.Method, absoluteUri ?? request.AbsoluteUri, date, secret)}", authorization);
         }
 
         private static void AssertAuthorizationHashDoesNotMatch(CapturedPapiRequest request, string secret, string accessKey, string accessId, string? absoluteUri = null)
         {
             Assert.IsTrue(request.Headers.TryGetValue("PolarisDate", out var date), "The request did not include a PolarisDate header.");
             Assert.IsTrue(request.Headers.TryGetValue("Authorization", out var authorization), "The request did not include an Authorization header.");
-            Assert.AreNotEqual($"PWS {accessId}:{ComputePapiHash(request.Method, absoluteUri ?? request.AbsoluteUri, date, secret, accessKey)}", authorization);
+            Assert.AreNotEqual($"PWS {accessId}:{PapiSignature.ComputeHash(accessKey, request.Method, absoluteUri ?? request.AbsoluteUri, date, secret)}", authorization);
         }
 
-        private static string ComputePapiHash(string httpMethod, string uri, string date, string password, string accessKey)
-        {
-            var hashString = httpMethod + uri + date + password;
-            var computedHash = HMACSHA1.HashData(Encoding.UTF8.GetBytes(accessKey), Encoding.UTF8.GetBytes(hashString));
-            return Convert.ToBase64String(computedHash);
-        }
 
         private sealed class CapturingHttpMessageHandler : HttpMessageHandler
         {
