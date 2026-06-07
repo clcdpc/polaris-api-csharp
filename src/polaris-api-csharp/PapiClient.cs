@@ -200,12 +200,15 @@ namespace Clc.Polaris.Api
                 StaffOverrideAccount != null;
         }
 
-        private static bool IsStaffAuthenticatorRequest(PapiRestRequest request)
+        private static bool IsStaffAuthenticatorRequest(PapiRestRequest? request)
         {
-            return request.Method == HttpMethod.Post &&
-                request.Path.StartsWith("/protected/", StringComparison.OrdinalIgnoreCase) &&
-                request.Path.EndsWith("/authenticator/staff", StringComparison.OrdinalIgnoreCase) &&
-                request.Path.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) < 0;
+            var path = request?.Path;
+
+            return request?.Method == HttpMethod.Post &&
+                !string.IsNullOrWhiteSpace(path) &&
+                path.StartsWith("/protected/", StringComparison.OrdinalIgnoreCase) &&
+                path.EndsWith("/authenticator/staff", StringComparison.OrdinalIgnoreCase) &&
+                path.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) < 0;
         }
 
         private static void ThrowProtectedTokenRequired(ProtectedTokenAcquisitionStatus status, bool pathContainsProtectedTokenPlaceholder)

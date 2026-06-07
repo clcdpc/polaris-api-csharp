@@ -245,6 +245,24 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public void IsStaffAuthenticatorRequest_InvalidOrMissingPath_ReturnsFalse()
+        {
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(null));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath(null)));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath(string.Empty)));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath("   ")));
+        }
+
+        [TestMethod]
+        public void IsStaffAuthenticatorRequest_RequiresExactProtectedPostStaffRouteWithoutPlaceholder()
+        {
+            Assert.IsTrue(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath("/protected/v1/1033/100/1/authenticator/staff")));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Get("/protected/v1/1033/100/1/authenticator/staff")));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff/extra")));
+            Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Post($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/authenticator/staff")));
+        }
+
+        [TestMethod]
         public async Task PatronSearchAsync_ConcurrentProtectedRequestsForSameCacheKey_AuthenticateOnce()
         {
             var handler = new ProtectedTokenHttpMessageHandler();
@@ -1045,6 +1063,22 @@ namespace Clc.Polaris.Api.Tests
 
             var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
             await task.ConfigureAwait(false);
+        }
+
+        private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
+        {
+            var isStaffAuthenticatorRequest = typeof(PapiClient)
+                .GetMethod("IsStaffAuthenticatorRequest", BindingFlags.Static | BindingFlags.NonPublic)!;
+
+            return (bool)isStaffAuthenticatorRequest.Invoke(null, new object?[] { request })!;
+        }
+
+        private static PapiRestRequest CreateStaffAuthenticatorRequestWithPath(string? path)
+        {
+            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff");
+            request.Path = path!;
+
+            return request;
         }
 
         private static PapiClient CreateClient(CapturingHttpMessageHandler handler)
