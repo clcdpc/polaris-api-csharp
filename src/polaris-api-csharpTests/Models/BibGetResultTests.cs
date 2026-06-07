@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests
+namespace Clc.Polaris.Api.Tests.Models
 {
     [TestClass]
     [UnitCategory]
