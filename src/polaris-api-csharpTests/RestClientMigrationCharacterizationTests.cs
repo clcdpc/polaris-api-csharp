@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -103,7 +102,7 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.AreSame(request.Body, formatted.Body);
         }
@@ -124,7 +123,7 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/1/protected-token/search/patrons/Boolean";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, "protected-secret", "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, "protected-secret");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
         }
@@ -141,7 +140,7 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&limit=branch%3A1";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
@@ -157,7 +156,7 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/patron/ABC123?ignoresa=True";
-            var expectedHash = ComputePapiHash("PUT", expectedUri, date, "1234", "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "PUT", expectedUri, date, "1234");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.AreSame(body, formatted.Body);
         }
@@ -175,7 +174,7 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/1/token/patron/123/account/payment?wsid=7&userid=8";
-            var expectedHash = ComputePapiHash("POST", expectedUri, date, "protected-secret", "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "POST", expectedUri, date, "protected-secret");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.AreSame(body, formatted.Body);
         }
@@ -199,7 +198,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual("staff-token", formatted.Headers["X-PAPI-AccessToken"]);
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, "staff-secret", "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, "staff-secret");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
@@ -224,7 +223,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
@@ -246,7 +245,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
             var date = formatted.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
@@ -273,7 +272,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(second.Headers.ContainsKey("X-PAPI-AccessToken"));
             var date = second.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/apikeyvalidate";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", second.Headers["Authorization"]);
         }
 
@@ -298,7 +297,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(1, second.Headers.Keys.Count(key => key == "Authorization"));
             var date = second.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/patron/ABC123?ignoresa=False";
-            var expectedHash = ComputePapiHash("PUT", expectedUri, date, "1234", "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "PUT", expectedUri, date, "1234");
             Assert.AreEqual($"PWS access-id:{expectedHash}", second.Headers["Authorization"]);
         }
 
@@ -316,8 +315,8 @@ namespace Clc.Polaris.Api.Tests
 
             var firstDate = firstFormatted.Headers["PolarisDate"];
             var secondDate = secondFormatted.Headers["PolarisDate"];
-            var firstExpectedHash = ComputePapiHash("GET", "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", firstDate, string.Empty, "access-key");
-            var secondExpectedHash = ComputePapiHash("GET", "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=lord%20of%20the%20rings", secondDate, string.Empty, "access-key");
+            var firstExpectedHash = PapiSignature.ComputeHash("access-key", "GET", "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", firstDate, string.Empty);
+            var secondExpectedHash = PapiSignature.ComputeHash("access-key", "GET", "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=lord%20of%20the%20rings", secondDate, string.Empty);
             Assert.AreEqual($"PWS access-id:{firstExpectedHash}", firstFormatted.Headers["Authorization"]);
             Assert.AreEqual($"PWS access-id:{secondExpectedHash}", secondFormatted.Headers["Authorization"]);
             Assert.AreNotEqual(firstFormatted.Headers["Authorization"], secondFormatted.Headers["Authorization"]);
@@ -408,9 +407,9 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsNotNull(handler.LastRequest);
             var date = handler.LastRequest!.Headers.GetValues("PolarisDate").Single();
             var expectedUri = "https://example.test/PAPIService/REST/protected/v1/1033/100/9/hash-token/search/patrons/Boolean?q=name%3DSmith&patronsperpage=10&page=1&sort=PATN";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, "hash-secret", "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, "hash-secret");
             var placeholderUri = expectedUri.Replace("hash-token", ProtectedToken.Placeholder, StringComparison.Ordinal);
-            var placeholderHash = ComputePapiHash("GET", placeholderUri, date, "hash-secret", "access-key");
+            var placeholderHash = PapiSignature.ComputeHash("access-key", "GET", placeholderUri, date, "hash-secret");
             Assert.AreEqual($"PWS access-id:{expectedHash}", handler.LastRequest.Headers.GetValues("Authorization").Single());
             Assert.AreNotEqual($"PWS access-id:{placeholderHash}", handler.LastRequest.Headers.GetValues("Authorization").Single());
         }
@@ -1056,7 +1055,7 @@ namespace Clc.Polaris.Api.Tests
 
             var date = formatted.Headers["PolarisDate"].ToString();
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone";
-            var expectedHash = ComputePapiHash("GET", expectedUri, date, string.Empty, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
@@ -1095,7 +1094,7 @@ namespace Clc.Polaris.Api.Tests
         private static void AssertAuthorizationHashesSentUri(HttpRequestMessage request, string password)
         {
             var date = request.Headers.GetValues("PolarisDate").Single();
-            var expectedHash = ComputePapiHash(request.Method.Method, request.RequestUri!.AbsoluteUri, date, password, "access-key");
+            var expectedHash = PapiSignature.ComputeHash("access-key", request.Method.Method, request.RequestUri!.AbsoluteUri, date, password);
             Assert.AreEqual($"PWS access-id:{expectedHash}", request.Headers.GetValues("Authorization").Single());
         }
 
@@ -1108,12 +1107,6 @@ namespace Clc.Polaris.Api.Tests
                 .ToDictionary(parts => WebUtility.UrlDecode(parts[0]), parts => parts.Length > 1 ? WebUtility.UrlDecode(parts[1]) : string.Empty);
         }
 
-        private static string ComputePapiHash(string httpMethod, string uri, string date, string password, string accessKey)
-        {
-            var hashString = httpMethod + uri + date + password;
-            var computedHash = HMACSHA1.HashData(Encoding.UTF8.GetBytes(accessKey), Encoding.UTF8.GetBytes(hashString));
-            return Convert.ToBase64String(computedHash);
-        }
 
         private sealed class TestPapiSettings : IPapiSettings
         {
