@@ -1,16 +1,10 @@
 using Clc.Polaris.Api;
 using Clc.Polaris.Api.Tests;
-using Clc.Polaris.Api.Models;
-using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api.Tests.Methods.RequestShape
@@ -36,5 +30,31 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             Assert.AreEqual("101,202,303", query["ids"]);
             AssertAuthorizationHashesSentUri(handler.LastRequest, "patron-password");
         }
+
+        private sealed class ThrowOnSecondEnumerationEnumerable : IEnumerable<int>
+        {
+            private readonly IEnumerable<int> _ids;
+
+            public int EnumerationCount { get; private set; }
+
+            public ThrowOnSecondEnumerationEnumerable(IEnumerable<int> ids)
+            {
+                _ids = ids;
+            }
+
+            public IEnumerator<int> GetEnumerator()
+            {
+                EnumerationCount++;
+                if (EnumerationCount > 1)
+                {
+                    throw new InvalidOperationException("The IDs enumerable was enumerated more than once.");
+                }
+
+                return _ids.GetEnumerator();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
     }
 }

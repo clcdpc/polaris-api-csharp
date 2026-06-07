@@ -1,15 +1,13 @@
 using Clc.Polaris.Api;
-using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Models;
-using Clc.Rest.Models;
+using Clc.Polaris.Api.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,5 +71,41 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             StringAssert.Contains(handler.ProtectedRequests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/blocked-token/search/patrons/Boolean");
             Assert.IsFalse(handler.ProtectedRequests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
         }
+
+        private sealed class BlockingProtectedTokenHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly object _syncRoot = new();
+            private int _authenticationRequestCount;
+
+            public TaskCompletionSource AuthenticationStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            public TaskCompletionSource CompleteAuthentication { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            public int AuthenticationRequestCount => _authenticationRequestCount;
+            public List<HttpRequestMessage> ProtectedRequests { get; } = new();
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
+                {
+                    Interlocked.Increment(ref _authenticationRequestCount);
+                    AuthenticationStarted.TrySetResult();
+                    await CompleteAuthentication.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"PAPIErrorCode\":0,\"AccessToken\":\"blocked-token\",\"AccessSecret\":\"blocked-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}", Encoding.UTF8, "application/json")
+                    };
+                }
+
+                lock (_syncRoot)
+                {
+                    ProtectedRequests.Add(request);
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                };
+            }
+        }
+
     }
 }

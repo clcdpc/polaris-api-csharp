@@ -1,19 +1,14 @@
 using Clc.Polaris.Api;
-using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Models;
-using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace Clc.Polaris.Api.Tests.Client
+namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitCategory]
@@ -312,5 +307,22 @@ namespace Clc.Polaris.Api.Tests.Client
             Assert.IsFalse(protectedRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             Assert.IsTrue(protectedRequest.Headers.ContainsKey("Authorization"));
         }
+
+        private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
+        {
+            var isStaffAuthenticatorRequest = typeof(PapiClient)
+                .GetMethod("IsStaffAuthenticatorRequest", BindingFlags.Static | BindingFlags.NonPublic)!;
+
+            return (bool)isStaffAuthenticatorRequest.Invoke(null, new object?[] { request })!;
+        }
+
+        private static PapiRestRequest CreateStaffAuthenticatorRequestWithPath(string? path)
+        {
+            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff");
+            request.Path = path!;
+
+            return request;
+        }
+
     }
 }

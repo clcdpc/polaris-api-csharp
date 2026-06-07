@@ -1,15 +1,13 @@
 using Clc.Polaris.Api;
-using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Models;
-using Clc.Rest.Models;
+using Clc.Polaris.Api.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -385,5 +383,72 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsFalse(handler.RequestPaths.Any(path => path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal)));
         }
+
+        private sealed class FailingStaffAuthenticationHttpMessageHandler : HttpMessageHandler
+        {
+            public int AuthenticationRequestCount { get; private set; }
+            public int ProtectedRequestCount { get; private set; }
+            public int PublicRequestCount { get; private set; }
+            public HttpRequestMessage? LastNonAuthenticationRequest { get; private set; }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
+                {
+                    AuthenticationRequestCount++;
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                    });
+                }
+
+                LastNonAuthenticationRequest = request;
+                if (request.RequestUri!.AbsolutePath.Contains("/protected/", StringComparison.Ordinal))
+                {
+                    ProtectedRequestCount++;
+                }
+                else
+                {
+                    PublicRequestCount++;
+                }
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                });
+            }
+        }
+
+        private sealed class SequencedProtectedTokenHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly object _syncRoot = new();
+            private int _authenticationRequestCount;
+
+            public int AuthenticationRequestCount => _authenticationRequestCount;
+            public List<HttpRequestMessage> ProtectedRequests { get; } = new();
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
+                {
+                    var requestNumber = Interlocked.Increment(ref _authenticationRequestCount);
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent($"{{\"PAPIErrorCode\":0,\"AccessToken\":\"protected-token-{requestNumber}\",\"AccessSecret\":\"protected-secret-{requestNumber}\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}}", Encoding.UTF8, "application/json")
+                    });
+                }
+
+                lock (_syncRoot)
+                {
+                    ProtectedRequests.Add(request);
+                }
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                });
+            }
+        }
+
     }
 }

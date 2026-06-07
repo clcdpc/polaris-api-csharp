@@ -1,10 +1,10 @@
+using Clc.Polaris.Api;
 using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -131,148 +131,6 @@ namespace Clc.Polaris.Api.Tests
                     Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                 });
             }
-        }
-
-        protected sealed class FailingStaffAuthenticationHttpMessageHandler : HttpMessageHandler
-        {
-            public int AuthenticationRequestCount { get; private set; }
-            public int ProtectedRequestCount { get; private set; }
-            public int PublicRequestCount { get; private set; }
-            public HttpRequestMessage? LastNonAuthenticationRequest { get; private set; }
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
-                {
-                    AuthenticationRequestCount++;
-                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
-                    });
-                }
-
-                LastNonAuthenticationRequest = request;
-                if (request.RequestUri!.AbsolutePath.Contains("/protected/", StringComparison.Ordinal))
-                {
-                    ProtectedRequestCount++;
-                }
-                else
-                {
-                    PublicRequestCount++;
-                }
-
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
-                });
-            }
-        }
-
-        protected sealed class SequencedProtectedTokenHttpMessageHandler : HttpMessageHandler
-        {
-            private readonly object _syncRoot = new();
-            private int _authenticationRequestCount;
-
-            public int AuthenticationRequestCount => _authenticationRequestCount;
-            public List<HttpRequestMessage> ProtectedRequests { get; } = new();
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
-                {
-                    var requestNumber = Interlocked.Increment(ref _authenticationRequestCount);
-                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent($"{{\"PAPIErrorCode\":0,\"AccessToken\":\"protected-token-{requestNumber}\",\"AccessSecret\":\"protected-secret-{requestNumber}\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}}", Encoding.UTF8, "application/json")
-                    });
-                }
-
-                lock (_syncRoot)
-                {
-                    ProtectedRequests.Add(request);
-                }
-
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
-                });
-            }
-        }
-
-        protected sealed class BlockingProtectedTokenHttpMessageHandler : HttpMessageHandler
-        {
-            private readonly object _syncRoot = new();
-            private int _authenticationRequestCount;
-
-            public TaskCompletionSource AuthenticationStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            public TaskCompletionSource CompleteAuthentication { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            public int AuthenticationRequestCount => _authenticationRequestCount;
-            public List<HttpRequestMessage> ProtectedRequests { get; } = new();
-
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
-                {
-                    Interlocked.Increment(ref _authenticationRequestCount);
-                    AuthenticationStarted.TrySetResult();
-                    await CompleteAuthentication.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
-                    return new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent("{\"PAPIErrorCode\":0,\"AccessToken\":\"blocked-token\",\"AccessSecret\":\"blocked-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}", Encoding.UTF8, "application/json")
-                    };
-                }
-
-                lock (_syncRoot)
-                {
-                    ProtectedRequests.Add(request);
-                }
-
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
-                };
-            }
-        }
-
-        protected sealed class ThrowOnSecondEnumerationEnumerable : IEnumerable<int>
-        {
-            private readonly IEnumerable<int> _ids;
-
-            public int EnumerationCount { get; private set; }
-
-            public ThrowOnSecondEnumerationEnumerable(IEnumerable<int> ids)
-            {
-                _ids = ids;
-            }
-
-            public IEnumerator<int> GetEnumerator()
-            {
-                EnumerationCount++;
-                if (EnumerationCount > 1)
-                {
-                    throw new InvalidOperationException("The IDs enumerable was enumerated more than once.");
-                }
-
-                return _ids.GetEnumerator();
-            }
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-        }
-
-        protected static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
-        {
-            var isStaffAuthenticatorRequest = typeof(PapiClient)
-                .GetMethod("IsStaffAuthenticatorRequest", BindingFlags.Static | BindingFlags.NonPublic)!;
-
-            return (bool)isStaffAuthenticatorRequest.Invoke(null, new object?[] { request })!;
-        }
-
-        protected static PapiRestRequest CreateStaffAuthenticatorRequestWithPath(string? path)
-        {
-            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff");
-            request.Path = path!;
-
-            return request;
         }
 
         protected static PapiClient CreateClient(CapturingHttpMessageHandler handler)
