@@ -190,7 +190,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsFalse(
                 missingDoNotParallelize.Any(),
-                $"Expected mutating integration tests to be marked with {nameof(DoNotParallelizeAttribute)} unless a documented exception is added to this test: {string.Join(", ", missingDoNotParallelize)}");
+                $"Expected mutating integration tests to be marked with {nameof(DoNotParallelizeAttribute)}: {string.Join(", ", missingDoNotParallelize)}");
         }
 
         [TestMethod]
