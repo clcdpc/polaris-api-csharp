@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/{branchId ?? OrganizationId}/bib/{bibId}";
             var request = PapiRestRequest.Get(url);
-            return await ExecutePapiAsync<BibGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<BibGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

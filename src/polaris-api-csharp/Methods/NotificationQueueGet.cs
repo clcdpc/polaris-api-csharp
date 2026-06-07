@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
             //"protected/{Version}/{LangID}/{AppID}/{OrgID}/{AccessToken}/notification
             var url = $"/protected/v1/1033/24/{orgId}/{ProtectedToken.Placeholder}/notification/";
             var request = PapiRestRequest.Get(url);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

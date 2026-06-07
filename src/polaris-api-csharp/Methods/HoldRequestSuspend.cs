@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/inactive";
             var json = new { HoldRequestActivationData = new { UserId = userId ?? UserId, activationDate } };
             var request = PapiRestRequest.Put(url, body: json, password: password);
-            return await ExecutePapiAsync<HoldRequestActivationResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<HoldRequestActivationResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api
             var body = new { Barcode = barcode, Password = password };
             var request = PapiRestRequest.Post(url, body: body);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<PatronAuthenticationResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronAuthenticationResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

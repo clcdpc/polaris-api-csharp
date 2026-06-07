@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("action", action);
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
         public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentAddAsync(int recordSetId, int recordId, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default)
         {

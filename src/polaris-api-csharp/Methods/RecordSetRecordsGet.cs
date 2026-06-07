@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("numRecords", numRecords);
             request.QueryParameters.Add("userid", userId);
             request.QueryParameters.Add("wsid", workstationId);
-            return await ExecutePapiAsync<RecordSetRecordsGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<RecordSetRecordsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

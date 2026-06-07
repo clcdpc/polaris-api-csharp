@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("maxitems", maxItems);
             request.QueryParameters.Add("listtype", (int)listType);
             if (startItemRecordId.HasValue) { request.QueryParameters.Add("startitemrecordid", startItemRecordId.Value); }
-            return await ExecutePapiAsync<RemoteStorageItemsGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<RemoteStorageItemsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

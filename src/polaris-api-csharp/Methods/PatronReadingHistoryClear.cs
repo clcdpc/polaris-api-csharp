@@ -26,7 +26,7 @@ namespace Clc.Polaris.Api
                 request.QueryParameters.Add("ids", string.Join(",", idList));
             }
 
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

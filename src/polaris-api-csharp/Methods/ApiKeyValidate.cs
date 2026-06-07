@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
             var url = "/public/v1/1033/100/1/apikeyvalidate";
             var request = PapiRestRequest.Get(url);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

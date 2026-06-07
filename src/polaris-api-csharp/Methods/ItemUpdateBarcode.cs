@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("wsid", transactionBranchId ?? WorkstationId);
             if (!string.IsNullOrWhiteSpace(oldBarcode)) { request.QueryParameters.Add("isBarcode", 1); }
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
 
 

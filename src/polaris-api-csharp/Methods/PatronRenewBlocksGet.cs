@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/protected/v1/1033/100/{branchId ?? OrganizationId}/{ProtectedToken.Placeholder}/circulation/patron/{patronId}/renewblocks";
             var request = PapiRestRequest.Get(url);
-            return await ExecutePapiAsync<PatronRenewBlocksResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronRenewBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

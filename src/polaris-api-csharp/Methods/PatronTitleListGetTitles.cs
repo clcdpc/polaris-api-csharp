@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("list", listId);
             request.QueryParameters.Add("startPosition", startPosition);
             request.QueryParameters.Add("endPosition", endPosition);
-            return await ExecutePapiAsync<PatronTitleListGetTitlesResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronTitleListGetTitlesResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

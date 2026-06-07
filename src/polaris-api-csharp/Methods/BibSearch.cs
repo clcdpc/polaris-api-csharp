@@ -25,7 +25,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("bibsperpage", options.PageSize);
             request.QueryParameters.Add("limit", options.Limit ?? string.Empty);
 
-            return await ExecutePapiAsync<BibSearchResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<BibSearchResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IRestResponse<BibSearchResult>> BibKeywordSearchAsync(string keyword, int? branchId = null, int page = 1, int pageSize = 10, SearchSortOptions sortBy = SearchSortOptions.MP, CancellationToken cancellationToken = default)

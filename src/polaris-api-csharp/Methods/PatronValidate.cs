@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api
         {
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}";
             var request = PapiRestRequest.Get(url, password: password);
-            return await ExecutePapiAsync<PatronValidateResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronValidateResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

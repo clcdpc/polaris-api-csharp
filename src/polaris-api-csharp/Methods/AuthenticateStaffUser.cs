@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api
         {
             var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff", body: staffUser);
 
-            return await ExecutePapiAsync<ProtectedToken>(request, cancellationToken, ProtectedTokenPreloadMode.Skip).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<ProtectedToken>(request, cancellationToken, ProtectedTokenPreloadMode.Skip).ConfigureAwait(false);
         }
 
 

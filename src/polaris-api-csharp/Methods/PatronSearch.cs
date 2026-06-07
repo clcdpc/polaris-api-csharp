@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("patronsperpage", pageSize);
             request.QueryParameters.Add("page", page);
             request.QueryParameters.Add("sort", sortBy);
-            return await ExecutePapiAsync<PatronSearchResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronSearchResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

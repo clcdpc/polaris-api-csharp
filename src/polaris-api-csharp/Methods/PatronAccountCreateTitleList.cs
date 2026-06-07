@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patronaccountcreatetitlelist";
             var body = new PatronAccountCreateTitleListData { RecordStoreName = listName };
             var request = PapiRestRequest.Post(url, body: body, password: password);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             request.QueryParameters.Add("pickupbranchid", pickupBranchId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("branch", branchId);
             request.QueryParameters.Add("branchtype", (int)branchType);
             request.QueryParameters.Add("requeststatus", (int)status);
-            return await ExecutePapiAsync<HoldRequestGetListResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<HoldRequestGetListResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Clc.Polaris.Api
             };
 
             var request = PapiRestRequest.Put(url, body: body);
-            return await ExecutePapiAsync<HoldRequestReplyResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<HoldRequestReplyResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

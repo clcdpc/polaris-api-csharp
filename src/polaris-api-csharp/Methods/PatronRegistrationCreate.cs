@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
             var url = "/public/v1/1033/100/1/patron";
             var request = PapiRestRequest.Post(url, body: _params);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateV2Async(PatronRegistrationData _params, CancellationToken cancellationToken = default)
@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api
             var url = "/public/v2/1033/100/1/patron";
             var request = PapiRestRequest.Post(url, body: _params);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

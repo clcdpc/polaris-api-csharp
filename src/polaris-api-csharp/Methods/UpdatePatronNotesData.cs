@@ -36,7 +36,7 @@ namespace Clc.Polaris.Api
 
             var request = PapiRestRequest.Post(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

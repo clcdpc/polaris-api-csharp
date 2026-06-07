@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Get(url, password: password);
             request.QueryParameters.Add("page", page);
             request.QueryParameters.Add("rowsperpage", rowsPerPage);
-            return await ExecutePapiAsync<PatronReadingHistoryGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronReadingHistoryGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

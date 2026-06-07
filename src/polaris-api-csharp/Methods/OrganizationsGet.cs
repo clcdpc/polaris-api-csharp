@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/1/organizations/{type}";
             var request = PapiRestRequest.Get(url);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<OrganizationsGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<OrganizationsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

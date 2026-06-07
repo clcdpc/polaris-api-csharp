@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/{organizationId ?? OrganizationId}/pickupbranches";
             var request = PapiRestRequest.Get(url);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<PickupBranchesGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PickupBranchesGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
             {
                 request.QueryParameters.Add("includeItems", 1);
             }
-            return await ExecutePapiAsync<Sync_BibsByIdGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<Sync_BibsByIdGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
         public Task<IRestResponse<Sync_BibsByIdGetResult>> Synch_BibsByIdGetAsync(int bibId, bool includeItems = false, CancellationToken cancellationToken = default) => Synch_BibsByIdGetAsync(new int[] { bibId }, includeItems, cancellationToken);

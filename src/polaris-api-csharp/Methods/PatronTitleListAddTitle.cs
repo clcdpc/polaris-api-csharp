@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistaddtitle/";
             var body = new PatronTitleListAddTitleData { RecordStoreId = recordStoreId, LocalControlNumber = localControlNumber };
             var request = PapiRestRequest.Post(url, body: body, password: password);
-            return await ExecutePapiAsync<PatronTitleListAddTitleResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronTitleListAddTitleResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

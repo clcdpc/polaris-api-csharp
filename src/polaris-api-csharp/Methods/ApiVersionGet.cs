@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
         {
             var url = "/public/v1/1033/100/1/api";
             var request = PapiRestRequest.Get(url);
-            return await ExecutePapiAsync<ApiResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<ApiResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

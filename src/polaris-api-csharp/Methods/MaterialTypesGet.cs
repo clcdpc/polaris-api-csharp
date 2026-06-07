@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
             var url = $"/public/v1/1033/100/{branchId ?? OrganizationId}/materialtypes";
             var request = PapiRestRequest.Get(url);
             request.BlockStaffOverride = true;
-            return await ExecutePapiAsync<MaterialTypesGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<MaterialTypesGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

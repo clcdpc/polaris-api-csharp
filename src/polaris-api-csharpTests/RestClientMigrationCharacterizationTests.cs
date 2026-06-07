@@ -662,7 +662,7 @@ namespace Clc.Polaris.Api.Tests
             var client = CreateClient(handler);
             var request = new PapiRestRequest($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/search/patrons/Boolean");
             var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+                .GetMethod("ExecutePapiCoreAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
                 .MakeGenericMethod(typeof(PapiResponseCommon));
             var skipMode = Enum.Parse(
                 typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,
@@ -1111,7 +1111,7 @@ namespace Clc.Polaris.Api.Tests
         private static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
         {
             var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+                .GetMethod("ExecutePapiCoreAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
                 .MakeGenericMethod(typeof(PapiResponseCommon));
             var autoMode = Enum.Parse(
                 typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,

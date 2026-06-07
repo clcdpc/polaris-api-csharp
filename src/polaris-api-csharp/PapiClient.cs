@@ -158,7 +158,7 @@ namespace Clc.Polaris.Api
             public bool HasValidToken => Status == ProtectedTokenAcquisitionStatus.ValidTokenAvailable && IsProtectedTokenUsable(Token);
         }
 
-        private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default, ProtectedTokenPreloadMode tokenPreloadMode = ProtectedTokenPreloadMode.Auto)
+        private async Task<IRestResponse<T>> ExecutePapiCoreAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default, ProtectedTokenPreloadMode tokenPreloadMode = ProtectedTokenPreloadMode.Auto)
         {
             var pathContainsProtectedTokenPlaceholder = RequestPathContainsProtectedTokenPlaceholder(request);
             var requiresProtectedToken = RequiresProtectedToken(request, pathContainsProtectedTokenPlaceholder);

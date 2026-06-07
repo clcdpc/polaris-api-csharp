@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Get(url, password: password);
             request.QueryParameters.Add("addresses", Convert.ToInt32(addresses));
             request.QueryParameters.Add("notes", Convert.ToInt32(notes));
-            return await ExecutePapiAsync<PatronBasicDataGetResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PatronBasicDataGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

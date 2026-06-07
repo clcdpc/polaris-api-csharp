@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             request.QueryParameters.Add("userid", userId ?? UserId);
 
-            return await ExecutePapiAsync<CreatePatronBlocksResult>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<CreatePatronBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
 

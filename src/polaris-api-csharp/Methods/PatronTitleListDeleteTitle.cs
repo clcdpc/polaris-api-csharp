@@ -29,7 +29,7 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Delete(url, password: password);
             request.QueryParameters.Add("list", listId);
             request.QueryParameters.Add("position", position);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiCoreAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }
