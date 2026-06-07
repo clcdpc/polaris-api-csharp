@@ -656,24 +656,18 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task ExecutePapiAsync_WithSkippedProtectedTokenPreloadAndPlaceholder_FailsBeforeSending()
+        public async Task ExecutePapiAsync_MalformedStaffAuthenticatorPath_RequiresProtectedTokenBeforeSending()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             var client = CreateClient(handler);
-            var request = new PapiRestRequest($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/search/patrons/Boolean");
-            var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
-                .MakeGenericMethod(typeof(PapiResponseCommon));
-            var skipMode = Enum.Parse(
-                typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,
-                "Skip");
+            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff-extra");
 
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None, skipMode })!;
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await task);
+            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => ExecuteRawPapiRequestAsync(client, request));
 
-            StringAssert.Contains(exception.Message, "ProtectedToken.Placeholder");
+            StringAssert.Contains(exception.Message, "valid protected access token");
             Assert.IsNull(handler.LastRequest);
-            Assert.AreEqual($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/search/patrons/Boolean", request.Path);
+            Assert.AreEqual("/protected/v1/1033/100/1/authenticator/staff-extra", request.Path);
         }
 
         [TestMethod]
@@ -1113,11 +1107,8 @@ namespace Clc.Polaris.Api.Tests
             var executePapiAsync = typeof(PapiClient)
                 .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
                 .MakeGenericMethod(typeof(PapiResponseCommon));
-            var autoMode = Enum.Parse(
-                typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,
-                "Auto");
 
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None, autoMode })!;
+            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
             await task.ConfigureAwait(false);
         }
 
