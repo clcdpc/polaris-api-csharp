@@ -15,8 +15,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
+    [UnitCategory]
     [DoNotParallelize]
-    [TestCategory("RestClientMigration")]
     public class PapiClientTokenTests
     {
         [TestInitialize]

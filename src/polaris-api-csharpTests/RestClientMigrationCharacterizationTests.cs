@@ -15,8 +15,7 @@ using System.Threading.Tasks;
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
-    [TestCategory("Unit")]
-    [TestCategory("RestClientMigration")]
+    [UnitCategory]
     public class RestClientMigrationCharacterizationTests
     {
         [TestMethod]

@@ -6,63 +6,36 @@ using System.Text.RegularExpressions;
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
-    [TestCategory("Unit")]
+    [UnitCategory]
     public class PapiClientTestCategoryTests
     {
-        private const string IntegrationCategory = "Integration";
-        private const string ReadOnlyIntegrationCategory = "ReadOnlyIntegration";
-        private const string ProtectedIntegrationCategory = "ProtectedIntegration";
-        private const string MutatingIntegrationCategory = "MutatingIntegration";
+        private const string LegacyIntegrationCategory = "Integration";
+        private const string LegacyProtectedIntegrationCategory = "ProtectedIntegration";
 
-        private static readonly string[] KnownReadOnlyIntegrationTests =
+        private static readonly string[] IntegrationCategories =
         {
-            nameof(PapiClientTests.ApiKeyValidateTest),
-            nameof(PapiClientTests.ApiVersionGetTest),
-            nameof(PapiClientTests.BibGetTest),
-            nameof(PapiClientTests.BibGetTest_PassBranchId),
-            nameof(PapiClientTests.BibSearchTest),
-            nameof(PapiClientTests.CollectionsGetTest),
-            nameof(PapiClientTests.DatesClosedGetTest),
-            nameof(PapiClientTests.HoldingsGetTest),
-            nameof(PapiClientTests.ItemStatusesGetAsyncTest),
-            nameof(PapiClientTests.LimitFiltersGetTest),
-            nameof(PapiClientTests.MARCTypeOfMaterialsGetAsyncTest),
-            nameof(PapiClientTests.OrganizationsGetTest),
-            nameof(PapiClientTests.PatronAccountGetTest),
-            nameof(PapiClientTests.PatronBasicDataGetTest),
-            nameof(PapiClientTests.PatronCirculateBlocksGetTest),
-            nameof(PapiClientTests.PatronCodesGetTest),
-            nameof(PapiClientTests.PatronHoldRequestsGetTest),
-            nameof(PapiClientTests.PatronILLRequestsGetTest),
-            nameof(PapiClientTests.PatronItemsOutGetTest),
-            nameof(PapiClientTests.PatronMessagesGetTest),
-            nameof(PapiClientTests.PatronPreferencesGetTest),
-            nameof(PapiClientTests.PatronReadingHistoryGetTest),
-            nameof(PapiClientTests.PatronSavedSearchesGetTest),
-            nameof(PapiClientTests.PatronTitleListGetTitlesTest),
-            nameof(PapiClientTests.PatronValidateTest),
-            nameof(PapiClientTests.PickupBranchesGetTest),
-            nameof(PapiClientTests.ShelfLocationsGetTest),
-            nameof(PapiClientTests.AuthenticateStaffUserTest),
-            nameof(PapiClientTests.HoldRequestGetListTest),
-            nameof(PapiClientTests.Patron_GetBarcodeFromIdTest),
-            nameof(PapiClientTests.PatronRenewBlocksGetTest),
-            nameof(PapiClientTests.PatronSearchTest),
-            nameof(PapiClientTests.RecordSetRecordsGetTest),
-            nameof(PapiClientTests.SA_GetValueByOrgTest),
-            nameof(PapiClientTests.Synch_BibsByIdGetTest),
+            TestCategories.ReadOnlyIntegration,
+            TestCategories.ProtectedReadOnlyIntegration,
+            TestCategories.MutatingIntegration,
+            TestCategories.ProtectedMutatingIntegration,
         };
 
-        private static readonly string[] KnownProtectedIntegrationTests =
+        private static readonly string[] ProtectedIntegrationCategories =
         {
-            nameof(PapiClientTests.AuthenticateStaffUserTest),
-            nameof(PapiClientTests.HoldRequestGetListTest),
-            nameof(PapiClientTests.Patron_GetBarcodeFromIdTest),
-            nameof(PapiClientTests.PatronRenewBlocksGetTest),
-            nameof(PapiClientTests.PatronSearchTest),
-            nameof(PapiClientTests.RecordSetRecordsGetTest),
-            nameof(PapiClientTests.SA_GetValueByOrgTest),
-            nameof(PapiClientTests.Synch_BibsByIdGetTest),
+            TestCategories.ProtectedReadOnlyIntegration,
+            TestCategories.ProtectedMutatingIntegration,
+        };
+
+        private static readonly string[] MutatingIntegrationCategories =
+        {
+            TestCategories.MutatingIntegration,
+            TestCategories.ProtectedMutatingIntegration,
+        };
+
+        private static readonly string[] ReadOnlyIntegrationCategories =
+        {
+            TestCategories.ReadOnlyIntegration,
+            TestCategories.ProtectedReadOnlyIntegration,
         };
 
         private static readonly string[] KnownMutatingIntegrationTests =
@@ -103,68 +76,48 @@ namespace Clc.Polaris.Api.Tests
         };
 
         [TestMethod]
-        public void AllPapiClientIntegrationTestsAreClassifiedOrDocumentedExceptions()
+        public void LivePapiClientTestsHaveExactlyOneIntegrationCategoryOrDocumentedException()
         {
             var documentedExceptions = new[]
             {
+                // This test currently only documents the not-yet-implemented method and does not issue a live request.
                 nameof(PapiClientTests.HeadingsSearchTest),
             };
 
-            var unclassified = GetPapiClientTestMethods()
+            var incorrectlyClassified = GetPapiClientTestMethods()
                 .Where(method => !documentedExceptions.Contains(method.Name))
-                .Where(method => MethodOrClassHasCategory(method, IntegrationCategory))
-                .Where(method => !MethodHasCategory(method, ReadOnlyIntegrationCategory))
-                .Where(method => !MethodHasCategory(method, MutatingIntegrationCategory))
-                .Select(method => method.Name)
+                .Select(method => new
+                {
+                    Method = method,
+                    Categories = MethodCategories(method).Where(IntegrationCategories.Contains).ToArray(),
+                })
+                .Where(method => method.Categories.Length != 1)
+                .Select(method => $"{method.Method.Name} ({string.Join(", ", method.Categories.DefaultIfEmpty("no integration category"))})")
                 .ToArray();
 
             Assert.IsFalse(
-                unclassified.Any(),
-                $@"Expected all PapiClient integration tests to be marked with TestCategory(""{ReadOnlyIntegrationCategory}""), TestCategory(""{MutatingIntegrationCategory}""), or documented in {nameof(documentedExceptions)}: {string.Join(", ", unclassified)}");
+                incorrectlyClassified.Any(),
+                $"Expected every live {nameof(PapiClientTests)} method to have exactly one integration category: {string.Join(", ", incorrectlyClassified)}");
         }
 
         [TestMethod]
-        public void SpecializedIntegrationCategoriesRequireIntegrationCategory()
+        public void PapiClientTestsDoNotUseLegacyIntegrationCategories()
         {
-            var missingIntegration = GetPapiClientTestMethods()
-                .Where(method =>
-                    (MethodHasCategory(method, ReadOnlyIntegrationCategory)
-                        || MethodHasCategory(method, ProtectedIntegrationCategory)
-                        || MethodHasCategory(method, MutatingIntegrationCategory))
-                    && !MethodOrClassHasCategory(method, IntegrationCategory))
-                .Select(method => method.Name)
+            var legacyCategoryMethods = GetPapiClientTestMethods()
+                .Select(method => new
+                {
+                    Method = method,
+                    Categories = MethodCategories(method)
+                        .Where(category => category is LegacyIntegrationCategory or LegacyProtectedIntegrationCategory)
+                        .ToArray(),
+                })
+                .Where(method => method.Categories.Any())
+                .Select(method => $"{method.Method.Name} ({string.Join(", ", method.Categories)})")
                 .ToArray();
 
             Assert.IsFalse(
-                missingIntegration.Any(),
-                $"Expected specialized integration tests to also be marked with TestCategory(\"{IntegrationCategory}\") at method or class level: {string.Join(", ", missingIntegration)}");
-        }
-
-        [TestMethod]
-        public void ReadOnlyAndMutatingIntegrationCategoriesAreMutuallyExclusive()
-        {
-            var conflictingMethods = GetPapiClientTestMethods()
-                .Where(method => MethodHasCategory(method, ReadOnlyIntegrationCategory) && MethodHasCategory(method, MutatingIntegrationCategory))
-                .Select(method => method.Name)
-                .ToArray();
-
-            Assert.IsFalse(
-                conflictingMethods.Any(),
-                $"Expected no test to have both TestCategory(\"{ReadOnlyIntegrationCategory}\") and TestCategory(\"{MutatingIntegrationCategory}\"): {string.Join(", ", conflictingMethods)}");
-        }
-
-        [TestMethod]
-        public void MutatingIntegrationTestsAreNotParallelized()
-        {
-            var missingDoNotParallelize = GetPapiClientTestMethods()
-                .Where(method => MethodHasCategory(method, MutatingIntegrationCategory))
-                .Where(method => !method.GetCustomAttributes<DoNotParallelizeAttribute>(inherit: false).Any())
-                .Select(method => method.Name)
-                .ToArray();
-
-            Assert.IsFalse(
-                missingDoNotParallelize.Any(),
-                $"Expected mutating integration tests to be marked with {nameof(DoNotParallelizeAttribute)} unless a documented exception is added to this test: {string.Join(", ", missingDoNotParallelize)}");
+                legacyCategoryMethods.Any(),
+                $"Expected no {nameof(PapiClientTests)} methods to use legacy raw integration categories: {string.Join(", ", legacyCategoryMethods)}");
         }
 
         [TestMethod]
@@ -175,37 +128,56 @@ namespace Clc.Polaris.Api.Tests
                 .Select(method => method.Key)
                 .ToArray();
 
-            AssertMethodsHaveCategory(methodsRequiringStaffOverride, ProtectedIntegrationCategory);
+            var missingProtectedCategory = methodsRequiringStaffOverride
+                .Where(methodName => !MethodHasAnyCategory(methodName, ProtectedIntegrationCategories))
+                .ToArray();
+
+            Assert.IsFalse(
+                missingProtectedCategory.Any(),
+                $"Expected tests that call {nameof(IntegrationTestRequirements.RequireStaffOverrideAccount)} to use either {TestCategories.ProtectedReadOnlyIntegration} or {TestCategories.ProtectedMutatingIntegration}: {string.Join(", ", missingProtectedCategory)}");
         }
 
         [TestMethod]
-        public void KnownReadOnlyTestsHaveReadOnlyIntegrationCategory()
+        public void MutatingIntegrationTestsAreNotParallelized()
         {
-            AssertMethodsHaveCategory(KnownReadOnlyIntegrationTests, ReadOnlyIntegrationCategory);
+            var missingDoNotParallelize = GetPapiClientTestMethods()
+                .Where(method => MethodHasAnyCategory(method, MutatingIntegrationCategories))
+                .Where(method => !method.GetCustomAttributes<DoNotParallelizeAttribute>(inherit: false).Any())
+                .Select(method => method.Name)
+                .ToArray();
+
+            Assert.IsFalse(
+                missingDoNotParallelize.Any(),
+                $"Expected mutating integration tests to be marked with {nameof(DoNotParallelizeAttribute)}: {string.Join(", ", missingDoNotParallelize)}");
         }
 
         [TestMethod]
-        public void KnownStaffRequiredReadOnlyTestsHaveProtectedIntegrationCategory()
+        public void ReadOnlyIntegrationTestsAreParallelizableUnlessDocumented()
         {
-            AssertMethodsHaveCategory(KnownProtectedIntegrationTests, ProtectedIntegrationCategory);
+            var documentedDoNotParallelizeReadOnlyTests = Array.Empty<string>();
+
+            var unexpectedlyNonParallelized = GetPapiClientTestMethods()
+                .Where(method => !documentedDoNotParallelizeReadOnlyTests.Contains(method.Name))
+                .Where(method => MethodHasAnyCategory(method, ReadOnlyIntegrationCategories))
+                .Where(method => method.GetCustomAttributes<DoNotParallelizeAttribute>(inherit: false).Any())
+                .Select(method => method.Name)
+                .ToArray();
+
+            Assert.IsFalse(
+                unexpectedlyNonParallelized.Any(),
+                $"Expected read-only integration tests not to be marked with {nameof(DoNotParallelizeAttribute)} unless documented in {nameof(documentedDoNotParallelizeReadOnlyTests)}: {string.Join(", ", unexpectedlyNonParallelized)}");
         }
 
         [TestMethod]
         public void KnownMutatingTestsHaveMutatingIntegrationCategory()
         {
-            AssertMethodsHaveCategory(KnownMutatingIntegrationTests, MutatingIntegrationCategory);
-        }
-
-        [TestMethod]
-        public void KnownMutatingTestsDoNotHaveReadOnlyIntegrationCategory()
-        {
-            var incorrectlyReadOnly = KnownMutatingIntegrationTests
-                .Where(methodName => MethodHasCategory(methodName, ReadOnlyIntegrationCategory))
+            var missingCategory = KnownMutatingIntegrationTests
+                .Where(methodName => !MethodHasAnyCategory(methodName, MutatingIntegrationCategories))
                 .ToArray();
 
             Assert.IsFalse(
-                incorrectlyReadOnly.Any(),
-                $"Expected known mutating tests not to be marked with TestCategory(\"{ReadOnlyIntegrationCategory}\"): {string.Join(", ", incorrectlyReadOnly)}");
+                missingCategory.Any(),
+                $"Expected known mutating tests to use either {TestCategories.MutatingIntegration} or {TestCategories.ProtectedMutatingIntegration}: {string.Join(", ", missingCategory)}");
         }
 
         private static IEnumerable<MethodInfo> GetPapiClientTestMethods()
@@ -215,41 +187,26 @@ namespace Clc.Polaris.Api.Tests
                 .Where(method => method.GetCustomAttributes<TestMethodAttribute>(inherit: false).Any());
         }
 
-        private static void AssertMethodsHaveCategory(IEnumerable<string> methodNames, string expectedCategory)
-        {
-            var missingCategory = methodNames
-                .Where(methodName => !MethodHasCategory(methodName, expectedCategory))
-                .ToArray();
-
-            Assert.IsFalse(
-                missingCategory.Any(),
-                $"Expected these {nameof(PapiClientTests)} methods to be marked with TestCategory(\"{expectedCategory}\"): {string.Join(", ", missingCategory)}");
-        }
-
-        private static bool MethodHasCategory(string methodName, string expectedCategory)
+        private static bool MethodHasAnyCategory(string methodName, IEnumerable<string> expectedCategories)
         {
             var method = typeof(PapiClientTests).GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public);
 
             Assert.IsNotNull(method, $"Expected to find public test method {nameof(PapiClientTests)}.{methodName}.");
 
-            return MethodHasCategory(method, expectedCategory);
+            return MethodHasAnyCategory(method, expectedCategories);
         }
 
-        private static bool MethodHasCategory(MethodInfo method, string expectedCategory)
+        private static bool MethodHasAnyCategory(MethodInfo method, IEnumerable<string> expectedCategories)
+        {
+            return MethodCategories(method).Intersect(expectedCategories).Any();
+        }
+
+        private static string[] MethodCategories(MethodInfo method)
         {
             return method
-                .GetCustomAttributes<TestCategoryAttribute>(inherit: false)
+                .GetCustomAttributes<TestCategoryBaseAttribute>(inherit: false)
                 .SelectMany(attribute => attribute.TestCategories)
-                .Contains(expectedCategory);
-        }
-
-        private static bool MethodOrClassHasCategory(MethodInfo method, string expectedCategory)
-        {
-            return MethodHasCategory(method, expectedCategory)
-                || typeof(PapiClientTests)
-                    .GetCustomAttributes<TestCategoryAttribute>(inherit: false)
-                    .SelectMany(attribute => attribute.TestCategories)
-                    .Contains(expectedCategory);
+                .ToArray();
         }
 
         private static Dictionary<string, string> PapiClientTestSourceMethods([CallerFilePath] string categoryTestSourcePath = "")
@@ -298,6 +255,5 @@ namespace Clc.Polaris.Api.Tests
             Assert.Fail($"Expected to find closing brace matching character index {openingBraceIndex}.");
             return -1;
         }
-
     }
 }
