@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
-    [TestCategory("Unit")]
+    [UnitCategory]
     public class AuthenticatePatronTests
     {
         private sealed class CaptureHttpMessageHandler : HttpMessageHandler

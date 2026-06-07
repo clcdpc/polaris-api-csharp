@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [DoNotParallelize]
-    [TestCategory("RestClientMigration")]
+    [UnitCategory]
     public class PapiClientTokenTests
     {
         [TestInitialize]

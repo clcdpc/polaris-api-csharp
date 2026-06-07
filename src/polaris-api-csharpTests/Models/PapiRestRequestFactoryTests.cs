@@ -5,7 +5,7 @@ using System.Net.Http;
 namespace Clc.Polaris.Api.Tests.Models
 {
     [TestClass]
-    [TestCategory("Unit")]
+    [UnitCategory]
     public class PapiRestRequestFactoryTests
     {
         [TestMethod]

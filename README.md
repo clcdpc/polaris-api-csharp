@@ -63,43 +63,43 @@ Protected-token-in-path endpoints use `ProtectedToken.Placeholder` internally. M
 
 ## Local tests
 
-Run non-live/unit tests from the repository root:
+Run unit tests from the repository root:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory!=Integration"
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Unit"
 ```
 
 Integration tests require a live Polaris dev environment plus local dev credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
 
-The live-test categories are:
+The live-test categories are mutually exclusive so each live test appears under exactly one trait in Visual Studio Test Explorer:
 
-- `Integration`: any test that requires a live Polaris/API environment.
 - `ReadOnlyIntegration`: live test that only reads/returns data and does not mutate Polaris state.
-- `ProtectedIntegration`: live test that requires staff/protected credentials.
+- `ProtectedReadOnlyIntegration`: read-only live test that requires staff/protected credentials.
 - `MutatingIntegration`: live test that creates, updates, cancels, deletes, clears, pays, voids, moves, renews, submits, or otherwise changes Polaris state.
+- `ProtectedMutatingIntegration`: mutating live test that requires staff/protected credentials.
 
 Run read-only integration tests that do not require staff credentials when you have local Polaris dev settings configured:
-
-```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ReadOnlyIntegration&TestCategory!=ProtectedIntegration"
-```
-
-Run protected read-only integration tests only when `PapiSettings.PolarisOverrideAccount` is configured with staff override credentials:
-
-```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ReadOnlyIntegration&TestCategory=ProtectedIntegration"
-```
-
-Run all read-only integration tests when both standard and staff/protected local credentials are available:
 
 ```bash
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ReadOnlyIntegration"
 ```
 
+Run protected read-only integration tests only when `PapiSettings.PolarisOverrideAccount` is configured with staff override credentials:
+
+```bash
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ProtectedReadOnlyIntegration"
+```
+
+Run all read-only integration tests when both standard and staff/protected local credentials are available:
+
+```bash
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ReadOnlyIntegration|TestCategory=ProtectedReadOnlyIntegration"
+```
+
 Run mutating/destructive integration tests only against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=MutatingIntegration"
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=MutatingIntegration|TestCategory=ProtectedMutatingIntegration"
 ```
 
 `MutatingIntegration` tests may create or modify patron blocks, title lists, account entries, record-set entries, notes, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed.
