@@ -15,7 +15,5 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Put(url, body: renewOptions ?? new ItemRenewOptions(), password: password);
             return await ExecutePapiAsync<ItemRenewResultWrapper>(request, cancellationToken).ConfigureAwait(false);
         }
-        public Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAllForPatronAsync(string barcode, string password = "", ItemRenewOptions? renewOptions = null, CancellationToken cancellationToken = default)
-            => ItemRenewAsync(barcode, 0, password, renewOptions, cancellationToken);
     }
 }

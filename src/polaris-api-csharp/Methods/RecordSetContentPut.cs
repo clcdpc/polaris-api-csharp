@@ -23,21 +23,5 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
         }
-        public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentAddAsync(int recordSetId, int recordId, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default)
-        {
-            return await RecordSetContentPutAsync(recordSetId, new[] { recordId }, RecordSetContentPutActions.Add, userId, workstationId, cancellationToken).ConfigureAwait(false);
-        }
-        public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentAddAsync(int recordSetId, IEnumerable<int> records, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default)
-        {
-            return await RecordSetContentPutAsync(recordSetId, records, RecordSetContentPutActions.Add, userId, workstationId, cancellationToken).ConfigureAwait(false);
-        }
-        public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentRemoveAsync(int recordSetId, int recordId, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default)
-        {
-            return await RecordSetContentPutAsync(recordSetId, new[] { recordId }, RecordSetContentPutActions.Remove, userId, workstationId, cancellationToken).ConfigureAwait(false);
-        }
-        public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentRemoveAsync(int recordSetId, IEnumerable<int> records, int userId = 1, int workstationId = 1, CancellationToken cancellationToken = default)
-        {
-            return await RecordSetContentPutAsync(recordSetId, records, RecordSetContentPutActions.Remove, userId, workstationId, cancellationToken).ConfigureAwait(false);
-        }
     }
 }
