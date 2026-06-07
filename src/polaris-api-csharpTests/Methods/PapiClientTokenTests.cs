@@ -198,7 +198,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual("protected-token", response.Data.AccessToken);
             Assert.IsNull(client.Token);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             var request = handler.CapturedRequests.Single();
             Assert.IsTrue(request.IsStaffAuthenticationRequest);
             Assert.AreEqual("POST", request.Method);
@@ -218,7 +218,7 @@ namespace Clc.Polaris.Api.Tests
             await ExecuteRawPapiRequestAsync(client, request);
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("route-token", client.Token?.AccessToken);
             var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
             StringAssert.EndsWith(finalRequest.Path, "/protected/v1/1033/100/1/patron/ABC123/account/outstanding");
@@ -237,11 +237,173 @@ namespace Clc.Polaris.Api.Tests
             await ExecuteRawPapiRequestAsync(client, request);
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("malformed-token", client.Token?.AccessToken);
             var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
             StringAssert.EndsWith(finalRequest.Path, "/protected/v1/1033/100/1/authenticator/staff/extra");
             AssertAuthorizationHash(finalRequest, "malformed-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public void ExecutePapiAsync_IsPublicOnPapiClientOnly()
+        {
+            var papiClientMethod = typeof(PapiClient)
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .SingleOrDefault(method => method.Name == nameof(PapiClient.ExecutePapiAsync) && method.IsGenericMethodDefinition);
+            var interfaceMethod = typeof(IPapiClient)
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .SingleOrDefault(method => method.Name == nameof(PapiClient.ExecutePapiAsync));
+
+            Assert.IsNotNull(papiClientMethod);
+            Assert.IsNull(interfaceMethod);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_NullRequest_ThrowsBeforeSendingHttpRequest()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => client.ExecutePapiAsync<PapiResponseCommon>(null!));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public async Task ExecutePapiAsync_NullEmptyOrWhitespacePath_ThrowsBeforeSendingHttpRequest(string? path)
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom");
+            request.Path = path!;
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        [DataRow("https://example.com/PAPIService/REST/public/v1/1033/100/1/custom")]
+        [DataRow("//example.com/foo")]
+        [DataRow("public/v1/1033/100/1/custom")]
+        public async Task ExecutePapiAsync_InvalidCustomPath_ThrowsBeforeSendingHttpRequest(string path)
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            var request = PapiRestRequest.Get(path);
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_AuthenticatedPathOutsidePublicOrProtected_ThrowsBeforeSendingHttpRequest()
+        {
+            var handler = new CapturingHttpMessageHandler();
+            var client = CreateClient(handler);
+            var request = PapiRestRequest.Get("/other/v1/1033/100/1/custom");
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicGet_SendsThroughPapiPipelineWithDateAndAuthorizationHeaders()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            client.StaffOverrideAccount = null;
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.AreEqual("GET", finalRequest.Method);
+            StringAssert.Contains(finalRequest.Path, "/public/v1/1033/100/1/custom/unsupported");
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicPost_SerializesBodyAndSignsRequest()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            client.StaffOverrideAccount = null;
+            var request = PapiRestRequest.Post(
+                "/public/v1/1033/100/1/custom/unsupported",
+                body: new { Message = "custom-body", Count = 3 });
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.AreEqual("POST", finalRequest.Method);
+            StringAssert.Contains(finalRequest.Body, "custom-body");
+            StringAssert.Contains(finalRequest.Body, "3");
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_AcquiresAndReplacesProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
+            StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/custom-placeholder-token/custom/unsupported");
+            Assert.IsFalse(finalRequest.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
+            AssertAuthorizationHash(finalRequest, "custom-placeholder-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicRequest_UsesStaffOverrideTokenWhenAllowed()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("override-token", "override-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
+            Assert.IsTrue(finalRequest.Headers.TryGetValue("X-PAPI-AccessToken", out var accessToken));
+            Assert.AreEqual("override-token", accessToken);
+            AssertAuthorizationHash(finalRequest, "override-secret", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicRequestWithBlockStaffOverride_DoesNotSendStaffOverrideToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler();
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+            request.BlockStaffOverride = true;
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
         }
 
         [TestMethod]
@@ -275,7 +437,7 @@ namespace Clc.Polaris.Api.Tests
             await Task.WhenAll(requests);
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(8, handler.ProtectedRequestCount);
+            Assert.AreEqual(8, handler.NonAuthenticationRequestCount);
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("protected-token", client.Token.AccessToken);
         }
@@ -296,7 +458,7 @@ namespace Clc.Polaris.Api.Tests
             await Task.WhenAll(clients.Select((client, index) => client.PatronSearchAsync($"name=shared-{index}")));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(clients.Length, handler.ProtectedRequestCount);
+            Assert.AreEqual(clients.Length, handler.NonAuthenticationRequestCount);
             Assert.IsTrue(clients.All(client => client.Token?.AccessToken == "shared-token"));
             var finalRequests = handler.CapturedRequests.Where(request => !request.IsStaffAuthenticationRequest).ToArray();
             Assert.AreEqual(clients.Length, finalRequests.Length);
@@ -353,7 +515,7 @@ namespace Clc.Polaris.Api.Tests
                 clients[3].PatronSearchAsync("name=bravo-1"));
 
             Assert.AreEqual(2, handler.AuthenticationRequestCount);
-            Assert.AreEqual(4, handler.ProtectedRequestCount);
+            Assert.AreEqual(4, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("token-for-password-a", clients[0].Token?.AccessToken);
             Assert.AreEqual("token-for-password-b", clients[1].Token?.AccessToken);
             Assert.AreEqual("token-for-password-a", clients[2].Token?.AccessToken);
@@ -369,7 +531,7 @@ namespace Clc.Polaris.Api.Tests
                 passwordBReuseClient.PatronSearchAsync("name=reuse-b"));
 
             Assert.AreEqual(2, handler.AuthenticationRequestCount);
-            Assert.AreEqual(6, handler.ProtectedRequestCount);
+            Assert.AreEqual(6, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("token-for-password-a", passwordAReuseClient.Token?.AccessToken);
             Assert.AreEqual("token-for-password-b", passwordBReuseClient.Token?.AccessToken);
             AssertFinalRequestsUseExpectedToken(handler, "reuse-a", "token-for-password-a", "secret-for-password-a");
@@ -394,7 +556,7 @@ namespace Clc.Polaris.Api.Tests
             await client.PatronSearchAsync("name=Smith");
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("fresh-token", client.Token?.AccessToken);
             var finalRequest = handler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest);
             StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/fresh-token/search/patrons/Boolean");
@@ -420,7 +582,7 @@ namespace Clc.Polaris.Api.Tests
             await client.PatronSearchAsync("name=Smith");
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("new-protected-token", client.Token?.AccessToken);
             var finalRequest = handler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest);
             StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/new-protected-token/search/patrons/Boolean");
@@ -465,7 +627,7 @@ namespace Clc.Polaris.Api.Tests
             await client.PatronSearchAsync("name=Smith");
 
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("cached-token", client.Token?.AccessToken);
         }
 
@@ -603,7 +765,7 @@ namespace Clc.Polaris.Api.Tests
             await client.PatronSearchAsync("name=Smith");
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("new-token", client.Token?.AccessToken);
             Assert.AreNotEqual(" ", client.Token?.AccessToken);
             Assert.IsTrue(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out var cachedToken));
@@ -628,7 +790,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
             Assert.IsNull(client.Token);
         }
@@ -668,7 +830,7 @@ namespace Clc.Polaris.Api.Tests
             await clientA.PatronSearchAsync("name=Smith");
 
             Assert.AreEqual(1, handlerA.AuthenticationRequestCount);
-            Assert.AreEqual(1, handlerA.ProtectedRequestCount);
+            Assert.AreEqual(1, handlerA.NonAuthenticationRequestCount);
             Assert.AreEqual("token-a", clientA.Token?.AccessToken);
             Assert.IsTrue(TryGetCachedToken(hostname, "access-a", clientA.AccessKey, staff, out var cachedTokenA));
             Assert.IsNotNull(cachedTokenA);
@@ -685,7 +847,7 @@ namespace Clc.Polaris.Api.Tests
             await clientB.PatronSearchAsync("name=Jones");
 
             Assert.AreEqual(1, handlerB.AuthenticationRequestCount);
-            Assert.AreEqual(1, handlerB.ProtectedRequestCount);
+            Assert.AreEqual(1, handlerB.NonAuthenticationRequestCount);
             Assert.AreEqual("token-b", clientB.Token?.AccessToken);
             Assert.IsTrue(TryGetCachedToken(hostname, "access-b", clientB.AccessKey, staff, out var cachedTokenB));
             Assert.IsNotNull(cachedTokenB);
@@ -705,7 +867,7 @@ namespace Clc.Polaris.Api.Tests
             await client.PatronSearchAsync("name=Smith");
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("protected-token", client.Token.AccessToken);
             var paths = handler.RequestPaths;
@@ -727,7 +889,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -741,7 +903,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -761,7 +923,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -781,7 +943,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -804,7 +966,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
@@ -819,7 +981,7 @@ namespace Clc.Polaris.Api.Tests
 
             StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
         [TestMethod]
@@ -832,7 +994,7 @@ namespace Clc.Polaris.Api.Tests
 
             StringAssert.Contains(exception.Message, "did not return a usable protected access token");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
         [TestMethod]
@@ -846,7 +1008,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
         [TestMethod]
@@ -860,7 +1022,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
         [TestMethod]
@@ -874,7 +1036,7 @@ namespace Clc.Polaris.Api.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
         [TestMethod]
@@ -898,7 +1060,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(exception.Message.Contains(returnedToken.AccessToken, StringComparison.Ordinal));
             Assert.IsFalse(exception.Message.Contains(returnedToken.AccessSecret, StringComparison.Ordinal));
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
             Assert.IsFalse(handler.RequestPaths.Any(path => path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal)));
         }
 
@@ -912,7 +1074,7 @@ namespace Clc.Polaris.Api.Tests
 
             StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
         [TestMethod]
@@ -927,7 +1089,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
         }
 
@@ -941,7 +1103,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.ProtectedRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
         }
 
@@ -962,7 +1124,7 @@ namespace Clc.Polaris.Api.Tests
             }
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(0, handler.ProtectedRequestCount);
+            Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
 
@@ -1057,12 +1219,7 @@ namespace Clc.Polaris.Api.Tests
 
         private static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
         {
-            var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .MakeGenericMethod(typeof(PapiResponseCommon));
-
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
-            await task.ConfigureAwait(false);
+            await client.ExecutePapiAsync<PapiResponseCommon>(request).ConfigureAwait(false);
         }
 
         private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
@@ -1238,12 +1395,12 @@ namespace Clc.Polaris.Api.Tests
             private readonly string _authenticationResponseJson;
             private readonly Func<CapturedPapiRequest, (HttpStatusCode StatusCode, string ResponseJson)>? _authenticationResponseFactory;
             private int _authenticationRequestCount;
-            private int _protectedRequestCount;
+            private int _nonAuthenticationRequestCount;
             private readonly ConcurrentQueue<string> _requestPaths = new ConcurrentQueue<string>();
             private readonly ConcurrentQueue<CapturedPapiRequest> _capturedRequests = new ConcurrentQueue<CapturedPapiRequest>();
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
-            public int ProtectedRequestCount => _protectedRequestCount;
+            public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
             public string[] RequestPaths => _requestPaths.ToArray();
             public CapturedPapiRequest[] CapturedRequests => _capturedRequests.ToArray();
 
@@ -1277,7 +1434,7 @@ namespace Clc.Polaris.Api.Tests
                     };
                 }
 
-                Interlocked.Increment(ref _protectedRequestCount);
+                Interlocked.Increment(ref _nonAuthenticationRequestCount);
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
