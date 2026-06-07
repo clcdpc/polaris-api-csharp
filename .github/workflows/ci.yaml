@@ -54,7 +54,7 @@ jobs:
           dotnet test "$TEST_PROJECT" \
             --configuration "$CONFIGURATION" \
             --no-build \
-            --filter "TestCategory!=Integration" \
+            --filter "TestCategory=Unit" \
             --logger "trx;LogFileName=unit-tests.trx" \
             --results-directory "$TEST_RESULTS_DIR"
 

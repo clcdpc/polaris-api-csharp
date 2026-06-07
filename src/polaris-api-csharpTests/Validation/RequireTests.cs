@@ -1,11 +1,12 @@
 using System;
+using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Validation.Tests
 {
     [TestClass]
-    [TestCategory("Unit")]
+    [UnitCategory]
     public class RequireTests
     {
         [TestMethod]

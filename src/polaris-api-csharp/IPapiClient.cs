@@ -43,7 +43,6 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<CollectionsGetResult>> CollectionsGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronBlocksAsync(string barcode, BlockType blockType, string blockValue, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<DatesClosedGetResult>> DatesClosedGetAsync(int organizationId, CancellationToken cancellationToken = default);
-        Task<IRestResponse<BibHoldingsGetResult>> HeadingsSearchAsync(int bibId, CancellationToken cancellationToken = default);
         Task<IRestResponse<BibHoldingsGetResult>> HoldingsGetAsync(int bibId, CancellationToken cancellationToken = default);
         Task<IRestResponse<HoldRequestCancelResult>> HoldRequestCancelAsync(string barcode, int requestId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<HoldRequestCreateResult>> HoldRequestCreateAsync(HoldRequestCreateParams holdParams, CancellationToken cancellationToken = default);
