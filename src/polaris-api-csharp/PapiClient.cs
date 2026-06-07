@@ -130,12 +130,6 @@ namespace Clc.Polaris.Api
             return papiRequest;
         }
 
-        private enum ProtectedTokenPreloadMode
-        {
-            Auto,
-            Skip
-        }
-
         private enum ProtectedTokenAcquisitionStatus
         {
             ValidTokenAvailable,
@@ -158,17 +152,12 @@ namespace Clc.Polaris.Api
             public bool HasValidToken => Status == ProtectedTokenAcquisitionStatus.ValidTokenAvailable && IsProtectedTokenUsable(Token);
         }
 
-        private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default, ProtectedTokenPreloadMode tokenPreloadMode = ProtectedTokenPreloadMode.Auto)
+        private async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default)
         {
             var pathContainsProtectedTokenPlaceholder = RequestPathContainsProtectedTokenPlaceholder(request);
             var requiresProtectedToken = RequiresProtectedToken(request, pathContainsProtectedTokenPlaceholder);
 
-            if (tokenPreloadMode == ProtectedTokenPreloadMode.Skip && pathContainsProtectedTokenPlaceholder)
-            {
-                throw new InvalidOperationException("ProtectedToken.Placeholder cannot be used when protected token preloading is skipped.");
-            }
-
-            if (tokenPreloadMode == ProtectedTokenPreloadMode.Auto && requiresProtectedToken)
+            if (requiresProtectedToken)
             {
                 var tokenResult = await EnsureProtectedTokenAsync(cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -188,6 +177,11 @@ namespace Clc.Polaris.Api
 
         private bool RequiresProtectedToken(PapiRestRequest request, bool pathContainsProtectedTokenPlaceholder)
         {
+            if (IsStaffAuthenticatorRequest(request))
+            {
+                return false;
+            }
+
             if (pathContainsProtectedTokenPlaceholder)
             {
                 return true;
@@ -204,6 +198,14 @@ namespace Clc.Polaris.Api
                 string.IsNullOrWhiteSpace(request.Password) &&
                 !request.BlockStaffOverride &&
                 StaffOverrideAccount != null;
+        }
+
+        private static bool IsStaffAuthenticatorRequest(PapiRestRequest request)
+        {
+            return request.Method == HttpMethod.Post &&
+                request.Path.StartsWith("/protected/", StringComparison.OrdinalIgnoreCase) &&
+                request.Path.EndsWith("/authenticator/staff", StringComparison.OrdinalIgnoreCase) &&
+                request.Path.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) < 0;
         }
 
         private static void ThrowProtectedTokenRequired(ProtectedTokenAcquisitionStatus status, bool pathContainsProtectedTokenPlaceholder)

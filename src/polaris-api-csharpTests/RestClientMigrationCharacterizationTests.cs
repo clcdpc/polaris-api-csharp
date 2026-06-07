@@ -656,27 +656,6 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        public async Task ExecutePapiAsync_WithSkippedProtectedTokenPreloadAndPlaceholder_FailsBeforeSending()
-        {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
-            var client = CreateClient(handler);
-            var request = new PapiRestRequest($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/search/patrons/Boolean");
-            var executePapiAsync = typeof(PapiClient)
-                .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
-                .MakeGenericMethod(typeof(PapiResponseCommon));
-            var skipMode = Enum.Parse(
-                typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,
-                "Skip");
-
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None, skipMode })!;
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await task);
-
-            StringAssert.Contains(exception.Message, "ProtectedToken.Placeholder");
-            Assert.IsNull(handler.LastRequest);
-            Assert.AreEqual($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/search/patrons/Boolean", request.Path);
-        }
-
-        [TestMethod]
         public async Task BibSearch_RequestShape_IsStable()
         {
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
@@ -1113,11 +1092,7 @@ namespace Clc.Polaris.Api.Tests
             var executePapiAsync = typeof(PapiClient)
                 .GetMethod("ExecutePapiAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
                 .MakeGenericMethod(typeof(PapiResponseCommon));
-            var autoMode = Enum.Parse(
-                typeof(PapiClient).GetNestedType("ProtectedTokenPreloadMode", System.Reflection.BindingFlags.NonPublic)!,
-                "Auto");
-
-            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None, autoMode })!;
+            var task = (Task)executePapiAsync.Invoke(client, new object[] { request, CancellationToken.None })!;
             await task.ConfigureAwait(false);
         }
 
