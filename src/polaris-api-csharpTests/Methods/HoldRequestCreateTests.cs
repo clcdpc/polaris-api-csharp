@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task HoldRequestCreateTest2()
         {
-            var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
+            var response = await ((global::Clc.Polaris.Api.PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
         }
     }

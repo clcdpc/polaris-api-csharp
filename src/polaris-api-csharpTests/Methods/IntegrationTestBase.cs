@@ -38,7 +38,7 @@ namespace Clc.Polaris.Api.Tests
                 Assert.Inconclusive(IntegrationTestRequirements.MissingIntegrationConfigurationMessage);
             }
 
-            Papi = new PapiClient(papiSettings!);
+            Papi = new global::Clc.Polaris.Api.PapiClient(papiSettings!);
             PapiSettings = papiSettings!;
             Settings = testSettings!;
         }
