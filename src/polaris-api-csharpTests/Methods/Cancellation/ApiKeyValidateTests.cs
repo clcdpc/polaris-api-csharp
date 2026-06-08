@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class ApiKeyValidateTests : PapiClientTestBase
     {
         [TestMethod]

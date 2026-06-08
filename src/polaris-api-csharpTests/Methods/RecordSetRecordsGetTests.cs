@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class RecordSetRecordsGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedReadOnlyIntegrationCategory]
+        [ProtectedReadOnlyIntegrationTest]
         public async Task RecordSetRecordsGetTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

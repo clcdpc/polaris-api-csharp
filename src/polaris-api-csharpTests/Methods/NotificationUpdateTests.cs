@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class NotificationUpdateTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedMutatingIntegrationCategory]
+        [ProtectedMutatingIntegrationTest]
         [DoNotParallelize]
         public async Task NotificationUpdateTest()
         {

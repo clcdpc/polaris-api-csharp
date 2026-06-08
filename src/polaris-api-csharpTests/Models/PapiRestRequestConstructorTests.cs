@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests.Models
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class PapiRestRequestConstructorTests
     {
         [TestMethod]

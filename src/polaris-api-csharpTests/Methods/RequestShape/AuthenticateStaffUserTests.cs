@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests.Methods.RequestShape
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class AuthenticateStaffUserTests : PapiClientTestBase
     {
 

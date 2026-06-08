@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class LimitFiltersGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task LimitFiltersGetTest()
         {
             var response = (await Papi.LimitFiltersGetAsync()).Data;

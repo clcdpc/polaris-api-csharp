@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class AuthenticateStaffUserTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedReadOnlyIntegrationCategory]
+        [ProtectedReadOnlyIntegrationTest]
         public async Task AuthenticateStaffUserTest()
         {
             var staffOverrideAccount = Papi.StaffOverrideAccount;

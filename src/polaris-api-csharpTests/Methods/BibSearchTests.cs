@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class BibSearchTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task BibSearchTest()
         {
             var response = await Papi.BibSearchAsync(new BibSearchOptions { Term = "dogs", PageSize = 10 });

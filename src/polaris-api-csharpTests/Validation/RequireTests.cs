@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Validation.Tests
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class RequireTests
     {
         [TestMethod]

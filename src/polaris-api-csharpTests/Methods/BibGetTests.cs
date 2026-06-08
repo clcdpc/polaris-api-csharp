@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class BibGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task BibGetTest()
         {
             var response = await Papi.BibGetAsync(478907);
@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task BibGetTest_PassBranchId()
         {
             var response = await Papi.BibGetAsync(478907, 7);

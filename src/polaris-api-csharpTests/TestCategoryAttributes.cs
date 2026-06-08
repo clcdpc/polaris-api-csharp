@@ -12,31 +12,31 @@ namespace Clc.Polaris.Api.Tests
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class UnitCategoryAttribute : TestCategoryBaseAttribute
+    public sealed class UnitTestAttribute : TestCategoryBaseAttribute
     {
         public override IList<string> TestCategories => new[] { global::Clc.Polaris.Api.Tests.TestCategories.Unit };
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class ReadOnlyIntegrationCategoryAttribute : TestCategoryBaseAttribute
+    public sealed class ReadOnlyIntegrationTestAttribute : TestCategoryBaseAttribute
     {
         public override IList<string> TestCategories => new[] { global::Clc.Polaris.Api.Tests.TestCategories.ReadOnlyIntegration };
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class ProtectedReadOnlyIntegrationCategoryAttribute : TestCategoryBaseAttribute
+    public sealed class ProtectedReadOnlyIntegrationTestAttribute : TestCategoryBaseAttribute
     {
         public override IList<string> TestCategories => new[] { global::Clc.Polaris.Api.Tests.TestCategories.ProtectedReadOnlyIntegration };
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class MutatingIntegrationCategoryAttribute : TestCategoryBaseAttribute
+    public sealed class MutatingIntegrationTestAttribute : TestCategoryBaseAttribute
     {
         public override IList<string> TestCategories => new[] { global::Clc.Polaris.Api.Tests.TestCategories.MutatingIntegration };
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class ProtectedMutatingIntegrationCategoryAttribute : TestCategoryBaseAttribute
+    public sealed class ProtectedMutatingIntegrationTestAttribute : TestCategoryBaseAttribute
     {
         public override IList<string> TestCategories => new[] { global::Clc.Polaris.Api.Tests.TestCategories.ProtectedMutatingIntegration };
     }

@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
-    [UnitCategory]
+    [UnitTest]
     public class ProtectedTokenCacheTests : PapiClientTestBase
     {
         [TestInitialize]

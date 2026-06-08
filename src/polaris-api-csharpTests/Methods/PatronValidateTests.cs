@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PatronValidateTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task PatronValidateTest()
         {
             var response = await Papi.PatronValidateAsync(Settings.PatronBarcode, Settings.PatronPin);

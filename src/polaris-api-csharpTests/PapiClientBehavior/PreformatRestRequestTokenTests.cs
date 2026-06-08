@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
-    [UnitCategory]
+    [UnitTest]
     public class PreformatRestRequestTokenTests : PapiClientTestBase
     {
         [TestInitialize]

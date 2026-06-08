@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 {
     [TestClass]
     [DoNotParallelize]
-    [UnitCategory]
+    [UnitTest]
     public class PatronSearchProtectedTokenTests : PapiClientTestBase
     {
         [TestInitialize]

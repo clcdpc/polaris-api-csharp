@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class PreformatRestRequestHeaderTests : PapiClientTestBase
     {
         [TestMethod]

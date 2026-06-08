@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class MARCTypeOfMaterialsGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task MARCTypeOfMaterialsGetAsyncTest()
         {
             var response = (await Papi.MARCTypeOfMaterialsGetAsync()).Data;

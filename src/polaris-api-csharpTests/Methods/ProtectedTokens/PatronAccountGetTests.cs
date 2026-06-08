@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
 {
     [TestClass]
     [DoNotParallelize]
-    [UnitCategory]
+    [UnitTest]
     public class PatronAccountGetTests : PapiClientTestBase
     {
         [TestInitialize]
