@@ -244,12 +244,34 @@ namespace Clc.Polaris.Api
                 return true;
             }
 
+            return IsStaffOverridePatronRequest(request);
+        }
+
+        private bool IsStaffOverridePatronRequest(PapiRestRequest request)
+        {
             return request.IsPublicMethod &&
                 request.AuthRequired &&
                 AllowStaffOverrideRequests &&
                 string.IsNullOrWhiteSpace(request.Password) &&
                 !request.BlockStaffOverride &&
-                StaffOverrideAccount != null;
+                StaffOverrideAccount != null &&
+                HasPatronBarcodeRouteSegment(request.Path);
+        }
+
+        private static bool HasPatronBarcodeRouteSegment(string path)
+        {
+            var pathWithoutQuery = path.Split('?', 2)[0];
+            var segments = pathWithoutQuery.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            for (var i = 0; i < segments.Length - 1; i++)
+            {
+                if (segments[i].Equals("patron", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool IsStaffAuthenticatorRequest(PapiRestRequest? request)

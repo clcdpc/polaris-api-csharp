@@ -172,14 +172,13 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             AssertAuthorizationHash(finalRequest, "custom-placeholder-secret", client.AccessKey, client.AccessID);
         }
 
-        [TestMethod]
-        public async Task ExecutePapiAsync_CustomPublicRequest_UsesStaffOverrideTokenWhenAllowed()
+        public async Task ExecutePapiAsync_CustomPublicPatronRequest_UsesStaffOverrideTokenWhenAllowed()
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
                 CreateProtectedTokenJson("override-token", "override-secret", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom/unsupported");
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/patron/ABC123/basicdata");
 
             await client.ExecutePapiAsync<PapiResponseCommon>(request);
 
@@ -203,6 +202,65 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicNonPatronRequest_WithStaffOverrideConfigured_DoesNotAcquireProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.Unauthorized,
+                "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/api");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
+            AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicPatronRequestWithPassword_DoesNotAcquireStaffOverrideToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.Unauthorized,
+                "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get(
+                "/public/v1/1033/100/1/patron/ABC123/basicdata",
+                password: "patron-password");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+
+            var finalRequest = handler.CapturedRequests.Single();
+            Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
+            AssertAuthorizationHash(finalRequest, "patron-password", client.AccessKey, client.AccessID);
+        }
+
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomPublicPatronNamedLookupRequest_DoesNotAcquireProtectedToken()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.Unauthorized,
+                "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/patronlanguages");
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(0, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+
             var finalRequest = handler.CapturedRequests.Single();
             Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
