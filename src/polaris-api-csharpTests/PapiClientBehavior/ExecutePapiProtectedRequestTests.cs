@@ -172,6 +172,21 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             AssertAuthorizationHash(finalRequest, "custom-placeholder-secret", client.AccessKey, client.AccessID);
         }
 
+        [TestMethod]
+        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_DoesNotMutateOriginalPath()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+            var originalPath = request.Path;
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(originalPath, request.Path);
+        }
+
         public async Task ExecutePapiAsync_CustomPublicPatronRequest_UsesStaffOverrideTokenWhenAllowed()
         {
             var handler = new ProtectedTokenHttpMessageHandler(
@@ -264,21 +279,6 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var finalRequest = handler.CapturedRequests.Single();
             Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
-        }
-
-        [TestMethod]
-        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_DoesNotMutateOriginalPath()
-        {
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
-            var client = CreateProtectedClient(handler);
-            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
-            var originalPath = request.Path;
-
-            await client.ExecutePapiAsync<PapiResponseCommon>(request);
-
-            Assert.AreEqual(originalPath, request.Path);
         }
     }
 }
