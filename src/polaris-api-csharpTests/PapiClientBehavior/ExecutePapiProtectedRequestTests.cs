@@ -187,6 +187,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.AreEqual(originalPath, request.Path);
         }
 
+        [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPatronRequest_UsesStaffOverrideTokenWhenAllowed()
         {
             var handler = new ProtectedTokenHttpMessageHandler(
