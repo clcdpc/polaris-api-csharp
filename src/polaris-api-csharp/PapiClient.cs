@@ -184,12 +184,24 @@ namespace Clc.Polaris.Api
                 }
             }
 
-            if (pathContainsProtectedTokenPlaceholder)
-            {
-                ReplaceProtectedTokenPlaceholderInPath(request);
-            }
+            var originalPath = request.Path;
 
-            return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (pathContainsProtectedTokenPlaceholder)
+                {
+                    ReplaceProtectedTokenPlaceholderInPath(request);
+                }
+
+                return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (pathContainsProtectedTokenPlaceholder)
+                {
+                    request.Path = originalPath;
+                }
+            }
         }
 
         private static void ValidateCustomPapiRequest(PapiRestRequest request)
