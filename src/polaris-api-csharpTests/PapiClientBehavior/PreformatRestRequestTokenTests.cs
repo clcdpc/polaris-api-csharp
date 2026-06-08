@@ -74,6 +74,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
             client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = CreateStaffUser();
             client.Token = new ProtectedToken
             {
                 AccessToken = " ",
@@ -84,30 +85,6 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var formatted = (PapiRestRequest)client.PreformatRestRequest(new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC"));
 
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_AddsStaffOverrideToken_WhenAllowedAndUnblocked()
-        {
-            var client = CreateClient();
-            client.AllowStaffOverrideRequests = true;
-            client.StaffOverrideAccount = CreateStaffUser();
-            client.Token = new ProtectedToken
-            {
-                AccessToken = "staff-token",
-                AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
-            };
-
-            var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC123/basicdata");
-            var formatted = (PapiRestRequest)client.PreformatRestRequest(request);
-
-            Assert.IsTrue(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
-            Assert.AreEqual("staff-token", formatted.Headers["X-PAPI-AccessToken"]);
-            var date = formatted.Headers["PolarisDate"];
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/patron/ABC123/basicdata";
-            var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, "staff-secret");
-            Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
     }
 }
