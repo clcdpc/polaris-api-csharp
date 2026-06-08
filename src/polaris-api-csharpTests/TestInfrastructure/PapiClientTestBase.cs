@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api;
-using PapiClientType = Clc.Polaris.Api.PapiClient;
 using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,18 +17,18 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 {
     public abstract class PapiClientTestBase
     {
-        protected static PapiClientType CreateClient(HttpMessageHandler? handler = null)
+        protected static PapiClient CreateClient(HttpMessageHandler? handler = null)
         {
             var settings = new TestPapiSettings();
             var httpClient = handler == null ? new HttpClient() : new HttpClient(handler);
-            return new PapiClientType(httpClient, settings)
+            return new PapiClient(httpClient, settings)
             {
                 AllowStaffOverrideRequests = false,
                 UseProtectedTokenCache = false
             };
         }
 
-        protected static PapiClientType CreateUrlEncodingClient(CaptureHttpMessageHandler handler)
+        protected static PapiClient CreateUrlEncodingClient(CaptureHttpMessageHandler handler)
         {
             var settings = new PapiSettings
             {
@@ -42,22 +41,22 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             };
 
             var httpClient = new HttpClient(handler);
-            return new PapiClientType(httpClient, settings);
+            return new PapiClient(httpClient, settings);
         }
 
-        protected static PapiClientType CreateProtectedClient(ProtectedTokenHttpMessageHandler handler)
+        protected static PapiClient CreateProtectedClient(ProtectedTokenHttpMessageHandler handler)
         {
             return CreateProtectedClient(handler, $"https://example-{Guid.NewGuid():N}.test", CreateStaffUser());
         }
 
-        protected static PapiClientType CreateProtectedClient(ProtectedTokenHttpMessageHandler handler, string hostname, PolarisUser staffUser)
+        protected static PapiClient CreateProtectedClient(ProtectedTokenHttpMessageHandler handler, string hostname, PolarisUser staffUser)
         {
             var httpClient = new HttpClient(handler)
             {
                 BaseAddress = new Uri($"{hostname}/")
             };
 
-            return new PapiClientType(httpClient, null)
+            return new PapiClient(httpClient, null)
             {
                 Hostname = hostname,
                 AccessID = "access-id",
@@ -69,7 +68,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             };
         }
 
-        protected static PapiClientType CreateClientWithProtectedCache(HttpMessageHandler handler, string username)
+        protected static PapiClient CreateClientWithProtectedCache(HttpMessageHandler handler, string username)
         {
             var client = CreateClient(handler);
             client.AllowStaffOverrideRequests = true;
@@ -110,7 +109,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             return CreateProtectedTokenJson(token.AccessToken!, token.AccessSecret!, token.ExpirationDate!.Value);
         }
 
-        protected static async Task ExecuteRawPapiRequestAsync(PapiClientType client, PapiRestRequest request)
+        protected static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
         {
             await client.ExecutePapiAsync<PapiResponseCommon>(request).ConfigureAwait(false);
         }
@@ -191,7 +190,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected static T? GetPrivateStaticProperty<T>(string propertyName) where T : class
         {
-            var cacheProperty = typeof(PapiClientType).GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Static);
+            var cacheProperty = typeof(PapiClient).GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Static);
             return cacheProperty?.GetValue(null) as T;
         }
 
@@ -199,7 +198,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
         {
             if (staffUser == null) { return null; }
 
-            var client = new PapiClientType
+            var client = new PapiClient
             {
                 Hostname = hostname,
                 AccessID = accessId,
@@ -210,9 +209,9 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             return BuildCacheKey(client);
         }
 
-        protected static string? BuildCacheKey(PapiClientType client)
+        protected static string? BuildCacheKey(PapiClient client)
         {
-            var buildCacheKeyMethod = typeof(PapiClientType).GetMethod("BuildProtectedTokenCacheKey", BindingFlags.Instance | BindingFlags.NonPublic)
+            var buildCacheKeyMethod = typeof(PapiClient).GetMethod("BuildProtectedTokenCacheKey", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?? throw new InvalidOperationException("Protected token cache-key builder was not available.");
             return buildCacheKeyMethod.Invoke(client, Array.Empty<object>()) as string;
         }

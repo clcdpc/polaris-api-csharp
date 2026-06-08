@@ -7,7 +7,7 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
@@ -19,7 +19,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
         {
             ClearProtectedTokenState();
         }
-
 
         [TestMethod]
         public void BuildProtectedTokenCacheKey_UsesCredentialFingerprintWithoutRawSecrets()
@@ -38,7 +37,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             StringAssert.Contains(cacheKey, client.StaffOverrideAccount.Domain.Trim());
             StringAssert.Contains(cacheKey, client.StaffOverrideAccount.Username.Trim());
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_SameHostAndStaffWithDifferentAccessIds_AuthenticatesAndCachesSeparateTokens()
@@ -84,7 +82,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsNotNull(cachedTokenAAfterClientB);
             Assert.AreEqual("token-a", cachedTokenAAfterClientB.AccessToken);
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_SuccessfulStaffAuthentication_LoadsTokenAndCachesIt()

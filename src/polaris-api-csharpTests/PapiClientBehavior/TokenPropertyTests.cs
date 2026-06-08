@@ -5,7 +5,7 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
@@ -18,7 +18,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             ClearProtectedTokenState();
         }
 
-
         [TestMethod]
         public void Token_WhenTokenIsNullAndNoStaffOverrideAccount_ReturnsNullWithoutAuthenticating()
         {
@@ -30,7 +29,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsNull(token);
             Assert.AreEqual(0, handler.RequestCount);
         }
-
 
         [TestMethod]
         public void Token_WhenTokenIsNullAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsNullWithoutCacheLookupOrAuthenticating()
@@ -53,7 +51,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual(0, handler.RequestCount);
         }
 
-
         [TestMethod]
         public void Token_WhenExistingTokenIsNotExpired_ReturnsExistingTokenWithoutAuthenticating()
         {
@@ -73,7 +70,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual("existing-token", token.AccessToken);
             Assert.AreEqual(0, handler.RequestCount);
         }
-
 
         [TestMethod]
         public void Token_WhenExistingTokenIsExpiredAndStaffOverrideAccountExistsAndCacheHasValidToken_ReturnsNullAndClearsTokenWithoutCacheLookupOrAuthenticating()
@@ -103,7 +99,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual(0, handler.RequestCount);
         }
 
-
         [TestMethod]
         public void Token_WhenExistingTokenIsExpiredAndNoStaffOverrideAccount_ReturnsNullAndClearsTokenWithoutAuthenticating()
         {
@@ -123,7 +118,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual(0, handler.RequestCount);
         }
 
-
         [TestMethod]
         public void Token_WhenExistingTokenHasNoExpiration_ReturnsNullAndClearsTokenWithoutAuthenticating()
         {
@@ -141,7 +135,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsNull(client.Token);
             Assert.AreEqual(0, handler.RequestCount);
         }
-
 
         [TestMethod]
         public void Token_WhenCacheEnabledTokenNullAndNoStaffOverrideAccount_ReturnsNullWithoutThrowing()

@@ -15,7 +15,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitCategory]
     public class PatronMessagesGetTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
         {
@@ -33,7 +32,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
         }
-
 
         [TestMethod]
         public async Task PublicPatronMethod_WithPassword_DoesNotAuthenticateOrSendStaffOverrideHeader()

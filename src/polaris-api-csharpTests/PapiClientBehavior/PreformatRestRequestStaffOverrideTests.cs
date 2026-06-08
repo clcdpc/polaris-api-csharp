@@ -6,13 +6,12 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitCategory]
     public class PreformatRestRequestStaffOverrideTests : PapiClientTestBase
     {
-
         [TestMethod]
         public void PreformatRestRequest_AddsStaffOverrideToken_WhenAllowedAndUnblocked()
         {
@@ -35,7 +34,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, "staff-secret");
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_DoesNotAddStaffOverrideToken_WhenBlocked()
@@ -62,7 +60,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
 
-
         [TestMethod]
         public void PreformatRestRequest_DoesNotAddStaffOverrideToken_WhenDisabled()
         {
@@ -84,7 +81,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_RemovesStaleStaffOverrideToken_WhenOverrideBecomesBlocked()

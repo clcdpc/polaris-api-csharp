@@ -4,13 +4,12 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitCategory]
     public class PreformatRestRequestHeaderTests : PapiClientTestBase
     {
-
         [TestMethod]
         public void PreformatRestRequest_AddsPapiHeaders_WhenAuthRequired()
         {
@@ -25,7 +24,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsTrue(formatted.Headers.ContainsKey("Authorization"));
             StringAssert.StartsWith(formatted.Headers["Authorization"], "PWS access-id:");
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_DoesNotAddPapiHeaders_WhenAuthNotRequired()

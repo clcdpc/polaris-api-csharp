@@ -23,7 +23,6 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             ClearProtectedTokenState();
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_CancellationDuringProtectedTokenAuthentication_PropagatesCancellation()
         {
@@ -107,6 +106,5 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
                 };
             }
         }
-
     }
 }

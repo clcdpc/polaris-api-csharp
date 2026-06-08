@@ -1,33 +1,30 @@
 using System.Linq;
 using System.Reflection;
 using Clc.Polaris.Api;
-using PapiClientType = Clc.Polaris.Api.PapiClient;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitCategory]
     public class ExecutePapiContractTests : PapiClientTestBase
     {
-
         [TestMethod]
         public void ExecutePapiAsync_IsPublicOnPapiClientOnly()
         {
-            var papiClientMethod = typeof(PapiClientType)
+            var papiClientMethod = typeof(PapiClient)
                 .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                .SingleOrDefault(method => method.Name == nameof(PapiClientType.ExecutePapiAsync) && method.IsGenericMethodDefinition);
+                .SingleOrDefault(method => method.Name == nameof(PapiClient.ExecutePapiAsync) && method.IsGenericMethodDefinition);
             var interfaceMethod = typeof(IPapiClient)
                 .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                .SingleOrDefault(method => method.Name == nameof(PapiClientType.ExecutePapiAsync));
+                .SingleOrDefault(method => method.Name == nameof(PapiClient.ExecutePapiAsync));
 
             Assert.IsNotNull(papiClientMethod);
             Assert.IsNull(interfaceMethod);
         }
-
 
         [TestMethod]
         public void IsStaffAuthenticatorRequest_InvalidOrMissingPath_ReturnsFalse()
@@ -38,7 +35,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(CreateStaffAuthenticatorRequestWithPath("   ")));
         }
 
-
         [TestMethod]
         public void IsStaffAuthenticatorRequest_RequiresExactProtectedPostStaffRouteWithoutPlaceholder()
         {
@@ -47,9 +43,10 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff/extra")));
             Assert.IsFalse(InvokeIsStaffAuthenticatorRequest(PapiRestRequest.Post($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/authenticator/staff")));
         }
+
         private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
         {
-            var isStaffAuthenticatorRequest = typeof(PapiClientType)
+            var isStaffAuthenticatorRequest = typeof(PapiClient)
                 .GetMethod("IsStaffAuthenticatorRequest", BindingFlags.Static | BindingFlags.NonPublic)!;
 
             return (bool)isStaffAuthenticatorRequest.Invoke(null, new object?[] { request })!;
@@ -62,6 +59,5 @@ namespace Clc.Polaris.Api.Tests.PapiClient
 
             return request;
         }
-
     }
 }

@@ -12,7 +12,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitCategory]
     public class BibSearchTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task BibSearch_RequestShape_IsStable()
         {
@@ -48,7 +47,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
-
         [TestMethod]
         public async Task BibKeywordSearchAsync_ThroughInterface_RequestShapeIsStable()
         {
@@ -78,7 +76,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
-
         [TestMethod]
         public async Task BibKeywordSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
         {
@@ -94,7 +91,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/keyword/KW?q=default%20branch%20search&sort=MP&page=1&bibsperpage=10", handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
-
 
         [TestMethod]
         public async Task BibBooleanSearchAsync_ThroughInterface_RequestShapeIsStable()
@@ -125,7 +121,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
-
         [TestMethod]
         public async Task BibBooleanSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
         {
@@ -141,7 +136,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/boolean?q=TI%3DDefault%20Branch&sort=MP&page=1&bibsperpage=10", handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
-
 
         [TestMethod]
         public async Task BibSearchAsync_DefaultLimit_OmitsLimitAndHashesSentUri()

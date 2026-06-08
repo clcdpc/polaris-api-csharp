@@ -25,8 +25,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             ClearProtectedTokenState();
         }
 
-
-
         [TestMethod]
         public async Task ProtectedTokenPathRequest_ReplacesPlaceholderBeforeSending()
         {
@@ -41,7 +39,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsFalse(handler.LastRequest!.RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
             StringAssert.Contains(handler.LastRequest.RequestUri.AbsolutePath, "/protected/v1/1033/100/9/real-token/search/patrons/Boolean");
         }
-
 
         [TestMethod]
         public async Task ProtectedTokenPathRequest_HashesReplacedUrlInsteadOfPlaceholderUrl()
@@ -61,7 +58,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual($"PWS access-id:{expectedHash}", handler.LastRequest.Headers.GetValues("Authorization").Single());
             Assert.AreNotEqual($"PWS access-id:{placeholderHash}", handler.LastRequest.Headers.GetValues("Authorization").Single());
         }
-
 
         [TestMethod]
         public async Task ProtectedTokenPathRequest_AcquiresProtectedTokenAutomaticallyWhenMissing()
@@ -84,8 +80,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/protected-token/search/patrons/Boolean");
             Assert.IsFalse(handler.Requests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
         }
-
-
 
         [TestMethod]
         public async Task ProtectedTokenPathRequest_WithExpiredToken_AcquiresProtectedTokenBeforePlaceholderReplacement()
@@ -116,7 +110,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual("protected-token", client.Token!.AccessToken);
         }
 
-
         [TestMethod]
         public async Task ProtectedTokenPathRequest_WhenAuthenticationCannotProvideValidToken_ThrowsPlaceholderExceptionBeforeProtectedRequest()
         {
@@ -145,7 +138,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.ProtectedRequestCount);
             Assert.IsNull(client.Token);
         }
-
 
         [TestMethod]
         public async Task ProtectedTokenPathRequest_UsesCachedProtectedTokenForPlaceholderReplacement()
@@ -216,7 +208,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             StringAssert.Contains(handler.ProtectedRequests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/protected-token-2/search/patrons/Boolean");
         }
 
-
         [TestMethod]
         public async Task ProtectedTokenPathRequest_WithoutTokenOrStaffOverride_FailsBeforeSendingProtectedRequest()
         {
@@ -235,7 +226,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.ProtectedRequestCount);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_ConcurrentProtectedRequestsForSameCacheKey_AuthenticateOnce()
         {
@@ -253,8 +243,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("protected-token", client.Token.AccessToken);
         }
-
-
 
         [TestMethod]
         public async Task PatronSearchAsync_ConcurrentProtectedRequestsAcrossClientsForSameCacheKey_AuthenticateOnceAndUseSharedToken()
@@ -282,7 +270,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 AssertAuthorizationHash(request, "shared-secret", "access-key", "access-id");
             }
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_ConcurrentProtectedRequestsAcrossClientsForDifferentPasswords_AuthenticateAndCacheSeparately()
@@ -352,7 +339,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             AssertFinalRequestsUseExpectedToken(handler, "reuse-b", "token-for-password-b", "secret-for-password-b");
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_WhenProtectedTokenCacheDisabled_IgnoresStaticCachedTokenAndUsesNewAuthenticationToken()
         {
@@ -380,7 +366,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             AssertAuthorizationHashDoesNotMatch(finalRequest, "cached-secret", client.AccessKey, client.AccessID);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_WithExpiredInstanceToken_ReauthenticatesAndUsesNewTokenForRequestSigning()
         {
@@ -407,7 +392,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             AssertAuthorizationHashDoesNotMatch(finalRequest, "expired-secret", client.AccessKey, client.AccessID);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_ProtectedTokenPlaceholder_ReplacesPlaceholderAfterSuccessfulTokenAcquisitionAndSignsFinalPath()
         {
@@ -429,7 +413,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             AssertAuthorizationHashDoesNotMatch(capturedRequests[1], "placeholder-secret", client.AccessKey, client.AccessID, placeholderUri);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_WithCachedValidToken_AvoidsStaffAuthentication()
         {
@@ -448,7 +431,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.AreEqual("cached-token", client.Token?.AccessToken);
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithSameUserButBlankPassword_IsNotReusedOrWrittenToCache()
@@ -480,7 +462,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(1, GetProtectedTokenCache().Count);
             Assert.IsFalse(TryGetCachedToken(hostname, clientB.AccessID, clientB.AccessKey, clientB.StaffOverrideAccount, out _));
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithSameUserButDifferentPassword_IsNotReused()
@@ -514,7 +495,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNotNull(cachedTokenB);
             Assert.AreEqual("token-b", cachedTokenB.AccessToken);
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithSameUserButDifferentAccessKey_IsNotReused()
@@ -551,7 +531,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual("token-b", cachedTokenB.AccessToken);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_ExpiredCachedToken_IsRemovedWhenEncountered()
         {
@@ -569,7 +548,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithBlankAccessToken_IsRemovedAndNewTokenIsUsed()
@@ -598,7 +576,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             StringAssert.Contains(handler.RequestPaths.Last(), "/protected/v1/1033/100/1/new-token/search/patrons/Boolean");
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithBlankAccessSecret_IsRemovedAndNotUsedWhenAuthenticationFails()
         {
@@ -619,7 +596,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNull(client.Token);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_FailedStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
@@ -633,7 +609,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_NullDataStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
@@ -646,7 +621,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_BlankAccessTokenStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
@@ -662,7 +636,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_BlankAccessSecretStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
@@ -677,7 +650,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
-
         [TestMethod]
         public async Task PatronSearchAsync_ExpiredTokenStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
@@ -691,7 +663,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
-
 
         [TestMethod]
         public async Task PatronSearchAsync_ProtectedTokenPlaceholder_ThrowsBeforeFinalRequestWhenTokenAcquisitionFails()

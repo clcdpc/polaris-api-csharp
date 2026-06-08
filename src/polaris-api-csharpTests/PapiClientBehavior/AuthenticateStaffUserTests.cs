@@ -7,7 +7,7 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
@@ -19,7 +19,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
         {
             ClearProtectedTokenState();
         }
-
 
         [TestMethod]
         public async Task AuthenticateStaffUserAsync_ReturnsTokenButDoesNotSetClientToken()
@@ -47,7 +46,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
             Assert.IsFalse(handler.LastRequest.Headers.Contains("X-PAPI-AccessToken"));
         }
-
 
         [TestMethod]
         public async Task AuthenticateStaffUserAsync_WithStaffOverrideAccountAndNoToken_DoesNotRecursivelyAcquireProtectedToken()

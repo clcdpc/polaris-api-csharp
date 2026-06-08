@@ -6,13 +6,12 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitCategory]
     public class ExecutePapiQueryParameterTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithNullValue_OmitsParameterAndHashesSentUri()
         {
@@ -30,7 +29,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsFalse(query.ContainsKey("limit"));
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithEmptyStringValue_OmitsParameterAndHashesSentUri()
@@ -50,7 +48,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithWhitespaceValue_OmitsParameterAndHashesSentUri()
         {
@@ -68,7 +65,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsFalse(query.ContainsKey("limit"));
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithBlankKey_OmitsParameterAndHashesSentUri()
@@ -89,7 +85,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_OnlyIneffectiveQueryParameters_OmitsQueryStringAndHashesSentUri()
         {
@@ -107,7 +102,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual(string.Empty, handler.LastRequest.RequestUri.Query);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameters_UseInvariantCultureForSentUriAndHash()
@@ -136,7 +130,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             }
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_NonEmptyQueryParameters_HashesSentUri()
         {
@@ -152,7 +145,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&limit=branch%3A1", handler.LastRequest!.RequestUri!.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_ExistingQueryString_AppendsQueryParametersAndHashesSentUri()

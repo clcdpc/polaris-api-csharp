@@ -9,7 +9,7 @@ using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
@@ -21,7 +21,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
         {
             ClearProtectedTokenState();
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_ProtectedRequestWithoutPlaceholderOrPassword_AcquiresProtectedToken()
@@ -42,7 +41,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             AssertAuthorizationHash(finalRequest, "route-secret", client.AccessKey, client.AccessID);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_ProtectedPathEndingDifferentlyThanStaffAuthenticator_AcquiresProtectedToken()
         {
@@ -62,7 +60,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             AssertAuthorizationHash(finalRequest, "malformed-secret", client.AccessKey, client.AccessID);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_NullRequest_ThrowsBeforeSendingHttpRequest()
         {
@@ -73,7 +70,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
 
             Assert.AreEqual(0, handler.RequestCount);
         }
-
 
         [TestMethod]
         [DataRow(null)]
@@ -91,7 +87,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual(0, handler.RequestCount);
         }
 
-
         [TestMethod]
         [DataRow("https://example.com/PAPIService/REST/public/v1/1033/100/1/custom")]
         [DataRow("//example.com/foo")]
@@ -107,7 +102,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual(0, handler.RequestCount);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_AuthenticatedPathOutsidePublicOrProtected_ThrowsBeforeSendingHttpRequest()
         {
@@ -119,7 +113,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
 
             Assert.AreEqual(0, handler.RequestCount);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicGet_SendsThroughPapiPipelineWithDateAndAuthorizationHeaders()
@@ -138,7 +131,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             StringAssert.Contains(finalRequest.Path, "/public/v1/1033/100/1/custom/unsupported");
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPost_SerializesBodyAndSignsRequest()
@@ -161,7 +153,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_AcquiresAndReplacesProtectedToken()
         {
@@ -181,7 +172,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             AssertAuthorizationHash(finalRequest, "custom-placeholder-secret", client.AccessKey, client.AccessID);
         }
 
-
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicRequest_UsesStaffOverrideTokenWhenAllowed()
         {
@@ -200,7 +190,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual("override-token", accessToken);
             AssertAuthorizationHash(finalRequest, "override-secret", client.AccessKey, client.AccessID);
         }
-
 
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicRequestWithBlockStaffOverride_DoesNotSendStaffOverrideToken()

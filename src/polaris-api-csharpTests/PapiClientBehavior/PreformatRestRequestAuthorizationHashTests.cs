@@ -7,13 +7,12 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitCategory]
     public class PreformatRestRequestAuthorizationHashTests : PapiClientTestBase
     {
-
         [TestMethod]
         public void PreformatRestRequest_PublicAuthenticatedGetWithoutQueryParameters_HashesOriginalUrl()
         {
@@ -28,7 +27,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.AreSame(request.Body, formatted.Body);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_ProtectedGet_UsesProtectedTokenSecretForHash()
@@ -51,7 +49,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
         }
 
-
         [TestMethod]
         public void PreformatRestRequest_PublicAuthenticatedGetWithQueryParameters_HashesEffectiveOutgoingUrl()
         {
@@ -67,7 +64,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             var expectedHash = PapiSignature.ComputeHash("access-key", "GET", expectedUri, date, string.Empty);
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_AuthenticatedPutWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
@@ -86,7 +82,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreSame(body, formatted.Body);
         }
 
-
         [TestMethod]
         public void PreformatRestRequest_AuthenticatedPostWithBodyAndQueryParameters_HashesQueryAndPreservesBody()
         {
@@ -104,7 +99,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual($"PWS access-id:{expectedHash}", formatted.Headers["Authorization"]);
             Assert.AreSame(body, formatted.Body);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_AuthorizationChanges_WhenQueryParameterValueChanges()
@@ -126,7 +120,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.AreEqual($"PWS access-id:{secondExpectedHash}", secondFormatted.Headers["Authorization"]);
             Assert.AreNotEqual(firstFormatted.Headers["Authorization"], secondFormatted.Headers["Authorization"]);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_HashesQueryParameters_WithOutgoingUriEncoding()

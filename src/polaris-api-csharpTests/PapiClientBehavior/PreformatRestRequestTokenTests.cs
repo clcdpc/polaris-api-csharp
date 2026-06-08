@@ -6,7 +6,7 @@ using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests.PapiClient
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
@@ -18,8 +18,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
         {
             ClearProtectedTokenState();
         }
-
-
 
         [TestMethod]
         public void PreformatRestRequest_ExpiredProtectedToken_DoesNotUseSecretForProtectedMethodSigning()
@@ -43,7 +41,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
             Assert.IsNull(client.Token);
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_ExpiredProtectedToken_DoesNotUseSecretOrHeaderForPublicStaffOverrideSigning()
@@ -71,7 +68,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
             Assert.IsNull(client.Token);
         }
 
-
         [TestMethod]
         public void PreformatRestRequest_PublicStaffOverrideWithMissingTokenValues_DoesNotAddAccessTokenHeader()
         {
@@ -89,7 +85,6 @@ namespace Clc.Polaris.Api.Tests.PapiClient
 
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
         }
-
 
         [TestMethod]
         public void PreformatRestRequest_ManualToken_UsesProtectedAndPublicOverrideFormatting()
