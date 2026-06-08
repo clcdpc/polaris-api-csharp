@@ -323,7 +323,7 @@ namespace Clc.Polaris.Api
 
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await AuthenticateAndLoadProtectedTokenAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+                return await AuthenticateAndLoadProtectedTokenAsync(null, cancellationToken).ConfigureAwait(false);
             }
 
             var cacheLock = ProtectedTokenCacheLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
