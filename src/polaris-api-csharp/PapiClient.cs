@@ -61,7 +61,7 @@ namespace Clc.Polaris.Api
 
                 return _token;
             }
-            set { _token = value; }
+            internal set { _token = value; }
         }
 
         /// <summary>
