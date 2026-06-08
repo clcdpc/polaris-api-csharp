@@ -61,7 +61,7 @@ namespace Clc.Polaris.Api
 
                 return _token;
             }
-            set { _token = value; }
+            internal set { _token = value; }
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Clc.Polaris.Api
                 var accessSecret = token?.AccessSecret;
                 var accessToken = token?.AccessToken;
 
-                if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride)
+                if (IsStaffOverridePatronRequest(papiRequest))
                 {
                     if (!string.IsNullOrWhiteSpace(accessSecret) && !string.IsNullOrWhiteSpace(accessToken))
                     {
@@ -184,12 +184,24 @@ namespace Clc.Polaris.Api
                 }
             }
 
-            if (pathContainsProtectedTokenPlaceholder)
-            {
-                ReplaceProtectedTokenPlaceholderInPath(request);
-            }
+            var originalPath = request.Path;
 
-            return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (pathContainsProtectedTokenPlaceholder)
+                {
+                    ReplaceProtectedTokenPlaceholderInPath(request);
+                }
+
+                return await ExecuteAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (pathContainsProtectedTokenPlaceholder)
+                {
+                    request.Path = originalPath;
+                }
+            }
         }
 
         private static void ValidateCustomPapiRequest(PapiRestRequest request)
@@ -244,12 +256,34 @@ namespace Clc.Polaris.Api
                 return true;
             }
 
+            return IsStaffOverridePatronRequest(request);
+        }
+
+        private bool IsStaffOverridePatronRequest(PapiRestRequest request)
+        {
             return request.IsPublicMethod &&
                 request.AuthRequired &&
                 AllowStaffOverrideRequests &&
                 string.IsNullOrWhiteSpace(request.Password) &&
                 !request.BlockStaffOverride &&
-                StaffOverrideAccount != null;
+                StaffOverrideAccount != null &&
+                HasPatronBarcodeRouteSegment(request.Path);
+        }
+
+        private static bool HasPatronBarcodeRouteSegment(string path)
+        {
+            var pathWithoutQuery = path.Split('?', 2)[0];
+            var segments = pathWithoutQuery.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            for (var i = 0; i < segments.Length - 1; i++)
+            {
+                if (segments[i].Equals("patron", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool IsStaffAuthenticatorRequest(PapiRestRequest? request)
@@ -323,7 +357,7 @@ namespace Clc.Polaris.Api
 
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await AuthenticateAndLoadProtectedTokenAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+                return await AuthenticateAndLoadProtectedTokenAsync(null, cancellationToken).ConfigureAwait(false);
             }
 
             var cacheLock = ProtectedTokenCacheLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));

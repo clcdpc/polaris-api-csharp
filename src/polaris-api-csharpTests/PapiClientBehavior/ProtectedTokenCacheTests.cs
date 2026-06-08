@@ -104,5 +104,48 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.AreEqual("protected-token", cachedToken.AccessToken);
             Assert.AreNotSame(client.Token, cachedToken);
         }
+
+        [TestMethod]
+        public async Task PatronSearchAsync_CacheDisabledAuthenticationFailure_DoesNotEvictSharedCachedToken()
+        {
+            var hostname = $"https://example-{Guid.NewGuid():N}.test";
+            var staff = CreateStaffUser(password: "shared-password");
+            var cachedToken = new ProtectedToken
+            {
+                AccessToken = "cached-token",
+                AccessSecret = "cached-secret",
+                ExpirationDate = DateTime.Now.AddHours(1)
+            };
+
+            SetCachedToken(hostname, "access-id", "access-key", staff, cachedToken);
+
+            var failingHandler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.Unauthorized,
+                "{\"PAPIErrorCode\":1}");
+            var cacheDisabledClient = CreateProtectedClient(failingHandler, hostname, staff);
+            cacheDisabledClient.UseProtectedTokenCache = false;
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                async () => await cacheDisabledClient.PatronSearchAsync("name=Failure").ConfigureAwait(false));
+
+            Assert.AreEqual(1, failingHandler.AuthenticationRequestCount);
+            Assert.AreEqual(0, failingHandler.NonAuthenticationRequestCount);
+            Assert.IsTrue(TryGetCachedToken(hostname, "access-id", "access-key", staff, out var cachedTokenAfterFailure));
+            Assert.IsNotNull(cachedTokenAfterFailure);
+            Assert.AreEqual("cached-token", cachedTokenAfterFailure!.AccessToken);
+
+            var cacheEnabledHandler = new ProtectedTokenHttpMessageHandler();
+            var cacheEnabledClient = CreateProtectedClient(cacheEnabledHandler, hostname, staff);
+
+            var response = await cacheEnabledClient.PatronSearchAsync("name=Cached").ConfigureAwait(false);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(0, cacheEnabledHandler.AuthenticationRequestCount);
+            Assert.AreEqual(1, cacheEnabledHandler.NonAuthenticationRequestCount);
+            Assert.AreEqual("cached-token", cacheEnabledClient.Token?.AccessToken);
+            StringAssert.Contains(
+                cacheEnabledHandler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest).Path,
+                "/protected/v1/1033/100/1/cached-token/search/patrons/Boolean");
+        }
     }
 }

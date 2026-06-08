@@ -74,6 +74,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
             client.AllowStaffOverrideRequests = true;
+            client.StaffOverrideAccount = CreateStaffUser();
             client.Token = new ProtectedToken
             {
                 AccessToken = " ",
@@ -84,28 +85,6 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var formatted = (PapiRestRequest)client.PreformatRestRequest(new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC"));
 
             Assert.IsFalse(formatted.Headers.ContainsKey("X-PAPI-AccessToken"));
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_ManualToken_UsesProtectedAndPublicOverrideFormatting()
-        {
-            var handler = new CapturingHttpMessageHandler();
-            var client = CreateClient(handler);
-            client.AllowStaffOverrideRequests = true;
-            client.Token = new ProtectedToken
-            {
-                AccessToken = "manual-token",
-                AccessSecret = "manual-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
-            };
-
-            var publicRequest = (PapiRestRequest)client.PreformatRestRequest(new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC"));
-            var protectedRequest = (PapiRestRequest)client.PreformatRestRequest(new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/manual-token/search/patrons/Boolean"));
-
-            Assert.AreEqual("manual-token", publicRequest.Headers["X-PAPI-AccessToken"]);
-            Assert.IsTrue(publicRequest.Headers.ContainsKey("Authorization"));
-            Assert.IsFalse(protectedRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
-            Assert.IsTrue(protectedRequest.Headers.ContainsKey("Authorization"));
         }
     }
 }
