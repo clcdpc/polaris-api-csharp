@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Clc.Polaris.Api;
+using PapiClientType = Clc.Polaris.Api.PapiClient;
 using Clc.Polaris.Api.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,7 +39,7 @@ namespace Clc.Polaris.Api.Tests
                 Assert.Inconclusive(IntegrationTestRequirements.MissingIntegrationConfigurationMessage);
             }
 
-            Papi = new PapiClient(papiSettings!);
+            Papi = new PapiClientType(papiSettings!);
             PapiSettings = papiSettings!;
             Settings = testSettings!;
         }

@@ -1,5 +1,6 @@
 using Clc.Polaris.Api;
 using Clc.Polaris.Api.Models;
+using PapiClientType = Clc.Polaris.Api.PapiClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
@@ -21,7 +22,7 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task HoldRequestCreateTest2()
         {
-            var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
+            var response = await ((PapiClientType)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
             Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
         }
     }

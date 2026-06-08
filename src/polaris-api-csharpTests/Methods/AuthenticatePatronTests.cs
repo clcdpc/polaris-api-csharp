@@ -4,8 +4,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api;
+using PapiClientType = Clc.Polaris.Api.PapiClient;
 using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
@@ -35,7 +35,7 @@ namespace Clc.Polaris.Api.Tests
             }
         }
 
-        private static PapiClient CreateClient(CaptureHttpMessageHandler handler)
+        private static PapiClientType CreateClient(CaptureHttpMessageHandler handler)
         {
             var settings = new PapiSettings
             {
@@ -48,7 +48,7 @@ namespace Clc.Polaris.Api.Tests
             };
 
             var httpClient = new HttpClient(handler);
-            return new PapiClient(httpClient, settings);
+            return new PapiClientType(httpClient, settings);
         }
 
         [TestMethod]
