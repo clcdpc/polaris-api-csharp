@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-dotnet add package Clc.Polaris.Api --version 4.0.0-alpha.1
+dotnet add package Clc.Polaris.Api --version 4.0.0-beta.1
 ```
 
 ## Configure `PapiClient`
@@ -34,7 +34,7 @@ var settings = new PapiSettings
 var client = new PapiClient(settings);
 ```
 
-`PapiSettings.PolarisOverrideAccount` is copied to `PapiClient.StaffOverrideAccount`. When `StaffOverrideAccount` is configured, protected requests and supported staff-override requests can acquire protected tokens automatically.
+`PapiSettings.PolarisOverrideAccount` is copied to `PapiClient.StaffOverrideAccount`. When configured, the client can acquire protected tokens automatically for protected methods and public patron-account methods that support staff override. General public methods continue to use normal PAPI signing and do not receive staff override credentials.
 
 ## Basic async usage
 
