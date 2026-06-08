@@ -103,7 +103,7 @@ namespace Clc.Polaris.Api
                 var accessSecret = token?.AccessSecret;
                 var accessToken = token?.AccessToken;
 
-                if (papiRequest.IsPublicMethod && AllowStaffOverrideRequests && string.IsNullOrWhiteSpace(password) && !papiRequest.BlockStaffOverride)
+                if (IsStaffOverridePatronRequest(papiRequest))
                 {
                     if (!string.IsNullOrWhiteSpace(accessSecret) && !string.IsNullOrWhiteSpace(accessToken))
                     {
