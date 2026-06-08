@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class HoldRequestReactivateTests : IntegrationTestBase
     {
         [TestMethod]
-        [MutatingIntegrationCategory]
+        [MutatingIntegrationTest]
         [DoNotParallelize]
         public async Task HoldRequestReactivateTest()
         {

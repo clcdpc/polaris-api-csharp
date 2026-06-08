@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class DatesClosedGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task DatesClosedGetTest()
         {
             var response = await Papi.DatesClosedGetAsync(7);

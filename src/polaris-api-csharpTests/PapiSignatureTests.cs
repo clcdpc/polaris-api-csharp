@@ -3,7 +3,7 @@
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class PapiSignatureTests
     {
         [TestMethod]

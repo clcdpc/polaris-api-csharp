@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class PapiClientIntegrationTestCategoryTests
     {
         private const string LegacyIntegrationCategory = "Integration";

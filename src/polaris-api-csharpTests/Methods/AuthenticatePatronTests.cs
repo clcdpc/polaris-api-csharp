@@ -5,13 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api;
 using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
-    [UnitCategory]
+    [UnitTest]
     public class AuthenticatePatronTests
     {
         private sealed class CaptureHttpMessageHandler : HttpMessageHandler

@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PatronTitleListCopyTitleTests : IntegrationTestBase
     {
         [TestMethod]
-        [MutatingIntegrationCategory]
+        [MutatingIntegrationTest]
         [DoNotParallelize]
         public async Task PatronTitleListCopyTitleTest()
         {

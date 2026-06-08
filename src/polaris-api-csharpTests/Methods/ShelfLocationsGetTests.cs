@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class ShelfLocationsGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task ShelfLocationsGetTest()
         {
             var response = await Papi.ShelfLocationsGetAsync(7);

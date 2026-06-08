@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class HoldRequestCreateTests : IntegrationTestBase
     {
         [TestMethod]
-        [MutatingIntegrationCategory]
+        [MutatingIntegrationTest]
         [DoNotParallelize]
         public async Task HoldRequestCreateTest()
         {
@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        [MutatingIntegrationCategory]
+        [MutatingIntegrationTest]
         [DoNotParallelize]
         public async Task HoldRequestCreateTest2()
         {

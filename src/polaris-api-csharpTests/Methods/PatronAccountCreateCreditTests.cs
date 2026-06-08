@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PatronAccountCreateCreditTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedMutatingIntegrationCategory]
+        [ProtectedMutatingIntegrationTest]
         [DoNotParallelize]
         public async Task PatronAccountCreateCreditTest()
         {

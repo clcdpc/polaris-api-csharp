@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PatronHoldRequestsGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task PatronHoldRequestsGetTest()
         {
             var response = await Papi.PatronHoldRequestsGetAsync(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin);

@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PatronAccountCreateTitleListTests : IntegrationTestBase
     {
         [TestMethod]
-        [MutatingIntegrationCategory]
+        [MutatingIntegrationTest]
         [DoNotParallelize]
         public async Task PatronAccountCreateTitleList_CreatedListCanBeFoundAndDeleted()
         {

@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PatronMessagesGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task PatronMessagesGetTest()
         {
             var response = await Papi.PatronMessagesGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);

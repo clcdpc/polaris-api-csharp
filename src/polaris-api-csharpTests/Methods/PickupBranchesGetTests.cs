@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PickupBranchesGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task PickupBranchesGetTest()
         {
             var response = await Papi.PickupBranchesGetAsync();

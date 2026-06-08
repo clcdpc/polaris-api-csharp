@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class SA_GetValueByOrgTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedReadOnlyIntegrationCategory]
+        [ProtectedReadOnlyIntegrationTest]
         public async Task SA_GetValueByOrgTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

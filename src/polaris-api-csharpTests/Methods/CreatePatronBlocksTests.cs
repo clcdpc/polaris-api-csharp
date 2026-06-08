@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class CreatePatronBlocksTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedMutatingIntegrationCategory]
+        [ProtectedMutatingIntegrationTest]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_FreeTextBlock()
         {
@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        [ProtectedMutatingIntegrationCategory]
+        [ProtectedMutatingIntegrationTest]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_SystemBlock()
         {
@@ -31,7 +31,7 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
-        [ProtectedMutatingIntegrationCategory]
+        [ProtectedMutatingIntegrationTest]
         [DoNotParallelize]
         public async Task CreatePatronBlocksTest_LibraryAssignedBlock()
         {

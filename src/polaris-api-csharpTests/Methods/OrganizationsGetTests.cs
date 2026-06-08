@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class OrganizationsGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ReadOnlyIntegrationCategory]
+        [ReadOnlyIntegrationTest]
         public async Task OrganizationsGetTest()
         {
             var response = await Papi.OrganizationsGetAsync();

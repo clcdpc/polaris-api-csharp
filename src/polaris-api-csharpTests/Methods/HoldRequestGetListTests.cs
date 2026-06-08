@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class HoldRequestGetListTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedReadOnlyIntegrationCategory]
+        [ProtectedReadOnlyIntegrationTest]
         public async Task HoldRequestGetListTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

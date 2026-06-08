@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.Tests
     public sealed class Synch_BibsByIdGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedReadOnlyIntegrationCategory]
+        [ProtectedReadOnlyIntegrationTest]
         public async Task Synch_BibsByIdGetTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
