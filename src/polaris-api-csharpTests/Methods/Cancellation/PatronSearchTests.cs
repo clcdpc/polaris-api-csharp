@@ -12,8 +12,6 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
     [UnitCategory]
     public class PatronSearchTests : PapiClientTestBase
     {
-
-
         [TestMethod]
         public async Task PatronSearchAsync_PassesCancellationTokenToProtectedTokenAcquisition()
         {

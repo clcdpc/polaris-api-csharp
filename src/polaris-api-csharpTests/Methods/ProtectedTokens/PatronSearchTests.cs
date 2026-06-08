@@ -303,11 +303,11 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             });
             var clients = new[]
             {
-                        CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a")),
-                        CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b")),
-                        CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a")),
-                        CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b"))
-                    };
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a")),
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b")),
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a")),
+                CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b"))
+            };
 
             await Task.WhenAll(
                 clients[0].PatronSearchAsync("name=alpha-0"),

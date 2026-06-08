@@ -11,8 +11,6 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
     [UnitCategory]
     public class ApiKeyValidateTests : PapiClientTestBase
     {
-
-
         [TestMethod]
         public async Task ApiKeyValidateAsync_PassesCancellationToken()
         {

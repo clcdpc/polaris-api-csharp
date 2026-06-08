@@ -47,39 +47,6 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
-        private sealed class CancelableProtectedTokenAuthenticationHttpMessageHandler : HttpMessageHandler
-        {
-            private int _authenticationRequestCount;
-            private int _nonAuthenticationRequestCount;
-
-            public TaskCompletionSource AuthenticationStarted { get; } =
-                new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-            public int AuthenticationRequestCount => _authenticationRequestCount;
-
-            public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
-
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
-                {
-                    Interlocked.Increment(ref _authenticationRequestCount);
-                    AuthenticationStarted.TrySetResult();
-
-                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
-
-                    Assert.Fail("Expected staff authentication to be canceled before returning a response.");
-                }
-
-                Interlocked.Increment(ref _nonAuthenticationRequestCount);
-
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
-                };
-            }
-        }
-
         [TestMethod]
         public async Task ProtectedTokenAcquisition_CanceledWaiterDoesNotHoldCacheLock()
         {
@@ -136,6 +103,39 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
                 {
                     ProtectedRequests.Add(request);
                 }
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                };
+            }
+        }
+
+        private sealed class CancelableProtectedTokenAuthenticationHttpMessageHandler : HttpMessageHandler
+        {
+            private int _authenticationRequestCount;
+            private int _nonAuthenticationRequestCount;
+
+            public TaskCompletionSource AuthenticationStarted { get; } =
+                new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            public int AuthenticationRequestCount => _authenticationRequestCount;
+
+            public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
+                {
+                    Interlocked.Increment(ref _authenticationRequestCount);
+                    AuthenticationStarted.TrySetResult();
+
+                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
+
+                    Assert.Fail("Expected staff authentication to be canceled before returning a response.");
+                }
+
+                Interlocked.Increment(ref _nonAuthenticationRequestCount);
 
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
