@@ -160,16 +160,22 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(
+                    "custom-placeholder-token",
+                    "custom-placeholder-secret",
+                    DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
-            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+            var request = PapiRestRequest.Get(
+                $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
 
             await client.ExecutePapiAsync<PapiResponseCommon>(request);
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             var finalRequest = handler.CapturedRequests.Single(capturedRequest => !capturedRequest.IsStaffAuthenticationRequest);
-            StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/custom-placeholder-token/custom/unsupported");
+            StringAssert.Contains(
+                finalRequest.Path,
+                "/protected/v1/1033/100/1/custom-placeholder-token/custom/unsupported");
             Assert.IsFalse(finalRequest.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
             AssertAuthorizationHash(finalRequest, "custom-placeholder-secret", client.AccessKey, client.AccessID);
         }
@@ -179,9 +185,13 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(
+                    "custom-placeholder-token",
+                    "custom-placeholder-secret",
+                    DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
-            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+            var request = PapiRestRequest.Get(
+                $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
             var originalPath = request.Path;
 
             await client.ExecutePapiAsync<PapiResponseCommon>(request);
@@ -190,11 +200,13 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         }
 
         [TestMethod]
-        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_RestoresOriginalPathAfterErrorResponse()
+        public async Task
+            ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_RestoresOriginalPathAfterErrorResponse()
         {
             var handler = new ErrorProtectedRequestHttpMessageHandler(HttpStatusCode.InternalServerError);
             var client = CreateClientWithProtectedCache(handler, $"error-response-{Guid.NewGuid():N}");
-            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+            var request = PapiRestRequest.Get(
+                $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
             var originalPath = request.Path;
 
             await client.ExecutePapiAsync<PapiResponseCommon>(request);
@@ -202,6 +214,9 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.AreEqual(originalPath, request.Path);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            StringAssert.Contains(
+                handler.FinalRequestPath!,
+                "/protected/v1/1033/100/1/error-path-token/custom/unsupported");
         }
 
         [TestMethod]
@@ -304,24 +319,36 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             private readonly HttpStatusCode _protectedRequestStatusCode;
             public int AuthenticationRequestCount { get; private set; }
             public int NonAuthenticationRequestCount { get; private set; }
+            public string? FinalRequestPath { get; private set; }
 
             public ErrorProtectedRequestHttpMessageHandler(HttpStatusCode protectedRequestStatusCode)
             {
                 _protectedRequestStatusCode = protectedRequestStatusCode;
             }
 
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            protected override Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                CancellationToken cancellationToken)
             {
-                if (request.RequestUri!.AbsolutePath.EndsWith("/authenticator/staff", StringComparison.OrdinalIgnoreCase))
+                if (request.RequestUri!.AbsolutePath.EndsWith(
+                    "/authenticator/staff",
+                    StringComparison.OrdinalIgnoreCase))
                 {
                     AuthenticationRequestCount++;
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(CreateProtectedTokenJson("error-path-token", "error-path-secret", DateTime.Now.AddHours(1)), Encoding.UTF8, "application/json")
+                        Content = new StringContent(
+                            CreateProtectedTokenJson(
+                                "error-path-token",
+                                "error-path-secret",
+                                DateTime.Now.AddHours(1)),
+                            Encoding.UTF8,
+                            "application/json")
                     });
                 }
 
                 NonAuthenticationRequestCount++;
+                FinalRequestPath = request.RequestUri.AbsolutePath;
                 return Task.FromResult(new HttpResponseMessage(_protectedRequestStatusCode)
                 {
                     Content = new StringContent("{\"PAPIErrorCode\":1}", Encoding.UTF8, "application/json")
