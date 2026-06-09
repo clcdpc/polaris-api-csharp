@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - master
+      - upgrade-to-restclient-3alpha
   push:
     branches:
       - master
+      - upgrade-to-restclient-3alpha
     tags:
       - "v*.*.*"
       - "v*.*.*-*"
