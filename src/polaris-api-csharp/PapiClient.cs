@@ -145,9 +145,7 @@ namespace Clc.Polaris.Api
         /// <returns>The REST response returned by the PAPI endpoint.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="request"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="request"/> has an invalid custom PAPI path.</exception>
-        public async Task<IRestResponse<T>> ExecutePapiAsync<T>(
-            PapiRestRequest request,
-            CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<T>> ExecutePapiAsync<T>(PapiRestRequest request, CancellationToken cancellationToken = default)
         {
             ValidateCustomPapiRequest(request);
 
@@ -155,9 +153,7 @@ namespace Clc.Polaris.Api
             var requiresProtectedToken = RequiresProtectedToken(request, pathContainsProtectedTokenPlaceholder);
 
             var protectedToken = requiresProtectedToken
-                ? await GetProtectedTokenOrThrowAsync(
-                    pathContainsProtectedTokenPlaceholder,
-                    cancellationToken).ConfigureAwait(false)
+                ? await GetProtectedTokenOrThrowAsync(pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false)
                 : null;
 
             var originalPath = request.Path;
@@ -273,16 +269,13 @@ namespace Clc.Polaris.Api
                 path.IndexOf(ProtectedToken.Placeholder, StringComparison.Ordinal) < 0;
         }
 
-        private static InvalidOperationException CreateProtectedTokenRequiredException(
-            string reason,
-            bool pathContainsProtectedTokenPlaceholder)
+        private static InvalidOperationException CreateProtectedTokenRequiredException(string reason, bool pathContainsProtectedTokenPlaceholder)
         {
             var placeholderReason = pathContainsProtectedTokenPlaceholder
                 ? " ProtectedToken.Placeholder cannot be replaced without a valid protected access token."
                 : string.Empty;
 
-            return new InvalidOperationException(
-                $"A valid protected access token is required for this request. {reason}{placeholderReason}");
+            return new InvalidOperationException($"A valid protected access token is required for this request. {reason}{placeholderReason}");
         }
 
         private static bool RequestPathContainsProtectedTokenPlaceholder(PapiRestRequest request)
@@ -294,20 +287,13 @@ namespace Clc.Polaris.Api
         {
             if (!IsProtectedTokenUsable(token))
             {
-                throw new InvalidOperationException(
-                    "A valid protected access token is required to replace " +
-                    "ProtectedToken.Placeholder in the request path.");
+                throw new InvalidOperationException("A valid protected access token is required to replace ProtectedToken.Placeholder in the request path.");
             }
 
-            request.Path = request.Path.Replace(
-                ProtectedToken.Placeholder,
-                token.AccessToken,
-                StringComparison.Ordinal);
+            request.Path = request.Path.Replace(ProtectedToken.Placeholder, token.AccessToken, StringComparison.Ordinal);
         }
 
-        private async Task<ProtectedToken> GetProtectedTokenOrThrowAsync(
-            bool pathContainsProtectedTokenPlaceholder,
-            CancellationToken cancellationToken = default)
+        private async Task<ProtectedToken> GetProtectedTokenOrThrowAsync(bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken = default)
         {
             var token = Token;
             if (IsProtectedTokenUsable(token))
@@ -322,9 +308,7 @@ namespace Clc.Polaris.Api
 
             if (StaffOverrideAccount == null)
             {
-                throw CreateProtectedTokenRequiredException(
-                    "No staff override credentials are configured.",
-                    pathContainsProtectedTokenPlaceholder);
+                throw CreateProtectedTokenRequiredException("No staff override credentials are configured.", pathContainsProtectedTokenPlaceholder);
             }
 
             var cacheKey = BuildProtectedTokenCacheKey();
@@ -337,10 +321,7 @@ namespace Clc.Polaris.Api
 
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await AuthenticateAndLoadProtectedTokenOrThrowAsync(
-                    null,
-                    pathContainsProtectedTokenPlaceholder,
-                    cancellationToken).ConfigureAwait(false);
+                return await AuthenticateAndLoadProtectedTokenOrThrowAsync(null, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
             }
 
             var cacheLock = ProtectedTokenCacheLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
@@ -364,10 +345,7 @@ namespace Clc.Polaris.Api
                     return token!;
                 }
 
-                return await AuthenticateAndLoadProtectedTokenOrThrowAsync(
-                    cacheKey,
-                    pathContainsProtectedTokenPlaceholder,
-                    cancellationToken).ConfigureAwait(false);
+                return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -433,38 +411,27 @@ namespace Clc.Polaris.Api
             return true;
         }
 
-        private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenOrThrowAsync(
-            string? cacheKey,
-            bool pathContainsProtectedTokenPlaceholder,
-            CancellationToken cancellationToken)
+        private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenOrThrowAsync(string? cacheKey, bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken)
         {
             var staffOverrideAccount = StaffOverrideAccount;
             if (staffOverrideAccount == null)
             {
-                throw CreateProtectedTokenRequiredException(
-                    "No staff override credentials are configured.",
-                    pathContainsProtectedTokenPlaceholder);
+                throw CreateProtectedTokenRequiredException("No staff override credentials are configured.", pathContainsProtectedTokenPlaceholder);
             }
 
-            var response = await AuthenticateStaffUserAsync(
-                staffOverrideAccount,
-                cancellationToken).ConfigureAwait(false);
+            var response = await AuthenticateStaffUserAsync(staffOverrideAccount, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             var responseData = response?.Data;
             if (response?.Response == null || !response.Response.IsSuccessStatusCode)
             {
                 ClearFailedProtectedToken(cacheKey);
-                throw CreateProtectedTokenRequiredException(
-                    "Staff authentication did not succeed.",
-                    pathContainsProtectedTokenPlaceholder);
+                throw CreateProtectedTokenRequiredException("Staff authentication did not succeed.", pathContainsProtectedTokenPlaceholder);
             }
 
             if (!IsProtectedTokenUsable(responseData))
             {
                 ClearFailedProtectedToken(cacheKey);
-                throw CreateProtectedTokenRequiredException(
-                    "Staff authentication did not return a usable protected access token.",
-                    pathContainsProtectedTokenPlaceholder);
+                throw CreateProtectedTokenRequiredException("Staff authentication did not return a usable protected access token.", pathContainsProtectedTokenPlaceholder);
             }
 
             var protectedToken = responseData!;
