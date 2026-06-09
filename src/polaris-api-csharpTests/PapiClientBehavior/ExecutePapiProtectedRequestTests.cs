@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Tests;
@@ -188,6 +190,21 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         }
 
         [TestMethod]
+        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_RestoresOriginalPathAfterErrorResponse()
+        {
+            var handler = new ErrorProtectedRequestHttpMessageHandler(HttpStatusCode.InternalServerError);
+            var client = CreateClientWithProtectedCache(handler, $"error-response-{Guid.NewGuid():N}");
+            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+            var originalPath = request.Path;
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(originalPath, request.Path);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+        }
+
+        [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPatronRequest_UsesStaffOverrideTokenWhenAllowed()
         {
             var handler = new ProtectedTokenHttpMessageHandler(
@@ -280,6 +297,36 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var finalRequest = handler.CapturedRequests.Single();
             Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
+        }
+
+        private sealed class ErrorProtectedRequestHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly HttpStatusCode _protectedRequestStatusCode;
+            public int AuthenticationRequestCount { get; private set; }
+            public int NonAuthenticationRequestCount { get; private set; }
+
+            public ErrorProtectedRequestHttpMessageHandler(HttpStatusCode protectedRequestStatusCode)
+            {
+                _protectedRequestStatusCode = protectedRequestStatusCode;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri!.AbsolutePath.EndsWith("/authenticator/staff", StringComparison.OrdinalIgnoreCase))
+                {
+                    AuthenticationRequestCount++;
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(CreateProtectedTokenJson("error-path-token", "error-path-secret", DateTime.Now.AddHours(1)), Encoding.UTF8, "application/json")
+                    });
+                }
+
+                NonAuthenticationRequestCount++;
+                return Task.FromResult(new HttpResponseMessage(_protectedRequestStatusCode)
+                {
+                    Content = new StringContent("{\"PAPIErrorCode\":1}", Encoding.UTF8, "application/json")
+                });
+            }
         }
     }
 }
