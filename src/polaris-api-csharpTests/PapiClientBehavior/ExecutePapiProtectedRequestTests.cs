@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Tests;
@@ -188,6 +187,27 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         }
 
         [TestMethod]
+        public async Task ExecutePapiAsync_CustomProtectedRequestWithPlaceholder_RestoresOriginalPathAfterErrorResponse()
+        {
+            var handler = new ProtectedTokenHttpMessageHandler(
+                HttpStatusCode.OK,
+                CreateProtectedTokenJson("error-path-token", "error-path-secret", DateTime.Now.AddHours(1)),
+                HttpStatusCode.InternalServerError,
+                "{\"PAPIErrorCode\":1}");
+            var client = CreateProtectedClient(handler);
+            var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
+            var originalPath = request.Path;
+
+            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+
+            Assert.AreEqual(originalPath, request.Path);
+            Assert.AreEqual(1, handler.AuthenticationRequestCount);
+            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+            var finalRequest = handler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest);
+            StringAssert.Contains(finalRequest.Path, "/protected/v1/1033/100/1/error-path-token/custom/unsupported");
+        }
+
+        [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPatronRequest_UsesStaffOverrideTokenWhenAllowed()
         {
             var handler = new ProtectedTokenHttpMessageHandler(
@@ -281,5 +301,6 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
         }
+
     }
 }
