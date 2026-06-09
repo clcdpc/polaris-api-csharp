@@ -302,6 +302,8 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             private readonly HttpStatusCode _authenticationStatusCode;
             private readonly string _authenticationResponseJson;
             private readonly Func<CapturedPapiRequest, (HttpStatusCode StatusCode, string ResponseJson)>? _authenticationResponseFactory;
+            private readonly HttpStatusCode _nonAuthenticationStatusCode;
+            private readonly string _nonAuthenticationResponseJson;
             private int _authenticationRequestCount;
             private int _nonAuthenticationRequestCount;
             private readonly ConcurrentQueue<string> _requestPaths = new ConcurrentQueue<string>();
@@ -312,10 +314,16 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             public string[] RequestPaths => _requestPaths.ToArray();
             public CapturedPapiRequest[] CapturedRequests => _capturedRequests.ToArray();
 
-            public ProtectedTokenHttpMessageHandler(HttpStatusCode authenticationStatusCode = HttpStatusCode.OK, string? authenticationResponseJson = null)
+            public ProtectedTokenHttpMessageHandler(
+                HttpStatusCode authenticationStatusCode = HttpStatusCode.OK,
+                string? authenticationResponseJson = null,
+                HttpStatusCode nonAuthenticationStatusCode = HttpStatusCode.OK,
+                string? nonAuthenticationResponseJson = null)
             {
                 _authenticationStatusCode = authenticationStatusCode;
                 _authenticationResponseJson = authenticationResponseJson ?? CreateProtectedTokenJson("protected-token", "protected-secret", DateTime.Now.AddHours(1));
+                _nonAuthenticationStatusCode = nonAuthenticationStatusCode;
+                _nonAuthenticationResponseJson = nonAuthenticationResponseJson ?? "{\"PAPIErrorCode\":0}";
             }
 
             public ProtectedTokenHttpMessageHandler(Func<CapturedPapiRequest, (HttpStatusCode StatusCode, string ResponseJson)> authenticationResponseFactory)
@@ -343,9 +351,9 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
                 }
 
                 Interlocked.Increment(ref _nonAuthenticationRequestCount);
-                return new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(_nonAuthenticationStatusCode)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(_nonAuthenticationResponseJson, Encoding.UTF8, "application/json")
                 };
             }
         }

@@ -313,10 +313,9 @@ namespace Clc.Polaris.Api
 
             var cacheKey = BuildProtectedTokenCacheKey();
 
-            if (TryLoadProtectedTokenFromCache(cacheKey))
+            if (TryLoadProtectedTokenFromCache(cacheKey, out var cachedToken))
             {
-                token = Token;
-                return token!;
+                return cachedToken!;
             }
 
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
@@ -339,10 +338,9 @@ namespace Clc.Polaris.Api
                     _token = null;
                 }
 
-                if (TryLoadProtectedTokenFromCache(cacheKey))
+                if (TryLoadProtectedTokenFromCache(cacheKey, out cachedToken))
                 {
-                    token = Token;
-                    return token!;
+                    return cachedToken!;
                 }
 
                 return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
@@ -388,8 +386,10 @@ namespace Clc.Polaris.Api
                 !string.IsNullOrWhiteSpace(token.AccessSecret);
         }
 
-        private bool TryLoadProtectedTokenFromCache(string? cacheKey)
+        private bool TryLoadProtectedTokenFromCache(string? cacheKey, out ProtectedToken? protectedToken)
         {
+            protectedToken = null;
+
             if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
             {
                 return false;
@@ -407,7 +407,8 @@ namespace Clc.Polaris.Api
                 return false;
             }
 
-            _token = new ProtectedToken(cachedToken);
+            protectedToken = new ProtectedToken(cachedToken);
+            _token = protectedToken;
             return true;
         }
 
