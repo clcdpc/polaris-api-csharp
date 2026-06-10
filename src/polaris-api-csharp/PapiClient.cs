@@ -45,6 +45,7 @@ namespace Clc.Polaris.Api
         private static ConcurrentDictionary<string, SemaphoreSlim> ProtectedTokenCacheLocks { get; set; } = new ConcurrentDictionary<string, SemaphoreSlim>();
 
         private ProtectedToken? _token;
+        private static readonly TimeSpan ProtectedTokenExpirationSkew = TimeSpan.FromMinutes(1);
 
         /// <summary>
         /// Used for protected methods and public method overrides
@@ -406,7 +407,24 @@ namespace Clc.Polaris.Api
 
         private static bool IsProtectedTokenMissingOrExpired(ProtectedToken? token)
         {
-            return token == null || !token.ExpirationDate.HasValue || token.ExpirationDate <= DateTime.Now;
+            if (token == null || !token.ExpirationDate.HasValue)
+            {
+                return true;
+            }
+
+            var expirationUtc = NormalizeProtectedTokenExpirationUtc(token.ExpirationDate.Value);
+
+            return expirationUtc <= DateTime.UtcNow.Add(ProtectedTokenExpirationSkew);
+        }
+
+        private static DateTime NormalizeProtectedTokenExpirationUtc(DateTime expirationDate)
+        {
+            return expirationDate.Kind switch
+            {
+                DateTimeKind.Utc => expirationDate,
+                DateTimeKind.Local => expirationDate.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc)
+            };
         }
 
         private static bool IsProtectedTokenUsable(ProtectedToken? token)
