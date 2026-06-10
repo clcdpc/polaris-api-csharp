@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.Models
         public string Password { get; set; } = "";
         public bool AuthRequired { get; set; } = true;
         public bool JsonSerializerIgnoreNulls { get; set; } = true;
-        public bool BlockStaffOverride = false;
+        public bool BlockStaffOverride { get; set; } = false;
         public string? HashString { get; set; }
 
         public bool IsPublicMethod => Path.StartsWith("/public", StringComparison.OrdinalIgnoreCase);
@@ -75,6 +75,6 @@ namespace Clc.Polaris.Api.Models
             }
         }
 
-        public override string ToString() => $"{Method} {Path} {Body}";
+        public override string ToString() => $"{Method} {Path}";
     }
 }
