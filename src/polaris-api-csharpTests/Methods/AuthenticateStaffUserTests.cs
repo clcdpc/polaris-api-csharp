@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api.Tests
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
             var response = await Papi.AuthenticateStaffUserAsync(staffOverrideAccount!);
-            Assert.AreEqual(response.Data.PAPIErrorCode, 0);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessToken));
         }

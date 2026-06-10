@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.Models
         public string Password { get; set; } = "";
         public bool AuthRequired { get; set; } = true;
         public bool JsonSerializerIgnoreNulls { get; set; } = true;
-        public bool BlockStaffOverride = false;
+        public bool BlockStaffOverride { get; set; } = false;
         public string? HashString { get; set; }
 
         public bool IsPublicMethod => Path.StartsWith("/public", StringComparison.OrdinalIgnoreCase);
@@ -49,13 +49,32 @@ namespace Clc.Polaris.Api.Models
 
         public PapiRestRequest(RestRequest request)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             Method = request.Method;
             Path = request.Path;
             Body = request.Body;
-            QueryParameters = request.QueryParameters;
-            Headers = request.Headers;
+
+            foreach (var parameter in request.QueryParameters)
+            {
+                QueryParameters[parameter.Key] = parameter.Value;
+            }
+
+            foreach (var header in request.Headers)
+            {
+                Headers[header.Key] = header.Value;
+            }
+
+            if (request is PapiRestRequest papiRequest)
+            {
+                Password = papiRequest.Password;
+                AuthRequired = papiRequest.AuthRequired;
+                JsonSerializerIgnoreNulls = papiRequest.JsonSerializerIgnoreNulls;
+                BlockStaffOverride = papiRequest.BlockStaffOverride;
+                HashString = papiRequest.HashString;
+            }
         }
 
-        public override string ToString() => $"{Method} {Path} {Body}";
+        public override string ToString() => $"{Method} {Path}";
     }
 }

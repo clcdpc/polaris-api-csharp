@@ -129,7 +129,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 () => client.PatronSearchAsync("name=Smith", orgId: 9));
 
             StringAssert.Contains(exception.Message, "valid protected access token");
@@ -217,7 +217,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             client.StaffOverrideAccount = null;
             client.Token = null;
 
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 () => client.PatronSearchAsync("name=Smith", orgId: 9));
 
             StringAssert.Contains(exception.Message, "valid protected access token");
@@ -543,7 +543,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddMinutes(-1)
             });
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
@@ -588,7 +588,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddHours(1)
             });
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -602,7 +602,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
             var client = CreateProtectedClient(handler);
 
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
@@ -615,7 +615,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "null");
             var client = CreateProtectedClient(handler);
 
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             StringAssert.Contains(exception.Message, "did not return a usable protected access token");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
@@ -630,7 +630,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 CreateProtectedTokenJson(" ", "protected-secret", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -644,7 +644,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 CreateProtectedTokenJson("protected-token", " ", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -658,7 +658,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 CreateProtectedTokenJson("protected-token", "protected-secret", DateTime.Now.AddMinutes(-1)));
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -678,7 +678,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             client.AccessKey = "failure-access-key";
             client.StaffOverrideAccount = CreateStaffUser(password: "failure-password");
 
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
 
             Assert.IsFalse(exception.Message.Contains(client.StaffOverrideAccount.Password, StringComparison.Ordinal));
             Assert.IsFalse(exception.Message.Contains(client.AccessKey, StringComparison.Ordinal));

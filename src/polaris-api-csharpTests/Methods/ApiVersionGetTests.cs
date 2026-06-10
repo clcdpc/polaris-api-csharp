@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Tests
         public async Task ApiVersionGetTest()
         {
             var response = await Papi.ApiVersionGetAsync();
-            Assert.AreEqual(response.Data.PAPIErrorCode, 0);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.ToString()));
         }
     }
