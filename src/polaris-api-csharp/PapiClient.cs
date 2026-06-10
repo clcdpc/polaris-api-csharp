@@ -41,8 +41,9 @@ namespace Clc.Polaris.Api
         public PolarisUser? StaffOverrideAccount { get; set; }
 
         public bool UseProtectedTokenCache { get; set; } = true;
-        private static ConcurrentDictionary<string, ProtectedToken> ProtectedTokenCache { get; set; } = new ConcurrentDictionary<string, ProtectedToken>();
-        private static ConcurrentDictionary<string, SemaphoreSlim> ProtectedTokenCacheLocks { get; set; } = new ConcurrentDictionary<string, SemaphoreSlim>();
+
+        private static ConcurrentDictionary<string, ProtectedToken> ProtectedTokenCache { get; } = new ConcurrentDictionary<string, ProtectedToken>();
+        private static SemaphoreSlim ProtectedTokenCacheLock { get; } = new SemaphoreSlim(1, 1);
 
         private ProtectedToken? _token;
         private static readonly TimeSpan ProtectedTokenExpirationSkew = TimeSpan.FromMinutes(1);
@@ -334,6 +335,11 @@ namespace Clc.Polaris.Api
 
             var cacheKey = BuildProtectedTokenCacheKey();
 
+            if (UseProtectedTokenCache)
+            {
+                PruneProtectedTokenCache();
+            }
+
             if (TryLoadProtectedTokenFromCache(cacheKey, out var cachedToken))
             {
                 return cachedToken!;
@@ -344,10 +350,14 @@ namespace Clc.Polaris.Api
                 return await AuthenticateAndLoadProtectedTokenOrThrowAsync(null, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
             }
 
-            var cacheLock = ProtectedTokenCacheLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
-            await cacheLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await ProtectedTokenCacheLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
+                if (UseProtectedTokenCache)
+                {
+                    PruneProtectedTokenCache();
+                }
+
                 token = Token;
                 if (IsProtectedTokenUsable(token))
                 {
@@ -368,7 +378,7 @@ namespace Clc.Polaris.Api
             }
             finally
             {
-                cacheLock.Release();
+                ProtectedTokenCacheLock.Release();
             }
         }
 
@@ -450,6 +460,42 @@ namespace Clc.Polaris.Api
             return true;
         }
 
+        internal static int PruneProtectedTokenCache()
+        {
+            var removedCount = 0;
+
+            foreach (var cachedToken in ProtectedTokenCache)
+            {
+                if (!IsProtectedTokenUsable(cachedToken.Value) &&
+                    ProtectedTokenCache.TryRemove(cachedToken.Key, out _))
+                {
+                    removedCount++;
+                }
+            }
+
+            return removedCount;
+        }
+
+        internal static void ClearProtectedTokenCache()
+        {
+            ProtectedTokenCache.Clear();
+        }
+
+        internal static void AddProtectedTokenToCacheForTesting(string cacheKey, ProtectedToken token)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(cacheKey);
+            ArgumentNullException.ThrowIfNull(token);
+
+            ProtectedTokenCache[cacheKey] = new ProtectedToken(token);
+        }
+
+        internal static bool ProtectedTokenCacheContainsKey(string cacheKey)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(cacheKey);
+
+            return ProtectedTokenCache.ContainsKey(cacheKey);
+        }
+
         private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenOrThrowAsync(string? cacheKey, bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken)
         {
             var staffOverrideAccount = StaffOverrideAccount;
@@ -478,6 +524,7 @@ namespace Clc.Polaris.Api
 
             if (UseProtectedTokenCache && !string.IsNullOrWhiteSpace(cacheKey))
             {
+                PruneProtectedTokenCache();
                 ProtectedTokenCache[cacheKey] = new ProtectedToken(protectedToken);
             }
 
