@@ -376,9 +376,7 @@ namespace Clc.Polaris.Api
             return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
         }
 
-        private static async Task<ProtectedTokenCacheLockLease> AcquireProtectedTokenCacheLockAsync(
-    string cacheKey,
-    CancellationToken cancellationToken)
+        private static async Task<ProtectedTokenCacheLockLease> AcquireProtectedTokenCacheLockAsync(string cacheKey, CancellationToken cancellationToken)
         {
             while (true)
             {
