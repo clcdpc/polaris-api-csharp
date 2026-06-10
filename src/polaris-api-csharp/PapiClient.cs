@@ -335,11 +335,6 @@ namespace Clc.Polaris.Api
 
             var cacheKey = BuildProtectedTokenCacheKey();
 
-            if (UseProtectedTokenCache)
-            {
-                PruneProtectedTokenCache();
-            }
-
             if (TryLoadProtectedTokenFromCache(cacheKey, out var cachedToken))
             {
                 return cachedToken!;
@@ -524,7 +519,6 @@ namespace Clc.Polaris.Api
 
             if (UseProtectedTokenCache && !string.IsNullOrWhiteSpace(cacheKey))
             {
-                PruneProtectedTokenCache();
                 ProtectedTokenCache[cacheKey] = new ProtectedToken(protectedToken);
             }
 
