@@ -2,10 +2,10 @@ using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using System;
+using System.Globalization;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
 {
@@ -20,7 +20,12 @@ namespace Clc.Polaris.Api
 
             if (itemRecordId is int itemRecordIdentifier)
             {
-                itemIdentifier = itemRecordIdentifier.ToString();
+                if (itemRecordIdentifier <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(itemRecordId));
+                }
+
+                itemIdentifier = itemRecordIdentifier.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
