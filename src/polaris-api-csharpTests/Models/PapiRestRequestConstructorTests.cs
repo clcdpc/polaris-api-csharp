@@ -11,34 +11,46 @@ namespace Clc.Polaris.Api.Tests.Models
     public class PapiRestRequestConstructorTests
     {
         [TestMethod]
-        public void PapiRestRequest_Constructors_PreserveCurrentBehavior()
+        public void PapiRestRequest_CopyConstructor_PreservesValuesWithoutSharingMutableCollections()
         {
-            var defaultGet = new PapiRestRequest("/public/foo");
-            Assert.AreEqual(HttpMethod.Get, defaultGet.Method);
-            Assert.AreEqual("/public/foo", defaultGet.Path);
+            var request = PapiRestRequest.Post(
+                "/protected/v1/1033/100/1/test",
+                new { Value = 1 },
+                "password");
 
-            var body = new { Name = "Example" };
-            var put = new PapiRestRequest(HttpMethod.Put, "/public/foo", "pin", body);
-            Assert.AreEqual(HttpMethod.Put, put.Method);
-            Assert.AreEqual("/public/foo", put.Path);
-            Assert.AreEqual("pin", put.Password);
-            Assert.AreSame(body, put.Body);
+            request.AuthRequired = false;
+            request.JsonSerializerIgnoreNulls = false;
+            request.BlockStaffOverride = true;
+            request.HashString = "hash-string";
+            request.Headers["X-Test"] = "header-value";
+            request.QueryParameters["query"] = "query-value";
 
-            var existing = new RestRequest
-            {
-                Method = HttpMethod.Post,
-                Path = "/protected/foo",
-                Body = new { Value = "v" },
-            };
-            existing.QueryParameters.Add("limit", "5");
-            existing.Headers.Add("X-Test", "header");
+            var copy = new PapiRestRequest(request);
 
-            var copied = new PapiRestRequest(existing);
-            Assert.AreEqual(existing.Method, copied.Method);
-            Assert.AreEqual(existing.Path, copied.Path);
-            Assert.AreSame(existing.Body, copied.Body);
-            Assert.AreSame(existing.QueryParameters, copied.QueryParameters);
-            Assert.AreSame(existing.Headers, copied.Headers);
+            Assert.AreEqual(request.Method, copy.Method);
+            Assert.AreEqual(request.Path, copy.Path);
+            Assert.AreSame(request.Body, copy.Body);
+            Assert.AreEqual(request.Password, copy.Password);
+            Assert.AreEqual(request.AuthRequired, copy.AuthRequired);
+            Assert.AreEqual(request.JsonSerializerIgnoreNulls, copy.JsonSerializerIgnoreNulls);
+            Assert.AreEqual(request.BlockStaffOverride, copy.BlockStaffOverride);
+            Assert.AreEqual(request.HashString, copy.HashString);
+
+            Assert.AreNotSame(request.Headers, copy.Headers);
+            Assert.AreNotSame(request.QueryParameters, copy.QueryParameters);
+
+            Assert.AreEqual("header-value", copy.Headers["X-Test"]);
+            Assert.AreEqual("query-value", copy.QueryParameters["query"]);
+
+            request.Headers["X-Test"] = "changed-header-value";
+            request.QueryParameters["query"] = "changed-query-value";
+            request.Headers["X-New"] = "new-header-value";
+            request.QueryParameters["new"] = "new-query-value";
+
+            Assert.AreEqual("header-value", copy.Headers["X-Test"]);
+            Assert.AreEqual("query-value", copy.QueryParameters["query"]);
+            Assert.IsFalse(copy.Headers.ContainsKey("X-New"));
+            Assert.IsFalse(copy.QueryParameters.ContainsKey("new"));
         }
     }
 }
