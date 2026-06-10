@@ -43,8 +43,14 @@ namespace Clc.Polaris.Api
 
         public bool UseProtectedTokenCache { get; set; } = true;
 
+        private const int MaxProtectedTokenCacheLockEntries = 1024;
+        private const int TargetProtectedTokenCacheLockEntries = 512;
+
+        private static readonly TimeSpan ProtectedTokenCacheLockIdleLimit = TimeSpan.FromMinutes(10);
+        private static readonly object ProtectedTokenCacheLocksPruneLock = new object();
+
         private static ConcurrentDictionary<string, ProtectedToken> ProtectedTokenCache { get; } = new ConcurrentDictionary<string, ProtectedToken>();
-        private static SemaphoreSlim ProtectedTokenCacheLock { get; } = new SemaphoreSlim(1, 1);
+        private static ConcurrentDictionary<string, ProtectedTokenCacheLockEntry> ProtectedTokenCacheLocks { get; } = new ConcurrentDictionary<string, ProtectedTokenCacheLockEntry>();
 
         private ProtectedToken? _token;
         private static readonly TimeSpan ProtectedTokenExpirationSkew = TimeSpan.FromMinutes(1);
@@ -343,35 +349,225 @@ namespace Clc.Polaris.Api
                 return await AuthenticateAndLoadProtectedTokenOrThrowAsync(null, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
             }
 
-            await ProtectedTokenCacheLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
+            using var cacheLockLease = await AcquireProtectedTokenCacheLockAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+
+            token = Token;
+            if (IsProtectedTokenUsable(token))
             {
-                token = Token;
-                if (IsProtectedTokenUsable(token))
-                {
-                    return token!;
-                }
-
-                if (token != null)
-                {
-                    _token = null;
-                }
-
-                if (TryLoadProtectedTokenFromCache(cacheKey, out cachedToken))
-                {
-                    return cachedToken!;
-                }
-
-                if (UseProtectedTokenCache)
-                {
-                    PruneProtectedTokenCache();
-                }
-
-                return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
+                return token!;
             }
-            finally
+
+            if (token != null)
             {
-                ProtectedTokenCacheLock.Release();
+                _token = null;
+            }
+
+            if (TryLoadProtectedTokenFromCache(cacheKey, out cachedToken))
+            {
+                return cachedToken!;
+            }
+
+            if (UseProtectedTokenCache)
+            {
+                PruneProtectedTokenCache();
+                PruneProtectedTokenCacheLocks();
+            }
+
+            return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static async Task<ProtectedTokenCacheLockLease> AcquireProtectedTokenCacheLockAsync(string cacheKey, CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var entry = ProtectedTokenCacheLocks.GetOrAdd(
+                    cacheKey,
+                    _ => new ProtectedTokenCacheLockEntry());
+
+                if (!entry.TryAddLease())
+                {
+                    continue;
+                }
+
+                try
+                {
+                    await entry.Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    return new ProtectedTokenCacheLockLease(entry);
+                }
+                catch
+                {
+                    entry.ReleaseLease();
+
+                    if (ProtectedTokenCacheLocks.Count > MaxProtectedTokenCacheLockEntries)
+                    {
+                        PruneProtectedTokenCacheLocks();
+                    }
+
+                    throw;
+                }
+            }
+        }
+
+        private static void PruneProtectedTokenCacheLocks()
+        {
+            if (ProtectedTokenCacheLocks.Count <= MaxProtectedTokenCacheLockEntries)
+            {
+                return;
+            }
+
+            lock (ProtectedTokenCacheLocksPruneLock)
+            {
+                if (ProtectedTokenCacheLocks.Count <= MaxProtectedTokenCacheLockEntries)
+                {
+                    return;
+                }
+
+                var cutoffUtc = DateTime.UtcNow.Subtract(ProtectedTokenCacheLockIdleLimit);
+
+                PruneProtectedTokenCacheLocks(cutoffUtc, requireIdle: true);
+
+                if (ProtectedTokenCacheLocks.Count > MaxProtectedTokenCacheLockEntries)
+                {
+                    PruneProtectedTokenCacheLocks(cutoffUtc, requireIdle: false);
+                }
+            }
+        }
+
+        private static void PruneProtectedTokenCacheLocks(DateTime cutoffUtc, bool requireIdle)
+        {
+            foreach (var pair in ProtectedTokenCacheLocks)
+            {
+                if (ProtectedTokenCacheLocks.Count <= TargetProtectedTokenCacheLockEntries)
+                {
+                    return;
+                }
+
+                var entry = pair.Value;
+
+                if (!entry.TryRetire(cutoffUtc, requireIdle))
+                {
+                    continue;
+                }
+
+                if (ProtectedTokenCacheLocks.TryRemove(pair.Key, out var removedEntry) &&
+                    ReferenceEquals(removedEntry, entry))
+                {
+                    removedEntry.Dispose();
+                }
+                else
+                {
+                    entry.UndoRetire();
+                }
+            }
+        }
+
+        private sealed class ProtectedTokenCacheLockLease : IDisposable
+        {
+            private ProtectedTokenCacheLockEntry? _entry;
+
+            public ProtectedTokenCacheLockLease(ProtectedTokenCacheLockEntry entry)
+            {
+                _entry = entry;
+            }
+
+            public void Dispose()
+            {
+                var entry = _entry;
+                if (entry == null)
+                {
+                    return;
+                }
+
+                _entry = null;
+
+                try
+                {
+                    entry.Semaphore.Release();
+                }
+                finally
+                {
+                    entry.ReleaseLease();
+
+                    if (ProtectedTokenCacheLocks.Count > MaxProtectedTokenCacheLockEntries)
+                    {
+                        PruneProtectedTokenCacheLocks();
+                    }
+                }
+            }
+        }
+
+        private sealed class ProtectedTokenCacheLockEntry : IDisposable
+        {
+            private readonly object _syncRoot = new object();
+            private int _leaseCount;
+            private bool _retired;
+            private DateTime _lastUsedUtc = DateTime.UtcNow;
+
+            public SemaphoreSlim Semaphore { get; } = new SemaphoreSlim(1, 1);
+
+            public bool TryAddLease()
+            {
+                lock (_syncRoot)
+                {
+                    if (_retired)
+                    {
+                        return false;
+                    }
+
+                    _leaseCount++;
+                    _lastUsedUtc = DateTime.UtcNow;
+                    return true;
+                }
+            }
+
+            public void ReleaseLease()
+            {
+                lock (_syncRoot)
+                {
+                    if (_leaseCount > 0)
+                    {
+                        _leaseCount--;
+                    }
+
+                    _lastUsedUtc = DateTime.UtcNow;
+                }
+            }
+
+            public bool TryRetire(DateTime cutoffUtc, bool requireIdle)
+            {
+                lock (_syncRoot)
+                {
+                    if (_retired || _leaseCount != 0)
+                    {
+                        return false;
+                    }
+
+                    if (requireIdle && _lastUsedUtc > cutoffUtc)
+                    {
+                        return false;
+                    }
+
+                    _retired = true;
+                    return true;
+                }
+            }
+
+            public void UndoRetire()
+            {
+                lock (_syncRoot)
+                {
+                    if (_retired && _leaseCount == 0)
+                    {
+                        _retired = false;
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+                Semaphore.Dispose();
             }
         }
 

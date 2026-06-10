@@ -162,8 +162,9 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
             cache?.Clear();
 
-            var locks = GetPrivateStaticProperty<ConcurrentDictionary<string, SemaphoreSlim>>("ProtectedTokenCacheLocks");
-            locks?.Clear();
+            var locksProperty = typeof(PapiClient).GetProperty("ProtectedTokenCacheLocks", BindingFlags.NonPublic | BindingFlags.Static);
+            var locks = locksProperty?.GetValue(null);
+            locks?.GetType().GetMethod("Clear")?.Invoke(locks, null);
         }
 
         protected static void SetCachedToken(string hostname, string accessId, string accessKey, PolarisUser? staffUser, ProtectedToken token)
