@@ -32,10 +32,10 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.IsNotNull(cacheKey);
             Assert.IsFalse(cacheKey!.Contains(client.StaffOverrideAccount.Password, StringComparison.Ordinal), "Cache key exposed secret material.");
             Assert.IsFalse(cacheKey.Contains(client.AccessKey, StringComparison.Ordinal), "Cache key exposed secret material.");
-            StringAssert.Contains(cacheKey, client.Hostname.Trim());
-            StringAssert.Contains(cacheKey, client.AccessID.Trim());
-            StringAssert.Contains(cacheKey, client.StaffOverrideAccount.Domain.Trim());
-            StringAssert.Contains(cacheKey, client.StaffOverrideAccount.Username.Trim());
+            Assert.Contains(client.Hostname.Trim(), cacheKey);
+            Assert.Contains(client.AccessID.Trim(), cacheKey);
+            Assert.Contains(client.StaffOverrideAccount.Domain.Trim(), cacheKey);
+            Assert.Contains(client.StaffOverrideAccount.Username.Trim(), cacheKey);
         }
 
         [TestMethod]
@@ -52,7 +52,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             clientA.AccessID = "access-a";
             clientA.StaffOverrideAccount = staff;
 
-            await clientA.PatronSearchAsync("name=Smith");
+            await clientA.PatronSearchAsync("name=Smith", cancellationToken: TestContext.CancellationToken);
 
             Assert.AreEqual(1, handlerA.AuthenticationRequestCount);
             Assert.AreEqual(1, handlerA.NonAuthenticationRequestCount);
@@ -69,7 +69,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             clientB.AccessID = "access-b";
             clientB.StaffOverrideAccount = staff;
 
-            await clientB.PatronSearchAsync("name=Jones");
+            await clientB.PatronSearchAsync("name=Jones", cancellationToken: TestContext.CancellationToken);
 
             Assert.AreEqual(1, handlerB.AuthenticationRequestCount);
             Assert.AreEqual(1, handlerB.NonAuthenticationRequestCount);
@@ -89,16 +89,16 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var handler = new ProtectedTokenHttpMessageHandler();
             var client = CreateProtectedClient(handler);
 
-            await client.PatronSearchAsync("name=Smith");
+            await client.PatronSearchAsync("name=Smith", cancellationToken: TestContext.CancellationToken);
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
             Assert.IsNotNull(client.Token);
             Assert.AreEqual("protected-token", client.Token.AccessToken);
             var paths = handler.RequestPaths;
-            Assert.AreEqual(2, paths.Length);
-            StringAssert.Contains(paths[0], "/protected/v1/1033/100/1/authenticator/staff");
-            StringAssert.Contains(paths[1], "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+            Assert.HasCount(2, paths);
+            Assert.Contains("/protected/v1/1033/100/1/authenticator/staff", paths[0]);
+            Assert.Contains("/protected/v1/1033/100/1/protected-token/search/patrons/Boolean", paths[1]);
             Assert.IsTrue(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out var cachedToken));
             Assert.IsNotNull(cachedToken);
             Assert.AreEqual("protected-token", cachedToken.AccessToken);
@@ -126,7 +126,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             cacheDisabledClient.UseProtectedTokenCache = false;
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-                async () => await cacheDisabledClient.PatronSearchAsync("name=Failure").ConfigureAwait(false));
+                async () => await cacheDisabledClient.PatronSearchAsync("name=Failure", cancellationToken: TestContext.CancellationToken).ConfigureAwait(false));
 
             Assert.AreEqual(1, failingHandler.AuthenticationRequestCount);
             Assert.AreEqual(0, failingHandler.NonAuthenticationRequestCount);
@@ -137,15 +137,17 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var cacheEnabledHandler = new ProtectedTokenHttpMessageHandler();
             var cacheEnabledClient = CreateProtectedClient(cacheEnabledHandler, hostname, staff);
 
-            var response = await cacheEnabledClient.PatronSearchAsync("name=Cached").ConfigureAwait(false);
+            var response = await cacheEnabledClient.PatronSearchAsync("name=Cached", cancellationToken: TestContext.CancellationToken).ConfigureAwait(false);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(0, cacheEnabledHandler.AuthenticationRequestCount);
             Assert.AreEqual(1, cacheEnabledHandler.NonAuthenticationRequestCount);
             Assert.AreEqual("cached-token", cacheEnabledClient.Token?.AccessToken);
-            StringAssert.Contains(
-                cacheEnabledHandler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest).Path,
-                "/protected/v1/1033/100/1/cached-token/search/patrons/Boolean");
+            Assert.Contains(
+                "/protected/v1/1033/100/1/cached-token/search/patrons/Boolean",
+                cacheEnabledHandler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest).Path);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

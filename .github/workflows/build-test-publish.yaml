@@ -146,7 +146,11 @@ jobs:
     needs: build-test-pack
     if: startsWith(github.ref, 'refs/tags/v')
     timeout-minutes: 10
-
+    environment: nuget-production
+    permissions:
+      contents: read
+      id-token: write
+      
     steps:
       - name: Download package artifacts
         uses: actions/download-artifact@v8
@@ -158,10 +162,16 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+          
+      - name: Login to NuGet
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: clcdpc
 
       - name: Publish package to nuget.org
         run: >
           dotnet nuget push "$PACKAGE_OUTPUT_DIR/*.nupkg"
-          --api-key "${{ secrets.NUGET_API_KEY }}"
+          --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY  }}"
           --source "$NUGET_SOURCE"
           --skip-duplicate

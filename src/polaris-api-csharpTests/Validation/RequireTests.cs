@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api.Validation.Tests
         [TestMethod]
         public void Argument_NonNullObject_DoesNotThrow()
         {
-            object notNullValue = new object();
+            object notNullValue = new();
 
             Require.Argument(notNullValue);
         }

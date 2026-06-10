@@ -9,9 +9,11 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task ApiVersionGetTest()
         {
-            var response = await Papi.ApiVersionGetAsync();
+            var response = await Papi.ApiVersionGetAsync(TestContext.CancellationToken);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.ToString()));
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

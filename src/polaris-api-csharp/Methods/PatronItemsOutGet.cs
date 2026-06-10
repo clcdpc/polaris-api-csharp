@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronItemsOutGetResult>> PatronItemsOutGetAsync(string barcode, PatronItemsOutGetStatus status = PatronItemsOutGetStatus.All, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/itemsout/{status}";
+            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/itemsout/{status}";
             var request = PapiRestRequest.Get(url, password: password);
             return await ExecutePapiAsync<PatronItemsOutGetResult>(request, cancellationToken).ConfigureAwait(false);
         }

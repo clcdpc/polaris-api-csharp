@@ -16,19 +16,19 @@ namespace Clc.Polaris.Api.Models
         public bool IsProtectedMethod => Path.StartsWith("/protected", StringComparison.OrdinalIgnoreCase);
 
         public static PapiRestRequest Get(string path, string password = "", object? body = null) =>
-            new PapiRestRequest(HttpMethod.Get, path, password, body);
+            new(HttpMethod.Get, path, password, body);
 
         public static PapiRestRequest Delete(string path, string password = "", object? body = null) =>
-            new PapiRestRequest(HttpMethod.Delete, path, password, body);
+            new(HttpMethod.Delete, path, password, body);
 
         public static PapiRestRequest Post(string path, object? body = null, string password = "") =>
-            new PapiRestRequest(HttpMethod.Post, path, password, body);
+            new(HttpMethod.Post, path, password, body);
 
         public static PapiRestRequest Put(string path, object? body = null, string password = "") =>
-            new PapiRestRequest(HttpMethod.Put, path, password, body);
+            new(HttpMethod.Put, path, password, body);
 
         public static PapiRestRequest Create(HttpMethod method, string path, object? body = null, string password = "") =>
-            new PapiRestRequest(method, path, password, body);
+            new(method, path, password, body);
 
         public PapiRestRequest()
         {

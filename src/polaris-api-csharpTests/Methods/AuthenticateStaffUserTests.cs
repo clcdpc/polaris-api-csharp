@@ -1,3 +1,4 @@
+using Clc.Polaris.Api.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
@@ -9,13 +10,15 @@ namespace Clc.Polaris.Api.Tests
         [ProtectedReadOnlyIntegrationTest]
         public async Task AuthenticateStaffUserTest()
         {
-            var staffOverrideAccount = Papi.StaffOverrideAccount;
+            PolarisUser? staffOverrideAccount = Papi.StaffOverrideAccount;
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.AuthenticateStaffUserAsync(staffOverrideAccount!);
+            var response = await Papi.AuthenticateStaffUserAsync(staffOverrideAccount!, TestContext.CancellationToken);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessToken));
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

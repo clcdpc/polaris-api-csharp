@@ -1,12 +1,13 @@
-﻿using Clc.Rest.Models;
-using Clc.Polaris.Api.Configuration;
+﻿using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Clc.Rest;
+using Clc.Rest.Models;
 using System;
+using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -200,10 +201,7 @@ namespace Clc.Polaris.Api
 
         private static void ValidateCustomPapiRequest(PapiRestRequest request)
         {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
+            ArgumentNullException.ThrowIfNull(request);
 
             if (string.IsNullOrWhiteSpace(request.Path))
             {
@@ -220,7 +218,7 @@ namespace Clc.Polaris.Api
                 throw new ArgumentException("PAPI request path must not be a protocol-relative URL.", nameof(request));
             }
 
-            if (!request.Path.StartsWith("/", StringComparison.Ordinal))
+            if (!request.Path.StartsWith('/'))
             {
                 throw new ArgumentException("PAPI request path must begin with '/'.", nameof(request));
             }
@@ -493,12 +491,7 @@ namespace Clc.Polaris.Api
 
         private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenOrThrowAsync(string? cacheKey, bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken)
         {
-            var staffOverrideAccount = StaffOverrideAccount;
-            if (staffOverrideAccount == null)
-            {
-                throw CreateProtectedTokenRequiredException("No staff override credentials are configured.", pathContainsProtectedTokenPlaceholder);
-            }
-
+            var staffOverrideAccount = StaffOverrideAccount ?? throw CreateProtectedTokenRequiredException("No staff override credentials are configured.", pathContainsProtectedTokenPlaceholder);
             var response = await AuthenticateStaffUserAsync(staffOverrideAccount, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             var responseData = response?.Data;
@@ -535,5 +528,6 @@ namespace Clc.Polaris.Api
             _token = null;
         }
 
+        private static string EncodeBarcodePathSegment(string barcode) => WebUtility.UrlEncode(barcode);
     }
 }
