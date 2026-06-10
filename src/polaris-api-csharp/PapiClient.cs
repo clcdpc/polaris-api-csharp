@@ -97,6 +97,8 @@ namespace Clc.Polaris.Api
 
             if (papiRequest.AuthRequired)
             {
+                ValidateConfigurationForAuthenticatedRequest();
+
                 papiRequest.Headers.Remove("X-PAPI-AccessToken");
 
                 var token = Token;
@@ -120,7 +122,7 @@ namespace Clc.Polaris.Api
                     }
                 }
 
-                var date = DateTime.Now.ToUniversalTime().ToString("R");
+                var date = DateTime.UtcNow.ToString("R");
                 var requestUri = BuildRequestUri(papiRequest);
                 var hash = PapiSignature.ComputeHash(AccessKey, papiRequest.Method.ToString(), requestUri.AbsoluteUri, date, password);
                 papiRequest.Headers["PolarisDate"] = date;
@@ -128,6 +130,34 @@ namespace Clc.Polaris.Api
             }
 
             return papiRequest;
+        }
+
+        private void ValidateConfigurationForAuthenticatedRequest()
+        {
+            if (string.IsNullOrWhiteSpace(Hostname))
+            {
+                throw new InvalidOperationException($"{nameof(Hostname)} must be configured before executing authenticated PAPI requests.");
+            }
+
+            if (!Uri.TryCreate(Hostname, UriKind.Absolute, out var hostnameUri))
+            {
+                throw new InvalidOperationException($"{nameof(Hostname)} must be an absolute URL before executing authenticated PAPI requests.");
+            }
+
+            if (hostnameUri.Scheme != Uri.UriSchemeHttp && hostnameUri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new InvalidOperationException($"{nameof(Hostname)} must use the http or https scheme before executing authenticated PAPI requests.");
+            }
+
+            if (string.IsNullOrWhiteSpace(AccessID))
+            {
+                throw new InvalidOperationException($"{nameof(AccessID)} must be configured before executing authenticated PAPI requests.");
+            }
+
+            if (string.IsNullOrWhiteSpace(AccessKey))
+            {
+                throw new InvalidOperationException($"{nameof(AccessKey)} must be configured before executing authenticated PAPI requests.");
+            }
         }
 
         /// <summary>
