@@ -167,7 +167,7 @@ jobs:
         id: nuget-login
         uses: NuGet/login@v1
         with:
-          user: mtfields
+          user: mfields
 
       - name: Publish package to nuget.org
         run: >
