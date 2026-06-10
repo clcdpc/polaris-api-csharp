@@ -1,12 +1,13 @@
-﻿using Clc.Rest.Models;
-using Clc.Polaris.Api.Configuration;
+﻿using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
 using Clc.Rest;
+using Clc.Rest.Models;
 using System;
+using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -527,5 +528,6 @@ namespace Clc.Polaris.Api
             _token = null;
         }
 
+        private static string EncodeBarcodePathSegment(string barcode) => EncodeBarcodePathSegment(barcode);
     }
 }

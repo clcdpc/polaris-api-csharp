@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string? password, IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/readinghistory";
+            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/readinghistory";
             var request = PapiRestRequest.Delete(url, password: password ?? string.Empty);
             var idList = ids?.ToArray() ?? Array.Empty<int>();
             if (idList.Length > 0)

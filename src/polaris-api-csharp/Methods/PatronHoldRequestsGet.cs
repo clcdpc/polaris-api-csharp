@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronHoldRequestsGetResult>> PatronHoldRequestsGetAsync(string barcode, PatronHoldStatus status = PatronHoldStatus.all, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{status}";
+            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/holdrequests/{status}";
             var request = PapiRestRequest.Get(url, password: password);
             return await ExecutePapiAsync<PatronHoldRequestsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }

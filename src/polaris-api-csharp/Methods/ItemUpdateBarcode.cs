@@ -30,7 +30,7 @@ namespace Clc.Polaris.Api
             else
             {
                 Require.Argument(oldBarcode);
-                itemIdentifier = WebUtility.UrlEncode(oldBarcode);
+                itemIdentifier = EncodeBarcodePathSegment(oldBarcode);
                 isBarcodeLookup = true;
             }
 

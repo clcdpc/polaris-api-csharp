@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronUpdateResult>> PatronUpdateAsync(string barcode, PatronUpdateParams updateParams, string password = "", bool ignoresa = true, CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}";
+            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}";
             var request = PapiRestRequest.Put(url, body: updateParams, password: password);
             request.QueryParameters.Add("ignoresa", ignoresa);
             return await ExecutePapiAsync<PatronUpdateResult>(request, cancellationToken).ConfigureAwait(false);

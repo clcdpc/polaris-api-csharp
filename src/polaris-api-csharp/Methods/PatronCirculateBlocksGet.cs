@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronCirculateBlocksResult>> PatronCirculateBlocksGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/circulationblocks";
+            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/circulationblocks";
             var request = PapiRestRequest.Get(url, password: password);
             return await ExecutePapiAsync<PatronCirculateBlocksResult>(request, cancellationToken).ConfigureAwait(false);
         }

@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<PapiResponseCommon>> UpdatePatronNotesDataAsync(string barcode, string? nonBlockingNote = null, string? blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{WebUtility.UrlEncode(barcode)}/notes";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/notes";
             var body = new UpdatePatronNotesData();
 
             if (!string.IsNullOrWhiteSpace(nonBlockingNote))

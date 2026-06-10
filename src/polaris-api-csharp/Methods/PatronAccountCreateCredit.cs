@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<PapiResponseCommon>> PatronAccountCreateCreditAsync(string barcode, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{WebUtility.UrlEncode(barcode)}/account/createcredit";
+            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/account/createcredit";
             var body = new PatronAccountCreateCreditData { TxnAmount = txnAmount, PaymentMethodId = paymentMethod, FreeTextNote = note };
             var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
