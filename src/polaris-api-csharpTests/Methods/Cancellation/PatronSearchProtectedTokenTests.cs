@@ -23,6 +23,20 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             ClearProtectedTokenState();
         }
 
+        private static async Task AssertOperationCanceledAsync(Func<Task> action)
+        {
+            try
+            {
+                await action().ConfigureAwait(false);
+                Assert.Fail("Expected cancellation to propagate.");
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected. TaskCanceledException also derives from OperationCanceledException,
+                // so this accepts both cancellation shapes without depending on the concrete type.
+            }
+        }
+
         [TestMethod]
         public async Task PatronSearchAsync_CancellationDuringProtectedTokenAuthentication_PropagatesCancellation()
         {
@@ -40,8 +54,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 
             cancellationTokenSource.Cancel();
 
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
-                async () => await request.ConfigureAwait(false));
+            await AssertOperationCanceledAsync(async () => await request.ConfigureAwait(false));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -62,7 +75,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             var secondRequest = secondClient.PatronSearchAsync("name=Second", orgId: 9, cancellationToken: secondCts.Token);
 
             secondCts.Cancel();
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () => await secondRequest.ConfigureAwait(false));
+            await AssertOperationCanceledAsync(async () => await secondRequest.ConfigureAwait(false));
 
             handler.CompleteAuthentication.SetResult();
             await firstRequest.ConfigureAwait(false);

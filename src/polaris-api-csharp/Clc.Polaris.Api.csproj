@@ -19,7 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Clc.Rest.Client" Version="3.0.0-beta.1" />
+		<PackageReference Include="Clc.Rest.Client" Version="3.0.0-beta.2" />
 	</ItemGroup>
 
 </Project>
