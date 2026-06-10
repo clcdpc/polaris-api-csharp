@@ -1,7 +1,6 @@
 using System.Net.Http;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Tests;
-using Clc.Rest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.Models
@@ -10,6 +9,30 @@ namespace Clc.Polaris.Api.Tests.Models
     [UnitTest]
     public class PapiRestRequestConstructorTests
     {
+        [TestMethod]
+        public void PapiRestRequest_StringConstructor_DefaultsToGetAndSetsPath()
+        {
+            var request = new PapiRestRequest("/public/foo");
+
+            Assert.AreEqual(HttpMethod.Get, request.Method);
+            Assert.AreEqual("/public/foo", request.Path);
+            Assert.AreEqual("", request.Password);
+            Assert.IsNull(request.Body);
+        }
+
+        [TestMethod]
+        public void PapiRestRequest_HttpMethodConstructor_PreservesMethodPathPasswordAndBody()
+        {
+            var body = new { Name = "Example" };
+
+            var request = new PapiRestRequest(HttpMethod.Put, "/public/foo", "pin", body);
+
+            Assert.AreEqual(HttpMethod.Put, request.Method);
+            Assert.AreEqual("/public/foo", request.Path);
+            Assert.AreEqual("pin", request.Password);
+            Assert.AreSame(body, request.Body);
+        }
+
         [TestMethod]
         public void PapiRestRequest_CopyConstructor_PreservesValuesWithoutSharingMutableCollections()
         {

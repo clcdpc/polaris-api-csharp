@@ -80,6 +80,24 @@ namespace Clc.Polaris.Api.Tests
         }
 
         [TestMethod]
+        public void PreformatRestRequest_AuthenticatedRequestWithUnsupportedHostnameScheme_ThrowsInvalidOperationException()
+        {
+            var client = new PapiClient
+            {
+                AccessID = "access-id",
+                AccessKey = "access-key",
+                Hostname = "ftp://example.org"
+            };
+
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
+            request.AuthRequired = true;
+
+            var exception = Assert.ThrowsException<InvalidOperationException>(() => client.PreformatRestRequest(request));
+
+            StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
+        }
+
+        [TestMethod]
         public void PreformatRestRequest_AuthenticatedRequestWithValidConfiguration_AddsAuthorizationHeaders()
         {
             var client = new PapiClient
