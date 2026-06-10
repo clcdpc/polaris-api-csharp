@@ -29,11 +29,11 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             var response = await client.PatronSearchAsync("name=Smith", cancellationToken: cts.Token);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual(2, handler.Requests.Count);
-            StringAssert.Contains(handler.Requests[0].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            Assert.HasCount(2, handler.Requests);
+            Assert.Contains("/protected/v1/1033/100/1/authenticator/staff", handler.Requests[0].RequestUri!.AbsolutePath);
             Assert.AreEqual(HttpMethod.Post, handler.Requests[0].Method);
             Assert.IsTrue(handler.CancellationTokens[0].CanBeCanceled);
-            StringAssert.Contains(handler.Requests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
+            Assert.Contains("/protected/v1/1033/100/1/protected-token/search/patrons/Boolean", handler.Requests[1].RequestUri!.AbsolutePath);
             Assert.IsTrue(handler.CancellationTokens[1].CanBeCanceled);
         }
     }

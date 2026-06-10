@@ -9,8 +9,10 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task ApiKeyValidateTest()
         {
-            var response = await Papi.ApiKeyValidateAsync();
+            var response = await Papi.ApiKeyValidateAsync(TestContext.CancellationToken);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

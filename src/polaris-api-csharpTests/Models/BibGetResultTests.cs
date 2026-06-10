@@ -15,14 +15,14 @@ namespace Clc.Polaris.Api.Tests.Models
         {
             var sut = new BibGetResult
             {
-                BibGetRows = new List<BibGetRow>
-                {
-                    new BibGetRow { ElementID = 7, Value = "70" },
-                    new BibGetRow { ElementID = 8, Value = "80" },
-                    new BibGetRow { ElementID = 11, Value = "110" },
-                    new BibGetRow { ElementID = 15, Value = "150" },
-                    new BibGetRow { ElementID = 16, Value = "160" }
-                }
+                BibGetRows =
+                [
+                    new() { ElementID = 7, Value = "70" },
+                    new() { ElementID = 8, Value = "80" },
+                    new() { ElementID = 11, Value = "110" },
+                    new() { ElementID = 15, Value = "150" },
+                    new() { ElementID = 16, Value = "160" }
+                ]
             };
 
             Assert.AreEqual(70, sut.SystemItemsTotal);
@@ -63,10 +63,10 @@ namespace Clc.Polaris.Api.Tests.Models
         {
             var sut = new BibGetResult
             {
-                BibGetRows = new List<BibGetRow>
-                {
-                    new BibGetRow { ElementID = 8, Value = "42" }
-                }
+                BibGetRows =
+                [
+                    new() { ElementID = 8, Value = "42" }
+                ]
             };
 
             Assert.IsNull(sut.SystemItemsTotal);

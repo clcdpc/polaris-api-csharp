@@ -23,19 +23,6 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             ClearProtectedTokenState();
         }
 
-        private static async Task AssertOperationCanceledAsync(Func<Task> action)
-        {
-            try
-            {
-                await action().ConfigureAwait(false);
-                Assert.Fail("Expected cancellation to propagate.");
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected. TaskCanceledException also derives from OperationCanceledException.
-            }
-        }
-
         [TestMethod]
         public async Task PatronSearchAsync_CancellationDuringProtectedTokenAuthentication_PropagatesCancellation()
         {
@@ -49,11 +36,11 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 
             var request = client.PatronSearchAsync("name=Smith", cancellationToken: cancellationTokenSource.Token);
 
-            await handler.AuthenticationStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            await handler.AuthenticationStarted.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.CancellationToken);
 
             cancellationTokenSource.Cancel();
 
-            await AssertOperationCanceledAsync(async () => await request.ConfigureAwait(false));
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await request.ConfigureAwait(false));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -68,23 +55,23 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             var secondClient = CreateClientWithProtectedCache(handler, cacheUsername);
             var thirdClient = CreateClientWithProtectedCache(handler, cacheUsername);
 
-            var firstRequest = firstClient.PatronSearchAsync("name=First", orgId: 9);
+            var firstRequest = firstClient.PatronSearchAsync("name=First", orgId: 9, cancellationToken: TestContext.CancellationToken);
             await handler.AuthenticationStarted.Task.ConfigureAwait(false);
             using var secondCts = new CancellationTokenSource();
             var secondRequest = secondClient.PatronSearchAsync("name=Second", orgId: 9, cancellationToken: secondCts.Token);
 
             secondCts.Cancel();
-            await AssertOperationCanceledAsync(async () => await secondRequest.ConfigureAwait(false));
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await secondRequest.ConfigureAwait(false));
 
             handler.CompleteAuthentication.SetResult();
             await firstRequest.ConfigureAwait(false);
 
-            var laterResponse = await thirdClient.PatronSearchAsync("name=Later", orgId: 9);
+            var laterResponse = await thirdClient.PatronSearchAsync("name=Later", orgId: 9, cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(laterResponse);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
-            Assert.AreEqual(2, handler.ProtectedRequests.Count);
-            StringAssert.Contains(handler.ProtectedRequests[1].RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/blocked-token/search/patrons/Boolean");
+            Assert.HasCount(2, handler.ProtectedRequests);
+            Assert.Contains("/protected/v1/1033/100/9/blocked-token/search/patrons/Boolean", handler.ProtectedRequests[1].RequestUri!.AbsolutePath);
             Assert.IsFalse(handler.ProtectedRequests[1].RequestUri!.AbsoluteUri.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
         }
 
@@ -96,7 +83,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             public TaskCompletionSource AuthenticationStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
             public TaskCompletionSource CompleteAuthentication { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
             public int AuthenticationRequestCount => _authenticationRequestCount;
-            public List<HttpRequestMessage> ProtectedRequests { get; } = new();
+            public List<HttpRequestMessage> ProtectedRequests { get; } = [];
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
@@ -155,5 +142,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
                 };
             }
         }
+
+        public TestContext TestContext { get; set; }
     }
 }
