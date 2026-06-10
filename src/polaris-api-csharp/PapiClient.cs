@@ -528,6 +528,6 @@ namespace Clc.Polaris.Api
             _token = null;
         }
 
-        private static string EncodeBarcodePathSegment(string barcode) => EncodeBarcodePathSegment(barcode);
+        private static string EncodeBarcodePathSegment(string barcode) => WebUtility.UrlEncode(barcode);
     }
 }
