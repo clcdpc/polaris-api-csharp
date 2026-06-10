@@ -65,7 +65,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var handler = new CapturingHttpMessageHandler();
             var client = CreateClient(handler);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => client.ExecutePapiAsync<PapiResponseCommon>(null!));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => client.ExecutePapiAsync<PapiResponseCommon>(null!));
 
             Assert.AreEqual(0, handler.RequestCount);
         }
@@ -81,7 +81,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/custom");
             request.Path = path!;
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
 
             Assert.AreEqual(0, handler.RequestCount);
         }
@@ -96,7 +96,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var client = CreateClient(handler);
             var request = PapiRestRequest.Get(path);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
 
             Assert.AreEqual(0, handler.RequestCount);
         }
@@ -108,7 +108,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var client = CreateClient(handler);
             var request = PapiRestRequest.Get("/other/v1/1033/100/1/custom");
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => client.ExecutePapiAsync<PapiResponseCommon>(request));
 
             Assert.AreEqual(0, handler.RequestCount);
         }

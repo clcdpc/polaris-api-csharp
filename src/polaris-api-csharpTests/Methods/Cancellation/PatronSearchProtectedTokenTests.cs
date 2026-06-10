@@ -32,8 +32,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
             }
             catch (OperationCanceledException)
             {
-                // Expected. TaskCanceledException also derives from OperationCanceledException,
-                // so this accepts both cancellation shapes without depending on the concrete type.
+                // Expected. TaskCanceledException also derives from OperationCanceledException.
             }
         }
 

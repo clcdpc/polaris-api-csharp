@@ -125,7 +125,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var cacheDisabledClient = CreateProtectedClient(failingHandler, hostname, staff);
             cacheDisabledClient.UseProtectedTokenCache = false;
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 async () => await cacheDisabledClient.PatronSearchAsync("name=Failure").ConfigureAwait(false));
 
             Assert.AreEqual(1, failingHandler.AuthenticationRequestCount);

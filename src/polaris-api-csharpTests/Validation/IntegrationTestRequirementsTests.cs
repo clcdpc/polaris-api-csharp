@@ -23,7 +23,7 @@ namespace Clc.Polaris.Api.Tests.Validation
             Assert.IsFalse(IntegrationTestRequirements.HasRequiredStaffOverrideAccount(settings));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("", "user", "password")]
         [DataRow("domain", "", "password")]
         [DataRow("domain", "user", "")]

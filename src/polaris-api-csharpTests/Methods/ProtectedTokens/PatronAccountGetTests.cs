@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -43,7 +43,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -64,7 +64,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -85,7 +85,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -109,7 +109,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -124,7 +124,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
             var client = CreateProtectedClient(handler);
 
-            var exception = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
 
             StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
             Assert.AreEqual(1, handler.AuthenticationRequestCount);

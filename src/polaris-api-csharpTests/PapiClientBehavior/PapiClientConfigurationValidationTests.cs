@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api.Tests
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.AuthRequired = true;
 
-            var exception = Assert.ThrowsException<InvalidOperationException>(() => client.PreformatRestRequest(request));
+            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
             StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
         }
@@ -38,7 +38,7 @@ namespace Clc.Polaris.Api.Tests
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.AuthRequired = true;
 
-            var exception = Assert.ThrowsException<InvalidOperationException>(() => client.PreformatRestRequest(request));
+            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
             StringAssert.Contains(exception.Message, nameof(PapiClient.AccessID));
         }
@@ -56,7 +56,7 @@ namespace Clc.Polaris.Api.Tests
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.AuthRequired = true;
 
-            var exception = Assert.ThrowsException<InvalidOperationException>(() => client.PreformatRestRequest(request));
+            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
             StringAssert.Contains(exception.Message, nameof(PapiClient.AccessKey));
         }
@@ -74,7 +74,7 @@ namespace Clc.Polaris.Api.Tests
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.AuthRequired = true;
 
-            var exception = Assert.ThrowsException<InvalidOperationException>(() => client.PreformatRestRequest(request));
+            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
             StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
         }
@@ -92,7 +92,7 @@ namespace Clc.Polaris.Api.Tests
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.AuthRequired = true;
 
-            var exception = Assert.ThrowsException<InvalidOperationException>(() => client.PreformatRestRequest(request));
+            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
             StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
         }

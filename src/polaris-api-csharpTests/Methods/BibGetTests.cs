@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Tests
         public async Task BibGetTest()
         {
             var response = await Papi.BibGetAsync(478907);
-            Assert.AreEqual(response.Data.PAPIErrorCode, 0);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("100/1/bib"));
         }
@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api.Tests
         public async Task BibGetTest_PassBranchId()
         {
             var response = await Papi.BibGetAsync(478907, 7);
-            Assert.AreEqual(response.Data.PAPIErrorCode, 0);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
             Assert.IsTrue(response.Response.RequestMessage.RequestUri.ToString().Contains("100/7/bib"));
         }

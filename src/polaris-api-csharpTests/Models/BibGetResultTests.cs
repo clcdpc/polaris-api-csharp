@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api.Tests.Models
             Assert.AreEqual(160, sut.SystemItemsAvailable);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("123", 123)]
         [DataRow("0", 0)]
         [DataRow("-1", -1)]
@@ -45,7 +45,7 @@ namespace Clc.Polaris.Api.Tests.Models
             Assert.AreEqual(expected, sut.SystemItemsTotal);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
         [DataRow("not-a-number")]

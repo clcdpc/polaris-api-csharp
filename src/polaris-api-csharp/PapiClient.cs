@@ -348,11 +348,6 @@ namespace Clc.Polaris.Api
             await ProtectedTokenCacheLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (UseProtectedTokenCache)
-                {
-                    PruneProtectedTokenCache();
-                }
-
                 token = Token;
                 if (IsProtectedTokenUsable(token))
                 {
@@ -367,6 +362,11 @@ namespace Clc.Polaris.Api
                 if (TryLoadProtectedTokenFromCache(cacheKey, out cachedToken))
                 {
                     return cachedToken!;
+                }
+
+                if (UseProtectedTokenCache)
+                {
+                    PruneProtectedTokenCache();
                 }
 
                 return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);

@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api.Tests
         public async Task ApiKeyValidateTest()
         {
             var response = await Papi.ApiKeyValidateAsync();
-            Assert.AreEqual(response.Data.PAPIErrorCode, 0);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api.Validation.Tests
         {
             object? nullValue = null;
 
-            var exception = Assert.ThrowsException<ArgumentNullException>(() => Require.Argument(nullValue));
+            var exception = Assert.ThrowsExactly<ArgumentNullException>(() => Require.Argument(nullValue));
 
             Assert.AreEqual(nameof(nullValue), exception.ParamName);
         }
@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api.Validation.Tests
         {
             string? nullString = null;
 
-            var exception = Assert.ThrowsException<ArgumentNullException>(() => Require.Argument(nullString));
+            var exception = Assert.ThrowsExactly<ArgumentNullException>(() => Require.Argument(nullString));
 
             Assert.AreEqual(nameof(nullString), exception.ParamName);
         }
@@ -42,7 +42,7 @@ namespace Clc.Polaris.Api.Validation.Tests
         {
             string emptyString = string.Empty;
 
-            var exception = Assert.ThrowsException<ArgumentException>(() => Require.Argument(emptyString));
+            var exception = Assert.ThrowsExactly<ArgumentException>(() => Require.Argument(emptyString));
 
             Assert.AreEqual(nameof(emptyString), exception.ParamName);
         }
@@ -52,7 +52,7 @@ namespace Clc.Polaris.Api.Validation.Tests
         {
             string whitespaceString = "   ";
 
-            var exception = Assert.ThrowsException<ArgumentException>(() => Require.Argument(whitespaceString));
+            var exception = Assert.ThrowsExactly<ArgumentException>(() => Require.Argument(whitespaceString));
 
             Assert.AreEqual(nameof(whitespaceString), exception.ParamName);
         }
