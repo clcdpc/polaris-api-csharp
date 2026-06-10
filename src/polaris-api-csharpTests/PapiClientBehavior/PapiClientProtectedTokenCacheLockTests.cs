@@ -1,13 +1,16 @@
 ﻿using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Clc.Polaris.Api.PapiClientBehavior
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [DoNotParallelize]
@@ -22,44 +25,74 @@ namespace Clc.Polaris.Api.PapiClientBehavior
             var blockedClient = CreateClientWithProtectedCache(handler, $"blocked-{Guid.NewGuid():N}");
             var independentClient = CreateClientWithProtectedCache(handler, $"independent-{Guid.NewGuid():N}");
 
-            var blockedRequest = blockedClient.PatronSearchAsync(
-                "name=Blocked",
-                orgId: 9,
-                cancellationToken: TestContext.CancellationToken);
+            Task? blockedRequest = null;
+            Task? independentRequest = null;
 
-            await handler.BlockedAuthenticationStarted.Task.WaitAsync(
-                TimeSpan.FromSeconds(5),
-                TestContext.CancellationToken);
+            try
+            {
+                blockedRequest = blockedClient.PatronSearchAsync(
+                    "name=Blocked",
+                    orgId: 9,
+                    cancellationToken: TestContext.CancellationToken);
 
-            var independentRequest = independentClient.PatronSearchAsync(
-                "name=Independent",
-                orgId: 9,
-                cancellationToken: TestContext.CancellationToken);
+                await handler.BlockedAuthenticationStarted.Task.WaitAsync(
+                    TimeSpan.FromSeconds(5),
+                    TestContext.CancellationToken);
 
-            var completed = await Task.WhenAny(
-                independentRequest,
-                Task.Delay(TimeSpan.FromSeconds(1), TestContext.CancellationToken));
+                independentRequest = independentClient.PatronSearchAsync(
+                    "name=Independent",
+                    orgId: 9,
+                    cancellationToken: TestContext.CancellationToken);
 
-            Assert.AreSame(
-                independentRequest,
-                completed,
-                "An authentication request for a different protected-token cache key should not wait behind the blocked cache key.");
+                var completed = await Task.WhenAny(
+                    independentRequest,
+                    Task.Delay(TimeSpan.FromSeconds(1), TestContext.CancellationToken));
 
-            var independentResponse = await independentRequest.ConfigureAwait(false);
+                Assert.AreSame(
+                    independentRequest,
+                    completed,
+                    "An authentication request for a different protected-token cache key should not wait behind the blocked cache key.");
 
-            Assert.IsNotNull(independentResponse);
-            Assert.AreEqual(2, handler.AuthenticationRequestCount);
-            Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
-            Assert.Contains(
-                "/protected/v1/1033/100/9/independent-token/search/patrons/Boolean",
-                handler.ProtectedRequests.Single().RequestUri!.AbsolutePath);
+                await independentRequest.ConfigureAwait(false);
 
-            handler.CompleteBlockedAuthentication.SetResult();
+                Assert.IsTrue(independentRequest.IsCompletedSuccessfully);
+                Assert.AreEqual(2, handler.AuthenticationRequestCount);
+                Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
+                Assert.Contains(
+                    "/protected/v1/1033/100/9/independent-token/search/patrons/Boolean",
+                    handler.ProtectedRequests.Single().RequestUri!.AbsolutePath);
 
-            var blockedResponse = await blockedRequest.ConfigureAwait(false);
+                handler.CompleteBlockedAuthentication.TrySetResult();
 
-            Assert.IsNotNull(blockedResponse);
-            Assert.AreEqual(2, handler.NonAuthenticationRequestCount);
+                await blockedRequest.ConfigureAwait(false);
+
+                Assert.IsTrue(blockedRequest.IsCompletedSuccessfully);
+                Assert.AreEqual(2, handler.NonAuthenticationRequestCount);
+            }
+            finally
+            {
+                handler.CompleteBlockedAuthentication.TrySetResult();
+
+                await DrainTaskAsync(blockedRequest).ConfigureAwait(false);
+                await DrainTaskAsync(independentRequest).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task DrainTaskAsync(Task? task)
+        {
+            if (task == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await task.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Cleanup path only. Do not mask the original test failure.
+            }
         }
 
         private sealed class PerUserBlockingProtectedTokenHttpMessageHandler : HttpMessageHandler
