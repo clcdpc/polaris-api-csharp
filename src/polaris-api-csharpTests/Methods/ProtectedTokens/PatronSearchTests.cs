@@ -459,7 +459,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(1, handlerA.AuthenticationRequestCount);
             Assert.AreEqual(1, handlerB.AuthenticationRequestCount);
             Assert.AreEqual("token-b", clientB.Token?.AccessToken);
-            Assert.AreEqual(1, GetProtectedTokenCache().Count);
+            Assert.AreEqual(1, ProtectedTokenCache.CountForTesting());
             Assert.IsFalse(TryGetCachedToken(hostname, clientB.AccessID, clientB.AccessKey, clientB.StaffOverrideAccount, out _));
         }
 
