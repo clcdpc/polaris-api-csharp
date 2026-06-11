@@ -38,9 +38,7 @@ namespace Clc.Polaris.Api
 
         internal static bool IsUsable(ProtectedToken? token)
         {
-            return !IsMissingOrExpired(token) &&
-                !string.IsNullOrWhiteSpace(token?.AccessToken) &&
-                !string.IsNullOrWhiteSpace(token.AccessSecret);
+            return !IsMissingOrExpired(token) && !string.IsNullOrWhiteSpace(token?.AccessToken) && !string.IsNullOrWhiteSpace(token.AccessSecret);
         }
 
         internal static bool TryGet(string? cacheKey, bool useCache, out ProtectedToken? protectedToken)
@@ -87,14 +85,41 @@ namespace Clc.Polaris.Api
             }
         }
 
+        internal static async Task<ProtectedToken> GetOrCreateAsync(string? cacheKey, bool useCache, Func<CancellationToken, Task<ProtectedToken>> createTokenAsync, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(createTokenAsync);
+
+            if (!CanUseCache(cacheKey, useCache))
+            {
+                return await createTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            if (TryGet(cacheKey, useCache: true, out var cachedToken))
+            {
+                return cachedToken!;
+            }
+
+            using var cacheLockLease = await AcquireLockAsync(cacheKey!, cancellationToken).ConfigureAwait(false);
+
+            if (TryGet(cacheKey, useCache: true, out cachedToken))
+            {
+                return cachedToken!;
+            }
+
+            var createdToken = await createTokenAsync(cancellationToken).ConfigureAwait(false);
+            Set(cacheKey, useCache: true, createdToken);
+            PruneExpired();
+
+            return createdToken;
+        }
+
         internal static int PruneExpired()
         {
             var removedCount = 0;
 
             foreach (var cachedToken in Tokens)
             {
-                if (!IsUsable(cachedToken.Value) &&
-                    Tokens.TryRemove(cachedToken.Key, out _))
+                if (!IsUsable(cachedToken.Value) && Tokens.TryRemove(cachedToken.Key, out _))
                 {
                     removedCount++;
                 }
@@ -103,15 +128,13 @@ namespace Clc.Polaris.Api
             return removedCount;
         }
 
-        internal static async Task<IDisposable> AcquireLockAsync(string cacheKey, CancellationToken cancellationToken)
+        private static async Task<IDisposable> AcquireLockAsync(string cacheKey, CancellationToken cancellationToken)
         {
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var entry = Locks.GetOrAdd(
-                    cacheKey,
-                    _ => new LockEntry());
+                var entry = Locks.GetOrAdd(cacheKey, _ => new LockEntry());
 
                 if (!entry.TryAddLease())
                 {
@@ -240,8 +263,7 @@ namespace Clc.Polaris.Api
                     continue;
                 }
 
-                if (Locks.TryRemove(pair.Key, out var removedEntry) &&
-                    ReferenceEquals(removedEntry, entry))
+                if (Locks.TryRemove(pair.Key, out var removedEntry) && ReferenceEquals(removedEntry, entry))
                 {
                     removedEntry.Dispose();
                 }
@@ -250,34 +272,6 @@ namespace Clc.Polaris.Api
                     entry.UndoRetire();
                 }
             }
-        }
-
-        internal static async Task<ProtectedToken> GetOrCreateAsync(string? cacheKey, bool useCache, Func<CancellationToken, Task<ProtectedToken>> createTokenAsync, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(createTokenAsync);
-
-            if (!CanUseCache(cacheKey, useCache))
-            {
-                return await createTokenAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            if (TryGet(cacheKey, useCache: true, out var cachedToken))
-            {
-                return cachedToken!;
-            }
-
-            using var cacheLockLease = await AcquireLockAsync(cacheKey!, cancellationToken).ConfigureAwait(false);
-
-            if (TryGet(cacheKey, useCache: true, out cachedToken))
-            {
-                return cachedToken!;
-            }
-
-            var createdToken = await createTokenAsync(cancellationToken).ConfigureAwait(false);
-            Set(cacheKey, useCache: true, createdToken);
-            PruneExpired();
-
-            return createdToken;
         }
 
         private static bool CanUseCache(string? cacheKey, bool useCache)

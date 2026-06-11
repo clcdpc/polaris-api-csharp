@@ -178,11 +178,7 @@ namespace Clc.Polaris.Api
             var executionRequest = new PapiRestRequest(request);
 
             var pathContainsProtectedTokenPlaceholder = PapiRequestClassifier.PathContainsProtectedTokenPlaceholder(executionRequest);
-            var requiresProtectedToken = PapiRequestClassifier.RequiresProtectedToken(
-                executionRequest,
-                pathContainsProtectedTokenPlaceholder,
-                AllowStaffOverrideRequests,
-                StaffOverrideAccount);
+            var requiresProtectedToken = PapiRequestClassifier.RequiresProtectedToken(executionRequest, pathContainsProtectedTokenPlaceholder, AllowStaffOverrideRequests, StaffOverrideAccount);
 
             var protectedToken = requiresProtectedToken
                 ? await GetProtectedTokenOrThrowAsync(pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false)
@@ -195,7 +191,6 @@ namespace Clc.Polaris.Api
 
             return await ExecuteAsync<T>(executionRequest, cancellationToken).ConfigureAwait(false);
         }
-
 
         private static InvalidOperationException CreateProtectedTokenRequiredException(string reason, bool pathContainsProtectedTokenPlaceholder)
         {
@@ -219,9 +214,9 @@ namespace Clc.Polaris.Api
         private async Task<ProtectedToken> GetProtectedTokenOrThrowAsync(bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken = default)
         {
             var token = Token;
-            if (ProtectedTokenCache.IsUsable(token))
+            if (token != null)
             {
-                return token!;
+                return token;
             }
 
             if (StaffOverrideAccount == null)

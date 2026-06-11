@@ -30,37 +30,20 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             try
             {
-                blockedRequest = blockedClient.PatronSearchAsync(
-                    "name=Blocked",
-                    orgId: 9,
-                    cancellationToken: TestContext.CancellationToken);
+                blockedRequest = blockedClient.PatronSearchAsync("name=Blocked", orgId: 9, cancellationToken: TestContext.CancellationToken);
+                await handler.BlockedAuthenticationStarted.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.CancellationToken);
 
-                await handler.BlockedAuthenticationStarted.Task.WaitAsync(
-                    TimeSpan.FromSeconds(5),
-                    TestContext.CancellationToken);
+                independentRequest = independentClient.PatronSearchAsync("name=Independent", orgId: 9, cancellationToken: TestContext.CancellationToken);
+                var completed = await Task.WhenAny(independentRequest, Task.Delay(TimeSpan.FromSeconds(1), TestContext.CancellationToken));
 
-                independentRequest = independentClient.PatronSearchAsync(
-                    "name=Independent",
-                    orgId: 9,
-                    cancellationToken: TestContext.CancellationToken);
-
-                var completed = await Task.WhenAny(
-                    independentRequest,
-                    Task.Delay(TimeSpan.FromSeconds(1), TestContext.CancellationToken));
-
-                Assert.AreSame(
-                    independentRequest,
-                    completed,
-                    "An authentication request for a different protected-token cache key should not wait behind the blocked cache key.");
+                Assert.AreSame(independentRequest, completed, "An authentication request for a different protected-token cache key should not wait behind the blocked cache key.");
 
                 await independentRequest.ConfigureAwait(false);
 
                 Assert.IsTrue(independentRequest.IsCompletedSuccessfully);
                 Assert.AreEqual(2, handler.AuthenticationRequestCount);
                 Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
-                Assert.Contains(
-                    "/protected/v1/1033/100/9/independent-token/search/patrons/Boolean",
-                    handler.ProtectedRequests.Single().RequestUri!.AbsolutePath);
+                Assert.Contains("/protected/v1/1033/100/9/independent-token/search/patrons/Boolean", handler.ProtectedRequests.Single().RequestUri!.AbsolutePath);
 
                 handler.CompleteBlockedAuthentication.TrySetResult();
 
@@ -101,11 +84,8 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             private int _authenticationRequestCount;
             private int _nonAuthenticationRequestCount;
 
-            public TaskCompletionSource BlockedAuthenticationStarted { get; } =
-                new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-            public TaskCompletionSource CompleteBlockedAuthentication { get; } =
-                new(TaskCreationOptions.RunContinuationsAsynchronously);
+            public TaskCompletionSource BlockedAuthenticationStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            public TaskCompletionSource CompleteBlockedAuthentication { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
             public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
