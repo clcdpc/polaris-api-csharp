@@ -129,8 +129,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = DateTime.Now.AddHours(-1)
             };
 
-            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-                () => client.PatronSearchAsync("name=Smith", orgId: 9));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith", orgId: 9));
 
             StringAssert.Contains(exception.Message, "valid protected access token");
             StringAssert.Contains(exception.Message, "ProtectedToken.Placeholder");
@@ -217,8 +216,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             client.StaffOverrideAccount = null;
             client.Token = null;
 
-            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-                () => client.PatronSearchAsync("name=Smith", orgId: 9));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith", orgId: 9));
 
             StringAssert.Contains(exception.Message, "valid protected access token");
             StringAssert.Contains(exception.Message, "ProtectedToken.Placeholder");
@@ -249,9 +247,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staff = CreateStaffUser(password: "shared-password");
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("shared-token", "shared-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("shared-token", "shared-secret", DateTime.Now.AddHours(1)));
             var clients = Enumerable.Range(0, 6)
                 .Select(_ => CreateProtectedClient(handler, hostname, staff))
                 .ToArray();
@@ -327,9 +323,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var passwordAReuseClient = CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-a"));
             var passwordBReuseClient = CreateProtectedClient(handler, hostname, CreateStaffUser(password: "password-b"));
 
-            await Task.WhenAll(
-                passwordAReuseClient.PatronSearchAsync("name=reuse-a"),
-                passwordBReuseClient.PatronSearchAsync("name=reuse-b"));
+            await Task.WhenAll(passwordAReuseClient.PatronSearchAsync("name=reuse-a"), passwordBReuseClient.PatronSearchAsync("name=reuse-b"));
 
             Assert.AreEqual(2, handler.AuthenticationRequestCount);
             Assert.AreEqual(6, handler.NonAuthenticationRequestCount);
@@ -342,9 +336,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_WhenProtectedTokenCacheDisabled_IgnoresStaticCachedTokenAndUsesNewAuthenticationToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("fresh-token", "fresh-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("fresh-token", "fresh-secret", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
             client.UseProtectedTokenCache = false;
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
@@ -438,18 +430,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staffWithPassword = CreateStaffUser(password: "correct-1");
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.StaffOverrideAccount = staffWithPassword;
 
             await clientA.PatronSearchAsync("name=Smith");
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.StaffOverrideAccount = CreateStaffUser(password: string.Empty);
@@ -468,18 +456,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.StaffOverrideAccount = CreateStaffUser(password: "correct-1");
 
             await clientA.PatronSearchAsync("name=Smith");
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.StaffOverrideAccount = CreateStaffUser(password: "different-2");
@@ -502,18 +486,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staff = CreateStaffUser(password: "correct-1");
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.StaffOverrideAccount = staff;
 
             await clientA.PatronSearchAsync("name=Smith");
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.AccessKey = "different-access-key";
@@ -552,9 +532,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithBlankAccessToken_IsRemovedAndNewTokenIsUsed()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
@@ -625,9 +603,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_BlankAccessTokenStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson(" ", "protected-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(" ", "protected-secret", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -639,9 +615,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_BlankAccessSecretStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("protected-token", " ", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("protected-token", " ", DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));

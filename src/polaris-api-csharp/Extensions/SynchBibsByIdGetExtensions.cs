@@ -13,10 +13,7 @@ namespace Clc.Polaris.Api
             bool includeItems = false,
             CancellationToken cancellationToken = default)
         {
-            return client.Synch_BibsByIdGetAsync(
-                new[] { bibId },
-                includeItems,
-                cancellationToken);
+            return client.Synch_BibsByIdGetAsync(new[] { bibId }, includeItems, cancellationToken);
         }
     }
 }

@@ -16,13 +16,7 @@ namespace Clc.Polaris.Api
             int? workstationId = null,
             CancellationToken cancellationToken = default)
         {
-            return client.CreatePatronBlocksAsync(
-                barcode,
-                BlockType.FreeText,
-                blockText,
-                userId,
-                workstationId,
-                cancellationToken);
+            return client.CreatePatronBlocksAsync(barcode, BlockType.FreeText, blockText, userId, workstationId, cancellationToken);
         }
 
         public static Task<IRestResponse<CreatePatronBlocksResult>> CreatePatronLibraryAssignedBlockAsync(

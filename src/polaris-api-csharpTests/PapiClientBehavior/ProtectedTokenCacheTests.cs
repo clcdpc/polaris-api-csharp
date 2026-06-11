@@ -44,9 +44,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staff = CreateStaffUser();
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.AccessID = "access-a";
@@ -61,9 +59,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.IsNotNull(cachedTokenA);
             Assert.AreEqual("token-a", cachedTokenA.AccessToken);
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.AccessID = "access-b";
@@ -119,9 +115,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             SetCachedToken(hostname, "access-id", "access-key", staff, cachedToken);
 
-            var failingHandler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.Unauthorized,
-                "{\"PAPIErrorCode\":1}");
+            var failingHandler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
             var cacheDisabledClient = CreateProtectedClient(failingHandler, hostname, staff);
             cacheDisabledClient.UseProtectedTokenCache = false;
 

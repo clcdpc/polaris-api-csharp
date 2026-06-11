@@ -98,9 +98,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronAccountGetAsync_InvalidStaffAuthentication_AfterExpiredExistingTokenClearsTokenAndDoesNotCache()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(
-                HttpStatusCode.OK,
-                CreateProtectedTokenJson(string.Empty, string.Empty, DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(string.Empty, string.Empty, DateTime.Now.AddHours(1)));
             var client = CreateProtectedClient(handler);
             client.Token = new ProtectedToken
             {

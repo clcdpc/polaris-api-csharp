@@ -99,10 +99,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid-2"));
         }
 
-        private static ProtectedToken CreateToken(
-            DateTime? expirationDate,
-            string accessToken = "access-token",
-            string accessSecret = "access-secret")
+        private static ProtectedToken CreateToken(DateTime? expirationDate, string accessToken = "access-token", string accessSecret = "access-secret")
         {
             return new ProtectedToken
             {

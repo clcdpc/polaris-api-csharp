@@ -91,9 +91,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
             public List<HttpRequestMessage> ProtectedRequests { get; } = [];
 
-            protected override async Task<HttpResponseMessage> SendAsync(
-                HttpRequestMessage request,
-                CancellationToken cancellationToken)
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
                 {

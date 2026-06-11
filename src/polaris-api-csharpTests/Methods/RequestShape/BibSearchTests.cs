@@ -53,12 +53,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             IPapiClient client = CreateClient(handler);
 
-            var response = await client.BibKeywordSearchAsync(
-                "harry potter & stone",
-                branchId: 7,
-                page: 2,
-                pageSize: 15,
-                sortBy: SearchSortOptions.MP);
+            var response = await client.BibKeywordSearchAsync("harry potter & stone", branchId: 7, page: 2, pageSize: 15, sortBy: SearchSortOptions.MP);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
@@ -98,12 +93,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
             IPapiClient client = CreateClient(handler);
 
-            var response = await client.BibBooleanSearchAsync(
-                "TI=Harry Potter",
-                branchId: 8,
-                page: 3,
-                pageSize: 20,
-                sortBy: SearchSortOptions.AU);
+            var response = await client.BibBooleanSearchAsync("TI=Harry Potter", branchId: 8, page: 3, pageSize: 20, sortBy: SearchSortOptions.AU);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
