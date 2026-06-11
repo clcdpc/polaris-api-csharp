@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -159,12 +158,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected static void ClearProtectedTokenState()
         {
-            var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
-            cache?.Clear();
-
-            var locksProperty = typeof(PapiClient).GetProperty("ProtectedTokenCacheLocks", BindingFlags.NonPublic | BindingFlags.Static);
-            var locks = locksProperty?.GetValue(null);
-            locks?.GetType().GetMethod("Clear")?.Invoke(locks, null);
+            ProtectedTokenCache.ClearForTesting();
         }
 
         protected static void SetCachedToken(string hostname, string accessId, string accessKey, PolarisUser? staffUser, ProtectedToken token)
@@ -172,7 +166,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             var cacheKey = BuildCacheKey(hostname, accessId, accessKey, staffUser);
             if (cacheKey != null)
             {
-                GetProtectedTokenCache().TryAdd(cacheKey, token);
+                ProtectedTokenCache.AddForTesting(cacheKey, token);
             }
         }
 
@@ -180,19 +174,12 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
         {
             token = null;
             var cacheKey = BuildCacheKey(hostname, accessId, accessKey, staffUser);
-            return cacheKey != null && GetProtectedTokenCache().TryGetValue(cacheKey, out token);
+            return cacheKey != null && ProtectedTokenCache.TryGet(cacheKey, useCache: true, out token);
         }
 
-        protected static ConcurrentDictionary<string, ProtectedToken> GetProtectedTokenCache()
+        protected static int GetProtectedTokenCacheCount()
         {
-            return GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache")
-                ?? throw new InvalidOperationException("Protected token cache was not available.");
-        }
-
-        protected static T? GetPrivateStaticProperty<T>(string propertyName) where T : class
-        {
-            var cacheProperty = typeof(PapiClient).GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Static);
-            return cacheProperty?.GetValue(null) as T;
+            return ProtectedTokenCache.CountForTesting();
         }
 
         protected static string? BuildCacheKey(string hostname, string accessId, string accessKey, PolarisUser? staffUser)
@@ -212,9 +199,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected static string? BuildCacheKey(PapiClient client)
         {
-            var buildCacheKeyMethod = typeof(PapiClient).GetMethod("BuildProtectedTokenCacheKey", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?? throw new InvalidOperationException("Protected token cache-key builder was not available.");
-            return buildCacheKeyMethod.Invoke(client, Array.Empty<object>()) as string;
+            return ProtectedTokenCache.BuildKey(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount);
         }
 
         protected sealed class TestPapiSettings : IPapiSettings
