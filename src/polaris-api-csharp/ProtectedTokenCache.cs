@@ -252,6 +252,39 @@ namespace Clc.Polaris.Api
             }
         }
 
+        internal static async Task<ProtectedToken> GetOrCreateAsync(string? cacheKey, bool useCache, Func<CancellationToken, Task<ProtectedToken>> createTokenAsync, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(createTokenAsync);
+
+            if (!CanUseCache(cacheKey, useCache))
+            {
+                return await createTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            if (TryGet(cacheKey, useCache: true, out var cachedToken))
+            {
+                return cachedToken!;
+            }
+
+            using var cacheLockLease = await AcquireLockAsync(cacheKey!, cancellationToken).ConfigureAwait(false);
+
+            if (TryGet(cacheKey, useCache: true, out cachedToken))
+            {
+                return cachedToken!;
+            }
+
+            var createdToken = await createTokenAsync(cancellationToken).ConfigureAwait(false);
+            Set(cacheKey, useCache: true, createdToken);
+            PruneExpired();
+
+            return createdToken;
+        }
+
+        private static bool CanUseCache(string? cacheKey, bool useCache)
+        {
+            return useCache && !string.IsNullOrWhiteSpace(cacheKey);
+        }
+
         private sealed class LockLease : IDisposable
         {
             private LockEntry? _entry;

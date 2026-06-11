@@ -224,11 +224,6 @@ namespace Clc.Polaris.Api
                 return token!;
             }
 
-            if (token != null)
-            {
-                _token = null;
-            }
-
             if (StaffOverrideAccount == null)
             {
                 throw CreateProtectedTokenRequiredException("No staff override credentials are configured.", pathContainsProtectedTokenPlaceholder);
@@ -236,101 +231,31 @@ namespace Clc.Polaris.Api
 
             var cacheKey = ProtectedTokenCache.BuildKey(Hostname, AccessID, AccessKey, StaffOverrideAccount);
 
-            if (ProtectedTokenCache.TryGet(cacheKey, UseProtectedTokenCache, out var cachedToken))
-            {
-                _token = cachedToken;
-                return cachedToken!;
-            }
+            var protectedToken = await ProtectedTokenCache.GetOrCreateAsync(cacheKey, UseProtectedTokenCache, ct => AuthenticateProtectedTokenOrThrowAsync(pathContainsProtectedTokenPlaceholder, ct), cancellationToken).ConfigureAwait(false);
 
-            if (!UseProtectedTokenCache || string.IsNullOrWhiteSpace(cacheKey))
-            {
-                return await AuthenticateAndLoadProtectedTokenOrThrowAsync(null, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
-            }
-
-            using var cacheLockLease = await ProtectedTokenCache.AcquireLockAsync(cacheKey, cancellationToken).ConfigureAwait(false);
-
-            token = Token;
-            if (ProtectedTokenCache.IsUsable(token))
-            {
-                return token!;
-            }
-
-            if (token != null)
-            {
-                _token = null;
-            }
-
-            if (ProtectedTokenCache.TryGet(cacheKey, UseProtectedTokenCache, out cachedToken))
-            {
-                _token = cachedToken;
-                return cachedToken!;
-            }
-
-            if (UseProtectedTokenCache)
-            {
-                ProtectedTokenCache.PruneExpired();
-            }
-
-            return await AuthenticateAndLoadProtectedTokenOrThrowAsync(cacheKey, pathContainsProtectedTokenPlaceholder, cancellationToken).ConfigureAwait(false);
+            _token = protectedToken;
+            return protectedToken;
         }
 
-        internal static int PruneProtectedTokenCache()
-        {
-            return ProtectedTokenCache.PruneExpired();
-        }
-
-        internal static void ClearProtectedTokenCache()
-        {
-            ProtectedTokenCache.ClearForTesting();
-        }
-
-        internal static void AddProtectedTokenToCacheForTesting(string cacheKey, ProtectedToken token)
-        {
-            ProtectedTokenCache.AddForTesting(cacheKey, token);
-        }
-
-        internal static bool ProtectedTokenCacheContainsKey(string cacheKey)
-        {
-            return ProtectedTokenCache.ContainsKey(cacheKey);
-        }
-
-        private async Task<ProtectedToken> AuthenticateAndLoadProtectedTokenOrThrowAsync(string? cacheKey, bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken)
+        private async Task<ProtectedToken> AuthenticateProtectedTokenOrThrowAsync(bool pathContainsProtectedTokenPlaceholder, CancellationToken cancellationToken)
         {
             var staffOverrideAccount = StaffOverrideAccount ?? throw CreateProtectedTokenRequiredException("No staff override credentials are configured.", pathContainsProtectedTokenPlaceholder);
+
             var response = await AuthenticateStaffUserAsync(staffOverrideAccount, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
+
             var responseData = response?.Data;
             if (response?.Response == null || !response.Response.IsSuccessStatusCode)
             {
-                ClearFailedProtectedToken(cacheKey);
                 throw CreateProtectedTokenRequiredException("Staff authentication did not succeed.", pathContainsProtectedTokenPlaceholder);
             }
 
             if (!ProtectedTokenCache.IsUsable(responseData))
             {
-                ClearFailedProtectedToken(cacheKey);
                 throw CreateProtectedTokenRequiredException("Staff authentication did not return a usable protected access token.", pathContainsProtectedTokenPlaceholder);
             }
 
-            var protectedToken = responseData!;
-            _token = protectedToken;
-
-            if (UseProtectedTokenCache && !string.IsNullOrWhiteSpace(cacheKey))
-            {
-                ProtectedTokenCache.Set(cacheKey, UseProtectedTokenCache, protectedToken);
-            }
-
-            return protectedToken;
-        }
-
-        private void ClearFailedProtectedToken(string? cacheKey)
-        {
-            if (!string.IsNullOrWhiteSpace(cacheKey))
-            {
-                ProtectedTokenCache.Remove(cacheKey);
-            }
-
-            _token = null;
+            return responseData!;
         }
 
         private static string EncodeBarcodePathSegment(string barcode) => WebUtility.UrlEncode(barcode);
