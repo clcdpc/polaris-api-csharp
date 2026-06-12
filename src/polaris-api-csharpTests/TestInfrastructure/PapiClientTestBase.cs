@@ -292,13 +292,13 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             private readonly string _nonAuthenticationResponseJson;
             private int _authenticationRequestCount;
             private int _nonAuthenticationRequestCount;
-            private readonly ConcurrentQueue<string> _requestPaths = new ConcurrentQueue<string>();
-            private readonly ConcurrentQueue<CapturedPapiRequest> _capturedRequests = new ConcurrentQueue<CapturedPapiRequest>();
+            private readonly ConcurrentQueue<string> _requestPaths = new();
+            private readonly ConcurrentQueue<CapturedPapiRequest> _capturedRequests = new();
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
             public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
-            public string[] RequestPaths => _requestPaths.ToArray();
-            public CapturedPapiRequest[] CapturedRequests => _capturedRequests.ToArray();
+            public string[] RequestPaths => [.. _requestPaths];
+            public CapturedPapiRequest[] CapturedRequests => [.. _capturedRequests];
 
             public ProtectedTokenHttpMessageHandler(
                 HttpStatusCode authenticationStatusCode = HttpStatusCode.OK,
@@ -320,7 +320,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                var body = request.Content == null ? string.Empty : await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var body = request.Content == null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 var capturedRequest = new CapturedPapiRequest(request, body);
                 _requestPaths.Enqueue(capturedRequest.Path);
                 _capturedRequests.Enqueue(capturedRequest);
@@ -329,10 +329,10 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
                 {
                     Interlocked.Increment(ref _authenticationRequestCount);
                     await Task.Delay(50, cancellationToken).ConfigureAwait(false);
-                    var authenticationResponse = _authenticationResponseFactory?.Invoke(capturedRequest) ?? (_authenticationStatusCode, _authenticationResponseJson);
-                    return new HttpResponseMessage(authenticationResponse.StatusCode)
+                    var (StatusCode, ResponseJson) = _authenticationResponseFactory?.Invoke(capturedRequest) ?? (_authenticationStatusCode, _authenticationResponseJson);
+                    return new HttpResponseMessage(StatusCode)
                     {
-                        Content = new StringContent(authenticationResponse.ResponseJson, Encoding.UTF8, "application/json")
+                        Content = new StringContent(ResponseJson, Encoding.UTF8, "application/json")
                     };
                 }
 
@@ -346,8 +346,8 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected sealed class ProtectedTokenCancellationHttpMessageHandler : HttpMessageHandler
         {
-            public List<HttpRequestMessage> Requests { get; } = new();
-            public List<CancellationToken> CancellationTokens { get; } = new();
+            public List<HttpRequestMessage> Requests { get; } = [];
+            public List<CancellationToken> CancellationTokens { get; } = [];
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
