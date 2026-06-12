@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.PatronSearchAsync($"PRID={Settings.PatronId}");
-            Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.PatronSearchRows.Count);
+            var response = await Papi.PatronSearchAsync($"PRID={Settings.PatronId}", cancellationToken: TestContext.CancellationToken);
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.PatronSearchRows);
         }
     }
 }

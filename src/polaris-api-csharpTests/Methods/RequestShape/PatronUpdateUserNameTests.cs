@@ -16,12 +16,12 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task PatronUpdateUserName_EncodesBarcodeAndNewUsername()
         {
-            var handler = new CaptureHttpMessageHandler();
+            var handler = new CapturingHttpMessageHandler();
             var client = CreateUrlEncodingClient(handler);
             var barcode = "AB C/+#?=";
             var newUsername = "new user+/name?=";
 
-            await client.PatronUpdateUserNameAsync(barcode, newUsername, "pin");
+            await client.PatronUpdateUserNameAsync(barcode, newUsername, "pin", TestContext.CancellationToken);
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/username/{WebUtility.UrlEncode(newUsername)}";
             Assert.IsNotNull(handler.LastRequest);

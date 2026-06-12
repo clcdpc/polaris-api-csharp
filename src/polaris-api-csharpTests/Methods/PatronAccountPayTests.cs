@@ -13,8 +13,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = (await Papi.PatronAccountPayAsync(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80))).Data;
-            Assert.IsTrue(response.PAPIErrorCode == -3600);
+            var response = (await Papi.PatronAccountPayAsync(Settings.PatronBarcode, 1234, .01, PaymentMethod.Cash, note: CreateUniqueTestArtifactText(maxLength: 80), cancellationToken: TestContext.CancellationToken)).Data;
+            Assert.AreEqual(-3600, response.PAPIErrorCode);
         }
     }
 }

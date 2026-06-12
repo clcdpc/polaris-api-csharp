@@ -42,7 +42,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "cached-token",
                 AccessSecret = "cached-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             });
 
             var token = client.Token;
@@ -61,7 +61,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "existing-token",
                 AccessSecret = "existing-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var token = client.Token;
@@ -83,13 +83,13 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddHours(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, staff, new ProtectedToken
             {
                 AccessToken = "cached-token",
                 AccessSecret = "cached-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             });
 
             var token = client.Token;
@@ -108,7 +108,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddHours(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
             var token = client.Token;

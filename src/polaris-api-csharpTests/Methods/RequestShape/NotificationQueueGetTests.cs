@@ -13,20 +13,19 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class NotificationQueueGetTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task NotificationQueueGet_RequestsCorrectUrl()
         {
-            var handler = new CaptureHttpMessageHandler();
+            var handler = new CapturingHttpMessageHandler();
             var client = CreateUrlEncodingClient(handler);
             client.Token = new ProtectedToken
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
-            await client.NotificationQueueGetAsync(1);
+            await client.NotificationQueueGetAsync(1, TestContext.CancellationToken);
 
             var expectedPath = $"/PAPIService/REST/protected/v1/1033/24/1/token-segment/notification/";
             Assert.IsNotNull(handler.LastRequest);

@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task HoldRequestReactivateTest()
         {
-            var response = await Papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, 1234, DateTime.Now);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -4201);
+            var response = await Papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, 1234, DateTime.Now, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(-4201, response.Data.PAPIErrorCode);
         }
     }
 }

@@ -36,10 +36,7 @@ namespace Clc.Polaris.Api.Tests.Models
         [TestMethod]
         public void PapiRestRequest_CopyConstructor_PreservesValuesWithoutSharingMutableCollections()
         {
-            var request = PapiRestRequest.Post(
-                "/protected/v1/1033/100/1/test",
-                new { Value = 1 },
-                "password");
+            var request = PapiRestRequest.Post("/protected/v1/1033/100/1/test", new { Value = 1 }, "password");
 
             request.AuthRequired = false;
             request.JsonSerializerIgnoreNulls = false;

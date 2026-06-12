@@ -9,8 +9,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task PatronCirculateBlocksGetTest()
         {
-            var response = await Papi.PatronCirculateBlocksGetAsync(Settings.PatronBarcode, Settings.PatronPin);
-            Assert.IsTrue(response.Data.PAPIErrorCode == 0);
+            var response = await Papi.PatronCirculateBlocksGetAsync(Settings.PatronBarcode, Settings.PatronPin, TestContext.CancellationToken);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
         }
     }
 }

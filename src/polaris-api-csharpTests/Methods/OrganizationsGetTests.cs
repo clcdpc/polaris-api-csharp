@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task OrganizationsGetTest()
         {
-            var response = await Papi.OrganizationsGetAsync();
-            Assert.IsTrue(response.Data.OrganizationsGetRows.Count() == response.Data.PAPIErrorCode);
+            var response = await Papi.OrganizationsGetAsync(cancellationToken: TestContext.CancellationToken);
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.OrganizationsGetRows);
         }
     }
 }

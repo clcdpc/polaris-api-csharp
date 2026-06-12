@@ -14,11 +14,7 @@ namespace Clc.Polaris.Api
             IEnumerable<int> ids,
             CancellationToken cancellationToken = default)
         {
-            return client.PatronReadingHistoryClearAsync(
-                barcode,
-                null,
-                ids,
-                cancellationToken);
+            return client.PatronReadingHistoryClearAsync(barcode, null, ids, cancellationToken);
         }
     }
 }

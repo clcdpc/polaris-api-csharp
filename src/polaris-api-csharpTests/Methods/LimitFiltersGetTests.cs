@@ -10,8 +10,10 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task LimitFiltersGetTest()
         {
-            var response = (await Papi.LimitFiltersGetAsync()).Data;
-            Assert.IsTrue(response.LimitFiltersRows.Count() == response.PAPIErrorCode);
+            var response = (await Papi.LimitFiltersGetAsync(cancellationToken: TestContext.CancellationToken)).Data;
+            Assert.HasCount(response.PAPIErrorCode, response.LimitFiltersRows);
         }
+
+        
     }
 }

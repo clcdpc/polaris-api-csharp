@@ -16,13 +16,13 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task UpdatePickupBranchID_EncodesBarcodeAndConstructsQuery()
         {
-            var handler = new CaptureHttpMessageHandler();
+            var handler = new CapturingHttpMessageHandler();
             var client = CreateUrlEncodingClient(handler);
             var barcode = "AB C/+#?=";
             var requestId = 1234;
             var pickupBranchId = 5678;
 
-            await client.UpdatePickupBranchIDAsync(barcode, requestId, pickupBranchId, "pin", userId: 888, workstationId: 999);
+            await client.UpdatePickupBranchIDAsync(barcode, requestId, pickupBranchId, "pin", userId: 888, workstationId: 999, TestContext.CancellationToken);
 
             var expectedPath = $"/PAPIService/REST/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/holdrequests/{requestId}/pickupbranch";
             var expectedQuery = $"?userid=888&wsid=999&pickupbranchid={pickupBranchId}";

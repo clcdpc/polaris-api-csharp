@@ -1,5 +1,6 @@
 ﻿using System;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
@@ -7,7 +8,7 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     [UnitTest]
     [DoNotParallelize]
-    public sealed class PapiClientProtectedTokenCacheTests
+    public sealed class PapiClientProtectedTokenCacheTests : PapiClientTestBase
     {
         [TestInitialize]
         public void TestInitialize()
@@ -24,8 +25,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesExpiredToken()
         {
-            ProtectedTokenCache.AddForTesting("expired", CreateToken(DateTime.UtcNow.AddMinutes(-5)));
-            ProtectedTokenCache.AddForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("expired", CreateToken(ExpiredProtectedTokenExpirationDate));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
             var removedCount = ProtectedTokenCache.PruneExpired();
 
@@ -38,7 +39,7 @@ namespace Clc.Polaris.Api.Tests
         public void PruneProtectedTokenCache_RemovesTokenWithoutExpirationDate()
         {
             ProtectedTokenCache.AddForTesting("missing-expiration", CreateToken(expirationDate: null));
-            ProtectedTokenCache.AddForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
             var removedCount = ProtectedTokenCache.PruneExpired();
 
@@ -50,8 +51,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesTokenWithoutAccessToken()
         {
-            ProtectedTokenCache.AddForTesting("missing-access-token", CreateToken(DateTime.UtcNow.AddMinutes(5), accessToken: ""));
-            ProtectedTokenCache.AddForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("missing-access-token", CreateToken(ValidProtectedTokenExpirationDate, accessToken: ""));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
             var removedCount = ProtectedTokenCache.PruneExpired();
 
@@ -63,8 +64,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesTokenWithoutAccessSecret()
         {
-            ProtectedTokenCache.AddForTesting("missing-access-secret", CreateToken(DateTime.UtcNow.AddMinutes(5), accessSecret: ""));
-            ProtectedTokenCache.AddForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("missing-access-secret", CreateToken(ValidProtectedTokenExpirationDate, accessSecret: ""));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
             var removedCount = ProtectedTokenCache.PruneExpired();
 
@@ -77,7 +78,7 @@ namespace Clc.Polaris.Api.Tests
         public void PruneProtectedTokenCache_RemovesTokenInsideExpirationSkew()
         {
             ProtectedTokenCache.AddForTesting("inside-skew", CreateToken(DateTime.UtcNow.AddSeconds(30)));
-            ProtectedTokenCache.AddForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
             var removedCount = ProtectedTokenCache.PruneExpired();
 
@@ -89,8 +90,8 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public void PruneProtectedTokenCache_DoesNotRemoveUsableTokens()
         {
-            ProtectedTokenCache.AddForTesting("valid-1", CreateToken(DateTime.UtcNow.AddMinutes(5)));
-            ProtectedTokenCache.AddForTesting("valid-2", CreateToken(DateTime.UtcNow.AddMinutes(10)));
+            ProtectedTokenCache.AddForTesting("valid-1", CreateToken(ValidProtectedTokenExpirationDate));
+            ProtectedTokenCache.AddForTesting("valid-2", CreateToken(ValidProtectedTokenExpirationDate));
 
             var removedCount = ProtectedTokenCache.PruneExpired();
 
@@ -99,10 +100,7 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid-2"));
         }
 
-        private static ProtectedToken CreateToken(
-            DateTime? expirationDate,
-            string accessToken = "access-token",
-            string accessSecret = "access-secret")
+        private static ProtectedToken CreateToken(DateTime? expirationDate, string accessToken = "access-token", string accessSecret = "access-secret")
         {
             return new ProtectedToken
             {

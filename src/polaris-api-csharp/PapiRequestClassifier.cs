@@ -7,11 +7,7 @@ namespace Clc.Polaris.Api
 {
     internal static class PapiRequestClassifier
     {
-        internal static bool RequiresProtectedToken(
-            PapiRestRequest request,
-            bool pathContainsProtectedTokenPlaceholder,
-            bool allowStaffOverrideRequests,
-            PolarisUser? staffOverrideAccount)
+        internal static bool RequiresProtectedToken(PapiRestRequest request, bool pathContainsProtectedTokenPlaceholder, bool allowStaffOverrideRequests, PolarisUser? staffOverrideAccount)
         {
             if (IsStaffAuthenticatorRequest(request))
             {
@@ -31,10 +27,7 @@ namespace Clc.Polaris.Api
             return IsStaffOverridePatronRequest(request, allowStaffOverrideRequests, staffOverrideAccount);
         }
 
-        internal static bool IsStaffOverridePatronRequest(
-            PapiRestRequest request,
-            bool allowStaffOverrideRequests,
-            PolarisUser? staffOverrideAccount)
+        internal static bool IsStaffOverridePatronRequest(PapiRestRequest request, bool allowStaffOverrideRequests, PolarisUser? staffOverrideAccount)
         {
             return request.IsPublicMethod &&
                 request.AuthRequired &&
