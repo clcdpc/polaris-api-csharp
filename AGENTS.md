@@ -99,11 +99,11 @@ ExpiredProtectedTokenExpirationDate
 
 Do not replace explicit `DateTime.UtcNow`, `DateTime.SpecifyKind`, or expiration-skew values when the test is specifically about:
 
-- UTC expiration handling
-- unspecified `DateTimeKind`
-- expiration skew
-- missing/null expiration dates
-- exact timestamp behavior
+- UTC expiration handling.
+- Unspecified `DateTimeKind`.
+- Expiration skew.
+- Missing/null expiration dates.
+- Exact timestamp behavior.
 
 ### Test HTTP handlers
 
@@ -167,6 +167,32 @@ Do not call the overload without a cancellation token when a suitable overload e
 ```csharp
 await client.AuthenticateStaffUserAsync(user);
 ```
+
+### MSTEST0037: Use specific assertion methods
+
+Prefer specific MSTest assertions over generic boolean assertions when available.
+
+Use:
+
+```csharp
+Assert.IsNotEmpty(items);
+Assert.Contains("expected", actual);
+Assert.AreEqual(expected, actual);
+Assert.IsNull(value);
+Assert.IsNotNull(value);
+```
+
+instead of:
+
+```csharp
+Assert.IsTrue(items.Length > 0);
+Assert.IsTrue(actual.Contains("expected"));
+Assert.IsTrue(expected == actual);
+Assert.IsTrue(value == null);
+Assert.IsTrue(value != null);
+```
+
+Do not change assertion meaning just to satisfy the analyzer. If the specific assertion would obscure the intent or change comparison semantics, preserve the clearer assertion.
 
 ### MSTEST0046: Assert.Contains vs StringAssert.Contains
 
@@ -268,10 +294,11 @@ CreateProtectedTokenJson("t", "s", ValidProtectedTokenExpirationDate)
 
 Do not introduce new diagnostics for:
 
+- `MSTEST0037`
 - `MSTEST0046`
 - `MSTEST0049`
-- nullable initialization warnings such as `CS8618`
-- member hiding warnings such as `CS0108`
+- Nullable initialization warnings such as `CS8618`
+- Member hiding warnings such as `CS0108`
 
 If touching tests, fix analyzer diagnostics in the touched files unless the task explicitly says not to.
 
