@@ -28,9 +28,9 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task ProtectedTokenPathRequest_ReplacesPlaceholderBeforeSending()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken { AccessToken = "real-token", AccessSecret = "real-secret", ExpirationDate = DateTime.Now.AddHours(1) };
+            client.Token = new ProtectedToken { AccessToken = "real-token", AccessSecret = "real-secret", ExpirationDate = ValidProtectedTokenExpirationDate };
 
             var response = await client.PatronSearchAsync("name=Smith", orgId: 9);
 
@@ -43,9 +43,9 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task ProtectedTokenPathRequest_HashesReplacedUrlInsteadOfPlaceholderUrl()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken { AccessToken = "hash-token", AccessSecret = "hash-secret", ExpirationDate = DateTime.Now.AddHours(1) };
+            client.Token = new ProtectedToken { AccessToken = "hash-token", AccessSecret = "hash-secret", ExpirationDate = ValidProtectedTokenExpirationDate };
 
             await client.PatronSearchAsync("name=Smith", orgId: 9);
 
@@ -97,7 +97,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddHours(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
             var response = await client.PatronSearchAsync("name=Smith", orgId: 9);
@@ -126,7 +126,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddHours(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
             var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith", orgId: 9));
@@ -247,7 +247,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staff = CreateStaffUser(password: "shared-password");
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("shared-token", "shared-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "shared-token", accessSecret: "shared-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var clients = Enumerable.Range(0, 6)
                 .Select(_ => CreateProtectedClient(handler, hostname, staff))
                 .ToArray();
@@ -275,13 +275,13 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             {
                 AccessToken = "token-for-password-a",
                 AccessSecret = "secret-for-password-a",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
             var passwordBToken = new ProtectedToken
             {
                 AccessToken = "token-for-password-b",
                 AccessSecret = "secret-for-password-b",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
             var handler = new ProtectedTokenHttpMessageHandler(request =>
             {
@@ -295,7 +295,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                     return (HttpStatusCode.OK, CreateProtectedTokenJson(passwordBToken));
                 }
 
-                return (HttpStatusCode.BadRequest, "{\"PAPIErrorCode\":1}");
+                return (HttpStatusCode.BadRequest, CreatePapiResponseJson(1));
             });
             var clients = new[]
             {
@@ -336,14 +336,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_WhenProtectedTokenCacheDisabled_IgnoresStaticCachedTokenAndUsesNewAuthenticationToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("fresh-token", "fresh-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "fresh-token", accessSecret: "fresh-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             client.UseProtectedTokenCache = false;
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
                 AccessToken = "cached-token",
                 AccessSecret = "cached-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             });
 
             await client.PatronSearchAsync("name=Smith");
@@ -363,13 +363,13 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("new-protected-token", "new-protected-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(accessToken: "new-protected-token", accessSecret: "new-protected-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             client.Token = new ProtectedToken
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddMinutes(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
             await client.PatronSearchAsync("name=Smith");
@@ -389,7 +389,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("placeholder-token", "placeholder-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(accessToken: "placeholder-token", accessSecret: "placeholder-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
 
             await client.PatronSearchAsync("name=Smith");
@@ -414,7 +414,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             {
                 AccessToken = "cached-token",
                 AccessSecret = "cached-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             });
 
             await client.PatronSearchAsync("name=Smith");
@@ -430,14 +430,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staffWithPassword = CreateStaffUser(password: "correct-1");
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-a", accessSecret: "secret-a", expirationDate: ValidProtectedTokenExpirationDate));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.StaffOverrideAccount = staffWithPassword;
 
             await clientA.PatronSearchAsync("name=Smith");
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-b", accessSecret: "secret-b", expirationDate: ValidProtectedTokenExpirationDate));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.StaffOverrideAccount = CreateStaffUser(password: string.Empty);
@@ -456,14 +456,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-a", accessSecret: "secret-a", expirationDate: ValidProtectedTokenExpirationDate));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.StaffOverrideAccount = CreateStaffUser(password: "correct-1");
 
             await clientA.PatronSearchAsync("name=Smith");
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-b", accessSecret: "secret-b", expirationDate: ValidProtectedTokenExpirationDate));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.StaffOverrideAccount = CreateStaffUser(password: "different-2");
@@ -486,14 +486,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staff = CreateStaffUser(password: "correct-1");
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-a", accessSecret: "secret-a", expirationDate: ValidProtectedTokenExpirationDate));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.StaffOverrideAccount = staff;
 
             await clientA.PatronSearchAsync("name=Smith");
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-b", accessSecret: "secret-b", expirationDate: ValidProtectedTokenExpirationDate));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.AccessKey = "different-access-key";
@@ -514,13 +514,13 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_ExpiredCachedToken_IsRemovedWhenEncountered()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddMinutes(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             });
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -532,13 +532,13 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithBlankAccessToken_IsRemovedAndNewTokenIsUsed()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "new-token", accessSecret: "new-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
                 AccessToken = " ",
                 AccessSecret = "cached-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             });
 
             await client.PatronSearchAsync("name=Smith");
@@ -557,13 +557,13 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithBlankAccessSecret_IsRemovedAndNotUsedWhenAuthenticationFails()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
                 AccessToken = "cached-token",
                 AccessSecret = " ",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             });
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -577,7 +577,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_FailedStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
             var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -603,7 +603,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_BlankAccessTokenStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(" ", "protected-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: " ", accessSecret: "protected-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -615,7 +615,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_BlankAccessSecretStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("protected-token", " ", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "protected-token", accessSecret: " ", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -629,7 +629,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("protected-token", "protected-secret", DateTime.Now.AddMinutes(-1)));
+                CreateProtectedTokenJson(accessToken: "protected-token", accessSecret: "protected-secret", expirationDate: ExpiredProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -645,7 +645,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             {
                 AccessToken = "failed-token",
                 AccessSecret = "failed-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, CreateProtectedTokenJson(returnedToken));
             var client = CreateProtectedClient(handler);
@@ -677,7 +677,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                     AuthenticationRequestCount++;
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(CreateEmptyJsonObject(), Encoding.UTF8, "application/json")
                     });
                 }
 
@@ -693,7 +693,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 });
             }
         }
@@ -711,9 +711,10 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
                 {
                     var requestNumber = Interlocked.Increment(ref _authenticationRequestCount);
+                    var responseJson = CreateProtectedTokenJson(accessToken: $"protected-token-{requestNumber}", accessSecret: $"protected-secret-{requestNumber}", expirationDate: ValidProtectedTokenExpirationDate);
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent($"{{\"PAPIErrorCode\":0,\"AccessToken\":\"protected-token-{requestNumber}\",\"AccessSecret\":\"protected-secret-{requestNumber}\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                     });
                 }
 
@@ -724,7 +725,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 });
             }
         }

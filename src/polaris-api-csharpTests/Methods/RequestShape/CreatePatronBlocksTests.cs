@@ -14,7 +14,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class CreatePatronBlocksTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task CreatePatronBlocks_EncodesBarcodeInProtectedRoute_PreservesTokenPath()
         {
@@ -25,7 +24,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             await client.CreatePatronBlocksAsync(barcode, BlockType.FreeText, "note", userId: 888, workstationId: 999);

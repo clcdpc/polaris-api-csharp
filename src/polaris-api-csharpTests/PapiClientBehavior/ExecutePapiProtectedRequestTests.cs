@@ -24,7 +24,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_ProtectedRequestWithoutPlaceholderOrPassword_AcquiresProtectedToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("route-token", "route-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "route-token", accessSecret: "route-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/protected/v1/1033/100/1/patron/ABC123/account/outstanding");
 
@@ -43,7 +43,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("malformed-token", "malformed-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(accessToken: "malformed-token", accessSecret: "malformed-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Post("/protected/v1/1033/100/1/authenticator/staff/extra");
 
@@ -153,7 +153,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(accessToken: "custom-placeholder-token", accessSecret: "custom-placeholder-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
 
@@ -172,7 +172,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("custom-placeholder-token", "custom-placeholder-secret", DateTime.Now.AddHours(1)));
+                CreateProtectedTokenJson(accessToken: "custom-placeholder-token", accessSecret: "custom-placeholder-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
             var originalPath = request.Path;
@@ -187,9 +187,9 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.OK,
-                CreateProtectedTokenJson("error-path-token", "error-path-secret", DateTime.Now.AddHours(1)),
+                CreateProtectedTokenJson(accessToken: "error-path-token", accessSecret: "error-path-secret", expirationDate: ValidProtectedTokenExpirationDate),
                 HttpStatusCode.InternalServerError,
-                "{\"PAPIErrorCode\":1}");
+                CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
             var originalPath = request.Path;
@@ -206,7 +206,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPatronRequest_UsesStaffOverrideTokenWhenAllowed()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("override-token", "override-secret", DateTime.Now.AddHours(1)));
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "override-token", accessSecret: "override-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/patron/ABC123/basicdata");
 
@@ -240,7 +240,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicNonPatronRequest_WithStaffOverrideConfigured_DoesNotAcquireProtectedToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/api");
 
@@ -257,7 +257,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPatronRequestWithPassword_DoesNotAcquireStaffOverrideToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/patron/ABC123/basicdata", password: "patron-password");
 
@@ -274,7 +274,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_CustomPublicPatronNamedLookupRequest_DoesNotAcquireProtectedToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/patronlanguages");
 

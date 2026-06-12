@@ -13,7 +13,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class Patron_GetBarcodeFromIdTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task Patron_GetBarcodeFromId_FormatsUrlCorrectly()
         {
@@ -24,7 +23,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             await client.Patron_GetBarcodeFromIdAsync(patronId);

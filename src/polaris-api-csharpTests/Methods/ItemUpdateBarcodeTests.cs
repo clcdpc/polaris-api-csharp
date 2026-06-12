@@ -5,13 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitTest]
-    public sealed class ItemUpdateBarcodeTests
+    public sealed class ItemUpdateBarcodeTests : PapiClientTestBase
     {
         [TestMethod]
         public async Task ItemUpdateBarcodeAsync_WhenUsingOldBarcode_EncodesBarcodeAndAddsIsBarcodeQueryParameter()
@@ -98,7 +99,7 @@ namespace Clc.Polaris.Api.Tests
                 {
                     AccessToken = "protected-token",
                     AccessSecret = "protected-secret",
-                    ExpirationDate = DateTime.UtcNow.AddHours(1)
+                    ExpirationDate = ValidProtectedTokenExpirationDate
                 },
                 UseProtectedTokenCache = false
             };
@@ -116,7 +117,7 @@ namespace Clc.Polaris.Api.Tests
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{}")
+                    Content = new StringContent(CreateEmptyJsonObject())
                 });
             }
         }

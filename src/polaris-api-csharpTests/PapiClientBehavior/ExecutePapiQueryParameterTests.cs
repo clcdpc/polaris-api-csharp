@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithNullValue_OmitsParameterAndHashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             request.QueryParameters.Add("q", "harry potter");
@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithEmptyStringValue_OmitsParameterAndHashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             request.QueryParameters.Add("q", "harry potter");
@@ -51,7 +51,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithWhitespaceValue_OmitsParameterAndHashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             request.QueryParameters.Add("q", "harry potter");
@@ -69,7 +69,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_QueryParameterWithBlankKey_OmitsParameterAndHashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             request.QueryParameters.Add("q", "harry potter");
@@ -88,7 +88,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_OnlyIneffectiveQueryParameters_OmitsQueryStringAndHashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             request.QueryParameters.Add(" ", "blank key");
@@ -112,7 +112,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
                 CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
-                var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+                var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
                 var client = CreateClient(handler);
                 var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
                 request.QueryParameters.Add("amount", 12.34m);
@@ -133,7 +133,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_NonEmptyQueryParameters_HashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW");
             request.QueryParameters.Add("q", "harry potter & stone");
@@ -149,7 +149,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task ExecutePapiAsync_ExistingQueryString_AppendsQueryParametersAndHashesSentUri()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/search/bibs/keyword/KW?existing=1");
             request.QueryParameters.Add("q", "harry potter");

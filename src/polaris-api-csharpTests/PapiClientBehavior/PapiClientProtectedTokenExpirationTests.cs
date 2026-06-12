@@ -1,12 +1,13 @@
 ﻿using System;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitTest]
-    public sealed class PapiClientProtectedTokenExpirationTests
+    public sealed class PapiClientProtectedTokenExpirationTests : PapiClientTestBase
     {
         [TestMethod]
         public void Token_WhenTokenIsNull_ReturnsNull()
@@ -90,7 +91,7 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public void Token_WhenLocalExpirationDateIsOutsideExpirationSkew_ReturnsToken()
         {
-            var token = CreateToken(DateTime.Now.AddMinutes(5));
+            var token = CreateToken(ValidProtectedTokenExpirationDate);
             var client = new PapiClient
             {
                 Token = token

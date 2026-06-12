@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
 
             var response = await client.PatronMessagesGetAsync("ABC 123", unreadOnly: true, password: "1234");
@@ -70,7 +70,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
                     AuthenticationRequestCount++;
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(CreateEmptyJsonObject(), Encoding.UTF8, "application/json")
                     });
                 }
 
@@ -86,7 +86,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 });
             }
         }

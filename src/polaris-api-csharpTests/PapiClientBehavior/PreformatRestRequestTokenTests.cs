@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddHours(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
             var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/expired-token/search/patrons/Boolean");
 
@@ -52,7 +52,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "expired-token",
                 AccessSecret = "expired-secret",
-                ExpirationDate = DateTime.Now.AddHours(-1)
+                ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC");
             request.Headers["X-PAPI-AccessToken"] = "stale-token";
@@ -79,7 +79,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = " ",
                 AccessSecret = "manual-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var formatted = (PapiRestRequest)client.PreformatRestRequest(new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC"));

@@ -12,11 +12,10 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class PatronReadingHistoryClearTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task PatronReadingHistoryClearAsync_EnumeratesIdsOnceAndSendsCommaSeparatedIds()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             var ids = new ThrowOnSecondEnumerationEnumerable(new[] { 101, 202, 303 });
 

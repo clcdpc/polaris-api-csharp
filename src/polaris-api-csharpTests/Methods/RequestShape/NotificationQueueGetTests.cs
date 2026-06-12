@@ -13,7 +13,6 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class NotificationQueueGetTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task NotificationQueueGet_RequestsCorrectUrl()
         {
@@ -23,7 +22,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             {
                 AccessToken = "token-segment",
                 AccessSecret = "token-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             await client.NotificationQueueGetAsync(1);

@@ -11,11 +11,10 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class AuthenticateStaffUserTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task AuthenticateStaffUser_RequestShape_IsStable()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0,\"AccessToken\":\"t\",\"AccessSecret\":\"s\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}");
+            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson(accessToken: "t", accessSecret: "s", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateClient(handler);
 
             var response = await client.AuthenticateStaffUserAsync(new PolarisUser

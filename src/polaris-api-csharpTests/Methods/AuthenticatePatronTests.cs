@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api;
@@ -27,7 +28,7 @@ namespace Clc.Polaris.Api.Tests
                 }
                 var response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0, \"AccessToken\":\"mock-token\", \"AccessSecret\":\"mock-secret\", \"PatronID\":123}")
+                    Content = new StringContent(JsonSerializer.Serialize(new { PAPIErrorCode = 0, AccessToken = "mock-token", AccessSecret = "mock-secret", PatronID = 123 }))
                 };
                 response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
                 return response;

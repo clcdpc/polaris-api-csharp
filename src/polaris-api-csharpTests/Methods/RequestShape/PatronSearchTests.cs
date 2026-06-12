@@ -12,14 +12,12 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class PatronSearchTests : PapiClientTestBase
     {
-
-
         [TestMethod]
         public async Task PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
-            client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.Now.AddHours(1) };
+            client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = ValidProtectedTokenExpirationDate };
 
             var response = await client.PatronSearchAsync("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
 

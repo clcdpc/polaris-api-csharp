@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC123/basicdata");
@@ -46,7 +46,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC123/basicdata")
@@ -72,7 +72,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC123/basicdata");
@@ -95,7 +95,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/api");
@@ -118,7 +118,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "staff-token",
                 AccessSecret = "staff-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
             var request = new PapiRestRequest(HttpMethod.Get, "/public/v1/1033/100/1/patron/ABC123/basicdata");
 
