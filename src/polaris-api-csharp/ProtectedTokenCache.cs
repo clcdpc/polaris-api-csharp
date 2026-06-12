@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
 
         private static readonly TimeSpan LockIdleLimit = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan ExpirationSkew = TimeSpan.FromMinutes(1);
-        private static readonly object LocksPruneLock = new object();
+        private static readonly object LocksPruneLock = new();
 
         private static ConcurrentDictionary<string, ProtectedToken> Tokens { get; } = new ConcurrentDictionary<string, ProtectedToken>();
         private static ConcurrentDictionary<string, LockEntry> Locks { get; } = new ConcurrentDictionary<string, LockEntry>();
@@ -316,7 +316,7 @@ namespace Clc.Polaris.Api
 
         private sealed class LockEntry : IDisposable
         {
-            private readonly object _syncRoot = new object();
+            private readonly object _syncRoot = new();
             private int _leaseCount;
             private bool _retired;
             private DateTime _lastUsedUtc = DateTime.UtcNow;
