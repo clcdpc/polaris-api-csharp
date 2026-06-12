@@ -15,6 +15,7 @@ namespace Clc.Polaris.Api
             Require.Argument(holdCreateResult);
             Require.Argument(holdCreateResult.TxnGroupQualifier);
             Require.Argument(holdCreateResult.TxnQualifier);
+            Require.Positive(requestingOrgId);
 
             var url = $"/public/v1/1033/100/1/holdrequest/{holdCreateResult.RequestGuid}";
             var body = new HoldRequestReplyData

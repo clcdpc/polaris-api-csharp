@@ -1,5 +1,6 @@
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,11 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PapiResponseCommon>> UpdatePickupBranchIDAsync(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
+            Require.Positive(requestId);
+            Require.Positive(pickupBranchId);
+            Require.PositiveIfProvided(userId);
+            Require.PositiveIfProvided(workstationId);
+
             var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/holdrequests/{requestId}/pickupbranch";
             var request = PapiRestRequest.Put(url, password: password);
             request.QueryParameters.Add("userid", userId ?? UserId);

@@ -18,13 +18,11 @@ namespace Clc.Polaris.Api
             string itemIdentifier;
             var isBarcodeLookup = false;
 
+            Require.PositiveIfProvided(itemRecordId);
+            Require.PositiveIfProvided(transactionBranchId);
+
             if (itemRecordId is int itemRecordIdentifier)
             {
-                if (itemRecordIdentifier <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(itemRecordId));
-                }
-
                 itemIdentifier = itemRecordIdentifier.ToString(CultureInfo.InvariantCulture);
             }
             else

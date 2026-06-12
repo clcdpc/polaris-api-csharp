@@ -64,5 +64,211 @@ namespace Clc.Polaris.Api.Validation.Tests
 
             Require.Argument(nonEmptyString);
         }
+
+        [TestMethod]
+        public void Argument_ZeroInteger_DoesNotThrow()
+        {
+            int zeroValue = 0;
+
+            Require.Argument(zeroValue);
+        }
+
+        [TestMethod]
+        public void Positive_ZeroInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int zeroValue = 0;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.Positive(zeroValue));
+
+            Assert.AreEqual(nameof(zeroValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Positive_NegativeInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.Positive(negativeValue));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Positive_PositiveInteger_DoesNotThrow()
+        {
+            int positiveValue = 1;
+
+            Require.Positive(positiveValue);
+        }
+
+        [TestMethod]
+        public void Positive_NullNullableInteger_ThrowsArgumentNullException()
+        {
+            int? nullValue = null;
+
+            var exception = Assert.ThrowsExactly<ArgumentNullException>(() => Require.Positive(nullValue));
+
+            Assert.AreEqual(nameof(nullValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Positive_ZeroNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? zeroValue = 0;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.Positive(zeroValue));
+
+            Assert.AreEqual(nameof(zeroValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Positive_NegativeNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.Positive(negativeValue));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void Positive_PositiveNullableInteger_DoesNotThrow()
+        {
+            int? positiveValue = 1;
+
+            Require.Positive(positiveValue);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvided_NullNullableInteger_DoesNotThrow()
+        {
+            int? nullValue = null;
+
+            Require.PositiveIfProvided(nullValue);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvided_ZeroNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? zeroValue = 0;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.PositiveIfProvided(zeroValue));
+
+            Assert.AreEqual(nameof(zeroValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvided_NegativeNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.PositiveIfProvided(negativeValue));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvided_PositiveNullableInteger_DoesNotThrow()
+        {
+            int? positiveValue = 1;
+
+            Require.PositiveIfProvided(positiveValue);
+        }
+
+        [TestMethod]
+        public void NonNegative_NegativeInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.NonNegative(negativeValue));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void NonNegative_ZeroInteger_DoesNotThrow()
+        {
+            int zeroValue = 0;
+
+            Require.NonNegative(zeroValue);
+        }
+
+        [TestMethod]
+        public void NonNegative_PositiveInteger_DoesNotThrow()
+        {
+            int positiveValue = 1;
+
+            Require.NonNegative(positiveValue);
+        }
+
+        [TestMethod]
+        public void NonNegative_NullNullableInteger_ThrowsArgumentNullException()
+        {
+            int? nullValue = null;
+
+            var exception = Assert.ThrowsExactly<ArgumentNullException>(() => Require.NonNegative(nullValue));
+
+            Assert.AreEqual(nameof(nullValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void NonNegative_NegativeNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.NonNegative(negativeValue));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void NonNegative_ZeroNullableInteger_DoesNotThrow()
+        {
+            int? zeroValue = 0;
+
+            Require.NonNegative(zeroValue);
+        }
+
+        [TestMethod]
+        public void NonNegative_PositiveNullableInteger_DoesNotThrow()
+        {
+            int? positiveValue = 1;
+
+            Require.NonNegative(positiveValue);
+        }
+
+        [TestMethod]
+        public void NonNegativeIfProvided_NullNullableInteger_DoesNotThrow()
+        {
+            int? nullValue = null;
+
+            Require.NonNegativeIfProvided(nullValue);
+        }
+
+        [TestMethod]
+        public void NonNegativeIfProvided_NegativeNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.NonNegativeIfProvided(negativeValue));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void NonNegativeIfProvided_ZeroNullableInteger_DoesNotThrow()
+        {
+            int? zeroValue = 0;
+
+            Require.NonNegativeIfProvided(zeroValue);
+        }
+
+        [TestMethod]
+        public void NonNegativeIfProvided_PositiveNullableInteger_DoesNotThrow()
+        {
+            int? positiveValue = 1;
+
+            Require.NonNegativeIfProvided(positiveValue);
+        }
     }
 }

@@ -15,6 +15,8 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PapiResponseCommon>> PatronMessageDeleteAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default)
         {
+            Require.Positive(messageId);
+
             var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/messages/{messageType}/{messageId}";
             var request = PapiRestRequest.Delete(url, password: password);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);

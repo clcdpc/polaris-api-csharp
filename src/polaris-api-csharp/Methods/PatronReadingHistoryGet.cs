@@ -15,6 +15,9 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronReadingHistoryGetResult>> PatronReadingHistoryGetAsync(string barcode, int page = 1, int rowsPerPage = 50, string password = "", CancellationToken cancellationToken = default)
         {
+            Require.Positive(page);
+            Require.Positive(rowsPerPage);
+
             var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/readinghistory";
             var request = PapiRestRequest.Get(url, password: password);
             request.QueryParameters.Add("page", page);

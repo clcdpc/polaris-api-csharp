@@ -1,6 +1,7 @@
 
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,9 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PapiResponseCommon>> PatronTitleListDeleteTitleAsync(string barcode, int listId, int position, string password = "", CancellationToken cancellationToken = default)
         {
+            Require.Positive(listId);
+            Require.Positive(position);
+
             var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistdeletetitle";
             var request = PapiRestRequest.Delete(url, password: password);
             request.QueryParameters.Add("list", listId);

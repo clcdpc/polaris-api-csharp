@@ -1,5 +1,6 @@
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<BibGetResult>> BibGetAsync(int bibId, int? branchId = null, CancellationToken cancellationToken = default)
         {
+            Require.Positive(bibId);
+            Require.PositiveIfProvided(branchId);
+
             var url = $"/public/v1/1033/100/{branchId ?? OrganizationId}/bib/{bibId}";
             var request = PapiRestRequest.Get(url);
             return await ExecutePapiAsync<BibGetResult>(request, cancellationToken).ConfigureAwait(false);

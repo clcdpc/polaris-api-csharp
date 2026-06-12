@@ -14,6 +14,14 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<HoldRequestCreateResult>> HoldRequestCreateAsync(HoldRequestCreateParams holdParams, CancellationToken cancellationToken = default)
         {
+            ArgumentNullException.ThrowIfNull(holdParams);
+            Require.Positive(holdParams.PatronID);
+            Require.Positive(holdParams.BibID);
+            Require.PositiveIfProvided(holdParams.PickupOrgID == 0 ? null : holdParams.PickupOrgID);
+            Require.Positive(holdParams.WorkstationID);
+            Require.Positive(holdParams.UserID);
+            Require.Positive(holdParams.RequestingOrgID);
+
             var url = $"/public/v1/1033/100/{holdParams.RequestingOrgID}/holdrequest";
             var request = PapiRestRequest.Post(url, body: holdParams);
             return await ExecutePapiAsync<HoldRequestCreateResult>(request, cancellationToken).ConfigureAwait(false);

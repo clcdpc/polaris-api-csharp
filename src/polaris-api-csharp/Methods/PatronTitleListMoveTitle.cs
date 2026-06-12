@@ -1,6 +1,7 @@
 
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +27,10 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PapiResponseCommon>> PatronTitleListMoveTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default)
         {
+            Require.Positive(fromRecordStoreId);
+            Require.Positive(fromPosition);
+            Require.Positive(toRecordStoreId);
+
             var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistmovetitle/";
             var body = new PatronTitleListMoveTitleData { FromRecordStoreId = fromRecordStoreId, FromPosition = fromPosition, ToRecordStoreId = toRecordStoreId };
             var request = PapiRestRequest.Post(url, body: body, password: password);

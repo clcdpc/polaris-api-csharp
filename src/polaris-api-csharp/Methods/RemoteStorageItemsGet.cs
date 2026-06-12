@@ -14,6 +14,10 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<RemoteStorageItemsGetResult>> RemoteStorageItemsGetAsync(int branchId, string startDate, string endDate, int maxItems, int listType, int? startItemRecordId = null, CancellationToken cancellationToken = default)
         {
+            Require.Positive(branchId);
+            Require.Positive(maxItems);
+            Require.PositiveIfProvided(startItemRecordId);
+
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/cataloging/remotestorage/items";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("branch", branchId);

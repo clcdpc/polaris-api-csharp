@@ -1,5 +1,6 @@
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,6 +13,8 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<GetBarcodeAndPatronIDResult>> Patron_GetBarcodeFromIdAsync(int patronId, CancellationToken cancellationToken = default)
         {
+            Require.Positive(patronId);
+
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/barcode";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("patronid", patronId);

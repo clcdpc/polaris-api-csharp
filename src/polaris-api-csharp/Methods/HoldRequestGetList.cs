@@ -1,5 +1,6 @@
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<HoldRequestGetListResult>> HoldRequestGetListAsync(int branchId, RequestListBranchType branchType = RequestListBranchType.PickupBranch, HoldStatus status = HoldStatus.Held, CancellationToken cancellationToken = default)
         {
+            Require.Positive(branchId);
+
             var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/circulation/requests/list";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("branch", branchId);

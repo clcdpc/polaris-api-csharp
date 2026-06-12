@@ -1,5 +1,6 @@
 using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,12 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<BibSearchResult>> BibSearchAsync(BibSearchOptions options, CancellationToken cancellationToken = default)
         {
+            ArgumentNullException.ThrowIfNull(options);
+            Require.Argument(options.Term);
+            Require.Positive(options.Branch);
+            Require.Positive(options.Page);
+            Require.Positive(options.PageSize);
+
             var url = $"/public/v1/1033/100/{options.Branch}/search/bibs/{options.SearchType}";
             if (options.SearchType == BibSearchTypes.keyword) { url += $"/{options.Qualifier}"; }
 

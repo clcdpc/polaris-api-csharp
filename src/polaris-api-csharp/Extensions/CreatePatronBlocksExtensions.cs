@@ -1,5 +1,6 @@
 using Clc.Polaris.Api.Models;
 using Clc.Rest;
+using Clc.Polaris.Api.Validation;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +28,8 @@ namespace Clc.Polaris.Api
             int? workstationId = null,
             CancellationToken cancellationToken = default)
         {
+            Require.Positive(blockId);
+
             return client.CreatePatronBlocksAsync(barcode, BlockType.LibraryAssigned, blockId.ToString(CultureInfo.InvariantCulture), userId, workstationId, cancellationToken);
         }
 
