@@ -142,8 +142,5 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
                     Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 };
             }
-        }
-
-        public TestContext TestContext { get; set; }
-    }
+        }}
 }

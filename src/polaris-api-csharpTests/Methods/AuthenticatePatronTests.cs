@@ -6,69 +6,34 @@ using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api;
 using Clc.Polaris.Api.Configuration;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitTest]
-    public class AuthenticatePatronTests
+    public class AuthenticatePatronTests : PapiClientTestBase
     {
-        private sealed class CaptureHttpMessageHandler : HttpMessageHandler
-        {
-            public HttpRequestMessage? LastRequest { get; private set; }
-            public string? RequestContent { get; private set; }
-
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                LastRequest = request;
-                if (request.Content != null)
-                {
-                    RequestContent = await request.Content.ReadAsStringAsync(cancellationToken);
-                }
-                var response = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(new { PAPIErrorCode = 0, AccessToken = "mock-token", AccessSecret = "mock-secret", PatronID = 123 }))
-                };
-                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                return response;
-            }
-        }
-
-        private static PapiClient CreateClient(CaptureHttpMessageHandler handler)
-        {
-            var settings = new PapiSettings
-            {
-                AccessId = "test-access-id",
-                AccessKey = "test-access-key",
-                Hostname = "https://example.test",
-                OrganizationId = 1,
-                UserId = 123,
-                WorkstationId = 456
-            };
-
-            var httpClient = new HttpClient(handler);
-            return new PapiClient(httpClient, settings);
-        }
-
         [TestMethod]
         public async Task AuthenticatePatron_SendsPostRequestWithJsonBody()
         {
-            var handler = new CaptureHttpMessageHandler();
+            var handler = new CapturingHttpMessageHandler(CreateJson(new { PAPIErrorCode = 0, AccessToken = "mock-token", AccessSecret = "mock-secret", PatronID = 123 }));
+
             var client = CreateClient(handler);
             var barcode = "21945001234567";
             var password = "mypassword";
 
-            var response = await client.AuthenticatePatronAsync(barcode, password);
+            var response = await client.AuthenticatePatronAsync(barcode, password, TestContext.CancellationToken);
 
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Post, handler.LastRequest.Method);
             var expectedPath = "/PAPIService/REST/public/v1/1033/100/1/authenticator/patron";
             Assert.AreEqual(expectedPath, handler.LastRequest.RequestUri!.AbsolutePath);
 
-            Assert.IsNotNull(handler.RequestContent);
-            Assert.IsTrue(handler.RequestContent.Contains($"\"Barcode\":\"{barcode}\"") || handler.RequestContent.Contains($"\"barcode\":\"{barcode}\""), "Body should contain barcode");
-            Assert.IsTrue(handler.RequestContent.Contains($"\"Password\":\"{password}\"") || handler.RequestContent.Contains($"\"password\":\"{password}\""), "Body should contain password");
+            Assert.IsNotNull(handler.LastRequestContent);
+            Assert.IsTrue(handler.LastRequestContent.Contains($"\"Barcode\":\"{barcode}\"") || handler.LastRequestContent.Contains($"\"barcode\":\"{barcode}\""), "Body should contain barcode");
+            Assert.IsTrue(handler.LastRequestContent.Contains($"\"Password\":\"{password}\"") || handler.LastRequestContent.Contains($"\"password\":\"{password}\""), "Body should contain password");
 
             Assert.IsNotNull(response.Data);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);

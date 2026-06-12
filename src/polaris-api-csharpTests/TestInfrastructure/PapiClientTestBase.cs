@@ -18,6 +18,8 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 {
     public abstract class PapiClientTestBase
     {
+        public TestContext TestContext { get; set; } = null!;
+
         protected static PapiClient CreateClient(HttpMessageHandler? handler = null)
         {
             var settings = new TestPapiSettings();
@@ -29,7 +31,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             };
         }
 
-        protected static PapiClient CreateUrlEncodingClient(CaptureHttpMessageHandler handler)
+        protected static PapiClient CreateUrlEncodingClient(CapturingHttpMessageHandler handler)
         {
             var settings = new PapiSettings
             {
@@ -157,10 +159,10 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             var matchingRequests = handler.CapturedRequests
                 .Where(request => !request.IsStaffAuthenticationRequest && request.AbsoluteUri.Contains(queryMarker, StringComparison.Ordinal))
                 .ToArray();
-            Assert.IsTrue(matchingRequests.Length > 0, $"Expected at least one final request containing '{queryMarker}'.");
+            Assert.IsNotEmpty(matchingRequests, $"Expected at least one final request containing '{queryMarker}'.");
             foreach (var request in matchingRequests)
             {
-                StringAssert.Contains(request.Path, $"/protected/v1/1033/100/1/{expectedToken}/search/patrons/Boolean");
+                Assert.Contains($"/protected/v1/1033/100/1/{expectedToken}/search/patrons/Boolean", request.Path);
                 Assert.IsFalse(request.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
                 AssertAuthorizationHash(request, expectedSecret, "access-key", "access-id");
             }
@@ -235,22 +237,6 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             public int WorkstationId { get; set; } = 1;
             public int OrganizationId { get; set; } = 1;
             public PolarisUser? PolarisOverrideAccount { get; set; }
-        }
-
-        protected sealed class CaptureHttpMessageHandler : HttpMessageHandler
-        {
-            public HttpRequestMessage? LastRequest { get; private set; }
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                LastRequest = request;
-                var response = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(CreatePapiResponseJson())
-                };
-                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                return Task.FromResult(response);
-            }
         }
 
         protected sealed class CapturingHttpMessageHandler : HttpMessageHandler

@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task HoldingsGetTest()
         {
-            var response = await Papi.HoldingsGetAsync(478907);
-            Assert.IsTrue(response.Data.BibHoldingsGetRows.Any());
+            var response = await Papi.HoldingsGetAsync(478907, TestContext.CancellationToken);
+            Assert.IsNotEmpty(response.Data.BibHoldingsGetRows);
         }
     }
 }

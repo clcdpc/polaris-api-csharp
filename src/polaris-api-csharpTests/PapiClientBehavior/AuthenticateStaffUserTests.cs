@@ -66,7 +66,5 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.EndsWith("/protected/v1/1033/100/1/authenticator/staff", request.Path);
             AssertAuthorizationHash(request, string.Empty, client.AccessKey, client.AccessID);
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

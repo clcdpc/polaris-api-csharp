@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task MARCTypeOfMaterialsGetAsyncTest()
         {
-            var response = (await Papi.MARCTypeOfMaterialsGetAsync()).Data;
-            Assert.IsTrue(response.MARCTypeOfMaterialsRows.Count() == response.PAPIErrorCode);
+            var response = (await Papi.MARCTypeOfMaterialsGetAsync(cancellationToken: TestContext.CancellationToken)).Data;
+            Assert.HasCount(response.PAPIErrorCode, response.MARCTypeOfMaterialsRows);
         }
     }
 }

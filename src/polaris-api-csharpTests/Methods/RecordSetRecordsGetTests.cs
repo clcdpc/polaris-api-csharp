@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.RecordSetRecordsGetAsync(1234);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
+            var response = await Papi.RecordSetRecordsGetAsync(1234, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(-11001, response.Data.PAPIErrorCode);
         }
     }
 }

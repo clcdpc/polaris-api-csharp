@@ -12,8 +12,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task HoldRequestCreateTest()
         {
-            var response = await Papi.HoldRequestCreateAsync(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7));
-            Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
+            var response = await Papi.HoldRequestCreateAsync(new HoldRequestCreateParams(Settings.PatronId, 1234, 7, 7), TestContext.CancellationToken);
+            Assert.AreEqual(-4006, response.Data.PAPIErrorCode);
         }
 
         [TestMethod]
@@ -21,8 +21,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task HoldRequestCreateTest2()
         {
-            var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -4006);
+            var response = await ((PapiClient)Papi).HoldRequestCreateAsync(Settings.PatronId, 1234, 7, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(-4006, response.Data.PAPIErrorCode);
         }
     }
 }

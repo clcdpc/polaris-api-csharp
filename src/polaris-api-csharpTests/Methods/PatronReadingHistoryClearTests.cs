@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronReadingHistoryClearTest()
         {
-            var response = await Papi.PatronReadingHistoryClearAsync(Settings.PatronBarcode, Settings.PatronPin, new[] { 1234 });
-            Assert.IsTrue(response.Data.PAPIErrorCode == -10);
+            var response = await Papi.PatronReadingHistoryClearAsync(Settings.PatronBarcode, Settings.PatronPin, [1234], TestContext.CancellationToken);
+            Assert.AreEqual(-10, response.Data.PAPIErrorCode);
         }
     }
 }

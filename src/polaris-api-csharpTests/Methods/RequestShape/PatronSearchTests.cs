@@ -19,14 +19,15 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             var client = CreateClient(handler);
             client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = ValidProtectedTokenExpirationDate };
 
-            var response = await client.PatronSearchAsync("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9);
+            var response = await client.PatronSearchAsync("name = Smith & status: active", page: 3, pageSize: 25, sortBy: PatronSortKeys.PATNL, orgId: 9, TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/9/token/search/patrons/Boolean");
+            Assert.Contains("/protected/v1/1033/100/9/token/search/patrons/Boolean", handler.LastRequest.RequestUri!.AbsolutePath);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
             Assert.AreEqual("name = Smith & status: active", query["q"]);
-            Assert.AreEqual("25", query["patronsperpage"]);
+            Assert.AreEqual("25", query["patrons" +
+                "perpage"]);
             Assert.AreEqual("3", query["page"]);
             Assert.AreEqual("PATNL", query["sort"]);
             Assert.IsNull(handler.LastRequest.Content);

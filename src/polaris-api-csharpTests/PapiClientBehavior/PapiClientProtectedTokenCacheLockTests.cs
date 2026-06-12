@@ -133,7 +133,5 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
                 };
             }
         }
-
-        public TestContext TestContext { get; set; } = null!;
     }
 }

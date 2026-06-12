@@ -64,7 +64,7 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public async Task ExecutePapiAsync_DoesNotMutateCallerRequestPath_WhenReplacingProtectedTokenPlaceholder()
         {
-            var handler = new MutationCaptureHttpMessageHandler();
+            var handler = new MutationCapturingHttpMessageHandler();
             var client = CreateMutationClient(handler);
             client.Token = new ProtectedToken
             {
@@ -78,23 +78,23 @@ namespace Clc.Polaris.Api.Tests
 
             var originalPath = request.Path;
 
-            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+            await client.ExecutePapiAsync<PapiResponseCommon>(request, TestContext.CancellationToken);
 
             Assert.AreEqual(originalPath, request.Path);
             Assert.IsNotNull(handler.LastRequest);
-            StringAssert.Contains(handler.LastRequest!.RequestUri!.AbsolutePath, "/protected-token/");
+            Assert.Contains("/protected-token/", handler.LastRequest!.RequestUri!.AbsolutePath);
         }
 
         [TestMethod]
         public async Task ExecutePapiAsync_DoesNotMutateCallerRequestHeaders_WhenSigningRequest()
         {
-            var handler = new MutationCaptureHttpMessageHandler();
+            var handler = new MutationCapturingHttpMessageHandler();
             var client = CreateMutationClient(handler);
 
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.Headers["X-Caller"] = "preserve";
 
-            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+            await client.ExecutePapiAsync<PapiResponseCommon>(request, TestContext.CancellationToken);
 
             Assert.AreEqual("preserve", request.Headers["X-Caller"]);
             Assert.IsFalse(request.Headers.ContainsKey("PolarisDate"));
@@ -105,15 +105,15 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         public async Task ExecutePapiAsync_DoesNotMutateCallerRequestQueryParameters()
         {
-            var handler = new MutationCaptureHttpMessageHandler();
+            var handler = new MutationCapturingHttpMessageHandler();
             var client = CreateMutationClient(handler);
 
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
             request.QueryParameters["first"] = "original";
 
-            await client.ExecutePapiAsync<PapiResponseCommon>(request);
+            await client.ExecutePapiAsync<PapiResponseCommon>(request, TestContext.CancellationToken);
 
-            Assert.AreEqual(1, request.QueryParameters.Count);
+            Assert.HasCount(1, request.QueryParameters);
             Assert.AreEqual("original", request.QueryParameters["first"]);
         }
 
@@ -127,7 +127,7 @@ namespace Clc.Polaris.Api.Tests
             };
         }
 
-        private sealed class MutationCaptureHttpMessageHandler : HttpMessageHandler
+        private sealed class MutationCapturingHttpMessageHandler : HttpMessageHandler
         {
             public HttpRequestMessage? LastRequest { get; private set; }
 

@@ -29,11 +29,11 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
                 Limit = "3"
             };
 
-            var response = await client.BibSearchAsync(options);
+            var response = await client.BibSearchAsync(options, TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/search/bibs/keyword/KW");
+            Assert.Contains("/public/v1/1033/100/1/search/bibs/keyword/KW", handler.LastRequest.RequestUri!.AbsolutePath);
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sort=MP&page=2&bibsperpage=15&limit=3";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
@@ -54,12 +54,12 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             IPapiClient client = CreateClient(handler);
 
-            var response = await client.BibKeywordSearchAsync("harry potter & stone", branchId: 7, page: 2, pageSize: 15, sortBy: SearchSortOptions.MP);
+            var response = await client.BibKeywordSearchAsync("harry potter & stone", branchId: 7, page: 2, pageSize: 15, sortBy: SearchSortOptions.MP, TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/7/search/bibs/keyword/KW");
+            Assert.Contains("/public/v1/1033/100/7/search/bibs/keyword/KW", handler.LastRequest.RequestUri!.AbsolutePath);
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/7/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sort=MP&page=2&bibsperpage=15";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
@@ -80,11 +80,11 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             IPapiClient client = CreateClient(handler);
             client.OrganizationId = 42;
 
-            var response = await client.BibKeywordSearchAsync("default branch search");
+            var response = await client.BibKeywordSearchAsync("default branch search", cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
-            StringAssert.Contains(handler.LastRequest!.RequestUri!.AbsolutePath, "/public/v1/1033/100/42/search/bibs/keyword/KW");
+            Assert.Contains("/public/v1/1033/100/42/search/bibs/keyword/KW", handler.LastRequest!.RequestUri!.AbsolutePath);
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/keyword/KW?q=default%20branch%20search&sort=MP&page=1&bibsperpage=10";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
@@ -96,12 +96,12 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             IPapiClient client = CreateClient(handler);
 
-            var response = await client.BibBooleanSearchAsync("TI=Harry Potter", branchId: 8, page: 3, pageSize: 20, sortBy: SearchSortOptions.AU);
+            var response = await client.BibBooleanSearchAsync("TI=Harry Potter", branchId: 8, page: 3, pageSize: 20, sortBy: SearchSortOptions.AU, TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/8/search/bibs/boolean");
+            Assert.Contains("/public/v1/1033/100/8/search/bibs/boolean", handler.LastRequest.RequestUri!.AbsolutePath);
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/8/search/bibs/boolean?q=TI%3DHarry%20Potter&sort=AU&page=3&bibsperpage=20";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
@@ -122,11 +122,11 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
             IPapiClient client = CreateClient(handler);
             client.OrganizationId = 42;
 
-            var response = await client.BibBooleanSearchAsync("TI=Default Branch");
+            var response = await client.BibBooleanSearchAsync("TI=Default Branch", cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
-            StringAssert.Contains(handler.LastRequest!.RequestUri!.AbsolutePath, "/public/v1/1033/100/42/search/bibs/boolean");
+            Assert.Contains("/public/v1/1033/100/42/search/bibs/boolean", handler.LastRequest!.RequestUri!.AbsolutePath);
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/boolean?q=TI%3DDefault%20Branch&sort=MP&page=1&bibsperpage=10";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
@@ -148,7 +148,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
                 PageSize = 15
             };
 
-            var response = await client.BibSearchAsync(options);
+            var response = await client.BibSearchAsync(options, TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);

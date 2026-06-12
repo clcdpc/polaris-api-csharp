@@ -120,8 +120,5 @@ namespace Clc.Polaris.Api.Tests
                     Content = new StringContent(CreateEmptyJsonObject())
                 });
             }
-        }
-
-        public TestContext TestContext { get; set; }
-    }
+        }}
 }

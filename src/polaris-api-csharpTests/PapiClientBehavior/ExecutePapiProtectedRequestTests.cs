@@ -286,8 +286,5 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var finalRequest = handler.CapturedRequests.Single();
             Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
-        }
-
-        public TestContext TestContext { get; set; }
-    }
+        }}
 }

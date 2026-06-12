@@ -140,8 +140,5 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.Contains(
                 "/protected/v1/1033/100/1/cached-token/search/patrons/Boolean",
                 cacheEnabledHandler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest).Path);
-        }
-
-        public TestContext TestContext { get; set; }
-    }
+        }}
 }

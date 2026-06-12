@@ -12,8 +12,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.RecordSetContentRemoveAsync(1234, 1234);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
+            var response = await Papi.RecordSetContentRemoveAsync(1234, 1234, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(-11001, response.Data.PAPIErrorCode);
         }
 
         [TestMethod]
@@ -23,8 +23,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.RecordSetContentRemoveAsync(1234, new[] { 1234 });
-            Assert.IsTrue(response.Data.PAPIErrorCode == -11001);
+            var response = await Papi.RecordSetContentRemoveAsync(1234, [1234], cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(-11001, response.Data.PAPIErrorCode);
         }
     }
 }

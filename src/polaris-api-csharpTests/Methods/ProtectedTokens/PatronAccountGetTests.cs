@@ -27,7 +27,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -41,7 +41,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateEmptyJsonObject());
             var client = CreateProtectedClient(handler);
 
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -61,7 +61,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -81,7 +81,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -101,7 +101,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 ExpirationDate = ExpiredProtectedTokenExpirationDate
             };
 
-            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken));
 
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
@@ -115,9 +115,9 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
-            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken));
 
-            StringAssert.Contains(exception.Message, "Staff authentication did not succeed");
+            Assert.Contains("Staff authentication did not succeed", exception.Message);
             Assert.AreEqual(1, handler.AuthenticationRequestCount);
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
@@ -130,12 +130,12 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             client.StaffOverrideAccount = null;
             client.AllowStaffOverrideRequests = true;
 
-            var response = await client.PatronAccountGetAsync("ABC123");
+            var response = await client.PatronAccountGetAsync("ABC123", cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
-            StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
+            Assert.Contains("/public/v1/1033/100/1/patron/ABC123/account/outstanding", handler.RequestPaths.Single());
         }
 
         [TestMethod]
@@ -144,12 +144,12 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
-            var response = await client.PatronAccountGetAsync("ABC123", password: "patron-password");
+            var response = await client.PatronAccountGetAsync("ABC123", password: "patron-password", TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
             Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
-            StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
+            Assert.Contains("/public/v1/1033/100/1/patron/ABC123/account/outstanding", handler.RequestPaths.Single());
         }
     }
 }

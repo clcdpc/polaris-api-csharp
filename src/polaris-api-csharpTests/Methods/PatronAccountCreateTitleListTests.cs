@@ -24,7 +24,5 @@ namespace Clc.Polaris.Api.Tests
             var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, list.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
             Assert.AreEqual(0, deleteResponse.Data.PAPIErrorCode);
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

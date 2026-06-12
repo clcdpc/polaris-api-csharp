@@ -80,7 +80,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual("https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter", handler.LastRequest!.RequestUri!.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
-            Assert.AreEqual(1, query.Count);
+            Assert.HasCount(1, query);
             Assert.IsTrue(query.ContainsKey("q"));
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
