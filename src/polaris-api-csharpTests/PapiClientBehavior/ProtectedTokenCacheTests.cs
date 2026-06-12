@@ -121,7 +121,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             var failingHandler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.Unauthorized,
-                "{\"PAPIErrorCode\":1}");
+                CreatePapiResponseJson(1));
             var cacheDisabledClient = CreateProtectedClient(failingHandler, hostname, staff);
             cacheDisabledClient.UseProtectedTokenCache = false;
 

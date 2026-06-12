@@ -1,7 +1,7 @@
-using Clc.Polaris.Api.Models;
-using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Rest;
 
 namespace Clc.Polaris.Api
 {
@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api
             CancellationToken cancellationToken = default)
         {
             return client.Synch_BibsByIdGetAsync(
-                new[] { bibId },
+                [bibId],
                 includeItems,
                 cancellationToken);
         }

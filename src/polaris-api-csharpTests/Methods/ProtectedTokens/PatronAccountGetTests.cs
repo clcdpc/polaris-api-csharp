@@ -21,11 +21,10 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             ClearProtectedTokenState();
         }
 
-
         [TestMethod]
         public async Task PatronAccountGetAsync_FailedStaffAuthentication_DoesNotPopulateProtectedTokenCache()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
@@ -35,12 +34,11 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
-
 
         [TestMethod]
         public async Task PatronAccountGetAsync_NullDataStaffAuthentication_DoesNotPopulateProtectedTokenCache()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateEmptyJsonObject());
             var client = CreateProtectedClient(handler);
 
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
@@ -50,12 +48,11 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
-
 
         [TestMethod]
         public async Task PatronAccountGetAsync_FailedStaffAuthentication_AfterExpiredExistingTokenClearsToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             client.Token = new ProtectedToken
             {
@@ -71,12 +68,11 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
-
 
         [TestMethod]
         public async Task PatronAccountGetAsync_NullDataStaffAuthentication_AfterExpiredExistingTokenClearsToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, "{}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateEmptyJsonObject());
             var client = CreateProtectedClient(handler);
             client.Token = new ProtectedToken
             {
@@ -92,8 +88,6 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsNull(client.Token);
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
-
-
 
         [TestMethod]
         public async Task PatronAccountGetAsync_InvalidStaffAuthentication_AfterExpiredExistingTokenClearsTokenAndDoesNotCache()
@@ -117,11 +111,10 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.IsFalse(TryGetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, out _));
         }
 
-
         [TestMethod]
         public async Task PatronAccountGetAsync_PublicStaffOverride_FailedStaffAuthentication_ThrowsBeforeFinalRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
             var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronAccountGetAsync("ABC123"));
@@ -131,11 +124,10 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             Assert.AreEqual(0, handler.NonAuthenticationRequestCount);
         }
 
-
         [TestMethod]
         public async Task PatronAccountGetAsync_PublicRequestWithoutStaffOverrideAccount_ContinuesAsOrdinaryPublicRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             client.StaffOverrideAccount = null;
             client.AllowStaffOverrideRequests = true;
@@ -148,11 +140,10 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
             StringAssert.Contains(handler.RequestPaths.Single(), "/public/v1/1033/100/1/patron/ABC123/account/outstanding");
         }
 
-
         [TestMethod]
         public async Task PatronAccountGetAsync_PublicRequestWithExplicitPassword_DoesNotRequireStaffOverrideToken()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
             var response = await client.PatronAccountGetAsync("ABC123", password: "patron-password");

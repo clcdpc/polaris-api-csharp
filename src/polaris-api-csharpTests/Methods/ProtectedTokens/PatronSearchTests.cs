@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task ProtectedTokenPathRequest_ReplacesPlaceholderBeforeSending()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             client.Token = new ProtectedToken { AccessToken = "real-token", AccessSecret = "real-secret", ExpirationDate = DateTime.Now.AddHours(1) };
 
@@ -43,7 +43,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task ProtectedTokenPathRequest_HashesReplacedUrlInsteadOfPlaceholderUrl()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             client.Token = new ProtectedToken { AccessToken = "hash-token", AccessSecret = "hash-secret", ExpirationDate = DateTime.Now.AddHours(1) };
 
@@ -299,7 +299,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                     return (HttpStatusCode.OK, CreateProtectedTokenJson(passwordBToken));
                 }
 
-                return (HttpStatusCode.BadRequest, "{\"PAPIErrorCode\":1}");
+                return (HttpStatusCode.BadRequest, CreatePapiResponseJson(1));
             });
             var clients = new[]
             {
@@ -534,7 +534,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_ExpiredCachedToken_IsRemovedWhenEncountered()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
@@ -579,7 +579,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_CachedTokenWithBlankAccessSecret_IsRemovedAndNotUsedWhenAuthenticationFails()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             SetCachedToken(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount, new ProtectedToken
             {
@@ -599,7 +599,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
         [TestMethod]
         public async Task PatronSearchAsync_FailedStaffAuthentication_ThrowsBeforeFinalProtectedRequest()
         {
-            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, "{\"PAPIErrorCode\":1}");
+            var handler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.InternalServerError, CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
 
             var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.PatronSearchAsync("name=Smith"));
@@ -703,7 +703,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                     AuthenticationRequestCount++;
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(CreateEmptyJsonObject(), Encoding.UTF8, "application/json")
                     });
                 }
 
@@ -719,7 +719,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 });
             }
         }
@@ -737,9 +737,14 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
                 if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
                 {
                     var requestNumber = Interlocked.Increment(ref _authenticationRequestCount);
+                    var responseJson = CreateProtectedTokenJson(
+                        $"protected-token-{requestNumber}",
+                        $"protected-secret-{requestNumber}",
+                        new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent($"{{\"PAPIErrorCode\":0,\"AccessToken\":\"protected-token-{requestNumber}\",\"AccessSecret\":\"protected-secret-{requestNumber}\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                     });
                 }
 
@@ -750,7 +755,7 @@ namespace Clc.Polaris.Api.Tests.Methods.ProtectedTokens
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 });
             }
         }

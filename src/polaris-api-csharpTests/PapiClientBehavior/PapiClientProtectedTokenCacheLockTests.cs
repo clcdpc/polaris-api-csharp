@@ -108,21 +108,19 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
                         BlockedAuthenticationStarted.TrySetResult();
                         await CompleteBlockedAuthentication.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
 
+                        var blockedResponseJson = CreateProtectedTokenJson("blocked-token", "blocked-secret", new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
                         return new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(
-                                "{\"PAPIErrorCode\":0,\"AccessToken\":\"blocked-token\",\"AccessSecret\":\"blocked-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}",
-                                Encoding.UTF8,
-                                "application/json")
+                            Content = new StringContent(blockedResponseJson, Encoding.UTF8, "application/json")
                         };
                     }
 
+                    var independentResponseJson = CreateProtectedTokenJson("independent-token", "independent-secret", new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
                     return new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(
-                            "{\"PAPIErrorCode\":0,\"AccessToken\":\"independent-token\",\"AccessSecret\":\"independent-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}",
-                            Encoding.UTF8,
-                            "application/json")
+                        Content = new StringContent(independentResponseJson, Encoding.UTF8, "application/json")
                     };
                 }
 
@@ -135,7 +133,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 };
             }
         }

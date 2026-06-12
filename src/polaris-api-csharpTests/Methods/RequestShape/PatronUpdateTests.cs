@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task PatronUpdate_RequestShape_IsStable()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
 
             var response = await client.PatronUpdateAsync("AB C/+#?=", new PatronUpdateParams { EmailAddress = "patron@example.test" }, "1234", ignoresa: true);

@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
         [TestMethod]
         public async Task ApiKeyValidateAsync_PassesCancellationToken()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             using var cts = new CancellationTokenSource();
 

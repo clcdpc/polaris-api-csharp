@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task AuthenticateStaffUser_RequestShape_IsStable()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0,\"AccessToken\":\"t\",\"AccessSecret\":\"s\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}");
+            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("t", "s", new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
             var client = CreateClient(handler);
 
             var response = await client.AuthenticateStaffUserAsync(new PolarisUser

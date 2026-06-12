@@ -17,7 +17,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task PatronSearch_RequestShape_PreservesEncodedQuerySemantics()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
             client.Token = new ProtectedToken { AccessToken = "token", AccessSecret = "secret", ExpirationDate = DateTime.Now.AddHours(1) };
 

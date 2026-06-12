@@ -92,9 +92,11 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
                     Interlocked.Increment(ref _authenticationRequestCount);
                     AuthenticationStarted.TrySetResult();
                     await CompleteAuthentication.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    var responseJson = CreateProtectedTokenJson("blocked-token", "blocked-secret", new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
                     return new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent("{\"PAPIErrorCode\":0,\"AccessToken\":\"blocked-token\",\"AccessSecret\":\"blocked-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                     };
                 }
 
@@ -105,7 +107,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 };
             }
         }
@@ -138,7 +140,7 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 };
             }
         }

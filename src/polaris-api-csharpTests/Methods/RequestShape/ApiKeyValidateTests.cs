@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task ApiKeyValidate_RequestShape_IsStable()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
 
             var response = await client.ApiKeyValidateAsync();

@@ -193,7 +193,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
                 HttpStatusCode.OK,
                 CreateProtectedTokenJson("error-path-token", "error-path-secret", DateTime.Now.AddHours(1)),
                 HttpStatusCode.InternalServerError,
-                "{\"PAPIErrorCode\":1}");
+                CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get($"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/custom/unsupported");
             var originalPath = request.Path;
@@ -248,7 +248,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.Unauthorized,
-                "{\"PAPIErrorCode\":1}");
+                CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/api");
 
@@ -267,7 +267,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.Unauthorized,
-                "{\"PAPIErrorCode\":1}");
+                CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get(
                 "/public/v1/1033/100/1/patron/ABC123/basicdata",
@@ -288,7 +288,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         {
             var handler = new ProtectedTokenHttpMessageHandler(
                 HttpStatusCode.Unauthorized,
-                "{\"PAPIErrorCode\":1}");
+                CreatePapiResponseJson(1));
             var client = CreateProtectedClient(handler);
             var request = PapiRestRequest.Get("/public/v1/1033/100/1/patronlanguages");
 
