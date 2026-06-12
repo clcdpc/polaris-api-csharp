@@ -1,6 +1,7 @@
 using Clc.Polaris.Api.Models;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -263,15 +264,21 @@ namespace Clc.Polaris.Api
                     continue;
                 }
 
-                if (Locks.TryRemove(pair.Key, out var removedEntry) && ReferenceEquals(removedEntry, entry))
+                if (TryRemoveLockEntry(pair.Key, entry))
                 {
-                    removedEntry.Dispose();
+                    entry.Dispose();
                 }
                 else
                 {
                     entry.UndoRetire();
                 }
             }
+        }
+
+        private static bool TryRemoveLockEntry(string cacheKey, LockEntry entry)
+        {
+            return ((ICollection<KeyValuePair<string, LockEntry>>)Locks)
+                .Remove(new KeyValuePair<string, LockEntry>(cacheKey, entry));
         }
 
         private static bool CanUseCache(string? cacheKey, bool useCache)
