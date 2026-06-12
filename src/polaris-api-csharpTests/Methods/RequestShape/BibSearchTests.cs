@@ -77,7 +77,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         public async Task BibKeywordSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            IPapiClient client = CreateClient(handler);
+            var client = CreateClient(handler);
             client.OrganizationId = 42;
 
             var response = await client.BibKeywordSearchAsync("default branch search", cancellationToken: TestContext.CancellationToken);
@@ -119,7 +119,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         public async Task BibBooleanSearchAsync_ThroughInterfaceWithoutBranchId_UsesOrganizationId()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            IPapiClient client = CreateClient(handler);
+            var client = CreateClient(handler);
             client.OrganizationId = 42;
 
             var response = await client.BibBooleanSearchAsync("TI=Default Branch", cancellationToken: TestContext.CancellationToken);
