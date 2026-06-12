@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
             int workstationId = 1,
             CancellationToken cancellationToken = default)
         {
-            return client.RecordSetContentPutAsync(recordSetId, new[] { recordId }, RecordSetContentPutActions.Add, userId, workstationId, cancellationToken);
+            return client.RecordSetContentPutAsync(recordSetId, [recordId], RecordSetContentPutActions.Add, userId, workstationId, cancellationToken);
         }
 
         public static Task<IRestResponse<PapiResponseCommon>> RecordSetContentAddAsync(
@@ -38,7 +38,7 @@ namespace Clc.Polaris.Api
             int workstationId = 1,
             CancellationToken cancellationToken = default)
         {
-            return client.RecordSetContentPutAsync(recordSetId, new[] { recordId }, RecordSetContentPutActions.Remove, userId, workstationId, cancellationToken);
+            return client.RecordSetContentPutAsync(recordSetId, [recordId], RecordSetContentPutActions.Remove, userId, workstationId, cancellationToken);
         }
 
         public static Task<IRestResponse<PapiResponseCommon>> RecordSetContentRemoveAsync(
