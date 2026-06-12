@@ -36,7 +36,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "protected-token",
                 AccessSecret = "protected-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
             var request = new PapiRestRequest(HttpMethod.Get, "/protected/v1/1033/100/1/protected-token/search/patrons/Boolean");
 

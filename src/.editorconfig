@@ -1,7 +1,19 @@
 ﻿[*.cs]
 
+# MSTEST0046: Use Assert.Contains instead of StringAssert.Contains
+dotnet_diagnostic.MSTEST0046.severity = warning
+
+# MSTEST0049: Pass TestContext.CancellationToken to async test calls when available
+dotnet_diagnostic.MSTEST0049.severity = warning
+
+# MSTEST0037: Use the most specific Assert method instead of generic Assert.IsTrue/Assert.IsFalse patterns
+dotnet_diagnostic.MSTEST0037.severity = warning
+
 # CA1707: Identifiers should not contain underscores
 dotnet_diagnostic.CA1707.severity = none
 
 # IDE0130: Namespace does not match folder structure
 dotnet_diagnostic.IDE0130.severity = none
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none

@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task PickupBranchesGetTest()
         {
-            var response = await Papi.PickupBranchesGetAsync();
-            Assert.IsTrue(response.Data.PickupBranchesRows.Any());
+            var response = await Papi.PickupBranchesGetAsync(cancellationToken: TestContext.CancellationToken);
+            Assert.IsNotEmpty(response.Data.PickupBranchesRows);
         }
     }
 }

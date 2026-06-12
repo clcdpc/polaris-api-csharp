@@ -11,30 +11,24 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
     [UnitTest]
     public class AuthenticateStaffUserTests : PapiClientTestBase
     {
-
         [TestMethod]
         public async Task AuthenticateStaffUser_RequestShape_IsStable()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0,\"AccessToken\":\"t\",\"AccessSecret\":\"s\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}");
+            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson(accessToken: "t", accessSecret: "s", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateClient(handler);
 
-            var response = await client.AuthenticateStaffUserAsync(new PolarisUser
-            {
-                Domain = "main",
-                Username = "staff",
-                Password = "secret"
-            });
+            var response = await client.AuthenticateStaffUserAsync(new PolarisUser("main", "staff", "secret"), TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Post, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/protected/v1/1033/100/1/authenticator/staff");
+            Assert.Contains("/protected/v1/1033/100/1/authenticator/staff", handler.LastRequest.RequestUri!.AbsolutePath);
             Assert.IsNotNull(handler.LastRequest.Content);
             Assert.IsTrue(handler.LastRequest.Headers.Contains("PolarisDate"));
             Assert.IsTrue(handler.LastRequest.Headers.Contains("Authorization"));
             Assert.IsNotNull(handler.LastRequestContent);
-            StringAssert.Contains(handler.LastRequestContent, "main");
-            StringAssert.Contains(handler.LastRequestContent, "staff");
-            StringAssert.Contains(handler.LastRequestContent, "secret");
+            Assert.Contains("main", handler.LastRequestContent);
+            Assert.Contains("staff", handler.LastRequestContent);
+            Assert.Contains("secret", handler.LastRequestContent);
         }
     }
 }

@@ -46,10 +46,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
         private static bool InvokeIsStaffAuthenticatorRequest(PapiRestRequest? request)
         {
-            var isStaffAuthenticatorRequest = typeof(PapiClient)
-                .GetMethod("IsStaffAuthenticatorRequest", BindingFlags.Static | BindingFlags.NonPublic)!;
-
-            return (bool)isStaffAuthenticatorRequest.Invoke(null, new object?[] { request })!;
+            return PapiRequestClassifier.IsStaffAuthenticatorRequest(request);
         }
 
         private static PapiRestRequest CreateStaffAuthenticatorRequestWithPath(string? path)

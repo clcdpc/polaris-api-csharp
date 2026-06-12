@@ -18,7 +18,5 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessSecret));
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.AccessToken));
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

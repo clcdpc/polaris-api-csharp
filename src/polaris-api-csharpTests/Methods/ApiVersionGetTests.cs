@@ -13,7 +13,5 @@ namespace Clc.Polaris.Api.Tests
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.ToString()));
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronUpdateUserNameTest()
         {
-            var response = await Papi.PatronUpdateUserNameAsync(Settings.PatronBarcode + "1234", Settings.PatronPin, Settings.PatronPin);
-            Assert.IsTrue(response.Response.StatusCode == HttpStatusCode.Unauthorized);
+            var response = await Papi.PatronUpdateUserNameAsync(Settings.PatronBarcode + "1234", Settings.PatronPin, Settings.PatronPin, TestContext.CancellationToken);
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.Response.StatusCode);
         }
     }
 }

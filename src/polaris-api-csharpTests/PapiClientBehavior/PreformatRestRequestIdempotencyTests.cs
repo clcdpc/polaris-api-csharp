@@ -26,11 +26,11 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var second = (PapiRestRequest)client.PreformatRestRequest(first);
 
             Assert.AreSame(first, second);
-            Assert.AreEqual(firstHeaderCount, second.Headers.Count);
+            Assert.HasCount(firstHeaderCount, second.Headers);
             Assert.AreEqual("keep", second.Headers["X-Custom"]);
             Assert.AreSame(body, second.Body);
-            Assert.AreEqual(1, second.Headers.Keys.Count(key => key == "PolarisDate"));
-            Assert.AreEqual(1, second.Headers.Keys.Count(key => key == "Authorization"));
+            Assert.ContainsSingle(key => key == "PolarisDate", second.Headers.Keys);
+            Assert.ContainsSingle(key => key == "Authorization", second.Headers.Keys);
             var date = second.Headers["PolarisDate"];
             var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/patron/ABC123?ignoresa=False";
             var expectedHash = PapiSignature.ComputeHash("access-key", "PUT", expectedUri, date, "1234");

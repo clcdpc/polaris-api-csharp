@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronUpdateTest()
         {
-            var response = await Papi.PatronUpdateAsync(Settings.PatronBarcode, new PatronUpdateParams(), Settings.PatronPin);
-            Assert.IsTrue(response.Data.PAPIErrorCode == 0);
+            var response = await Papi.PatronUpdateAsync(Settings.PatronBarcode, new PatronUpdateParams(), Settings.PatronPin, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
         }
     }
 }

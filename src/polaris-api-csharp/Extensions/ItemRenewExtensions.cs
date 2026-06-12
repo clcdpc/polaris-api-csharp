@@ -14,12 +14,7 @@ namespace Clc.Polaris.Api
             ItemRenewOptions? renewOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return client.ItemRenewAsync(
-                barcode,
-                0,
-                password,
-                renewOptions,
-                cancellationToken);
+            return client.ItemRenewAsync(barcode, 0, password, renewOptions, cancellationToken);
         }
     }
 }

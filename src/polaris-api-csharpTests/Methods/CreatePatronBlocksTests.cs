@@ -15,8 +15,8 @@ namespace Clc.Polaris.Api.Tests
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
             var blockText = CreateUniqueTestArtifactText(Settings.FreeTextBlock, maxLength: 80);
-            var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.FreeText, blockText);
-            Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
+            var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.FreeText, blockText, cancellationToken: TestContext.CancellationToken);
+            Assert.Contains(response.Data.PAPIErrorCode, [0, -3507]);
         }
 
         [TestMethod]
@@ -26,8 +26,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.System, "128");
-            Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
+            var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.System, "128", cancellationToken: TestContext.CancellationToken);
+            Assert.Contains(response.Data.PAPIErrorCode, [0, -3507]);
         }
 
         [TestMethod]
@@ -37,8 +37,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.LibraryAssigned, "1");
-            Assert.IsTrue(new[] { 0, -3507 }.Contains(response.Data.PAPIErrorCode));
+            var response = await Papi.CreatePatronBlocksAsync(Settings.PatronBarcode, BlockType.LibraryAssigned, "1", cancellationToken: TestContext.CancellationToken);
+            Assert.Contains(response.Data.PAPIErrorCode, [0, -3507]);
         }
     }
 }

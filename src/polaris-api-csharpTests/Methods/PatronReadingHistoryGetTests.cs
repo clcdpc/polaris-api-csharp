@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task PatronReadingHistoryGetTest()
         {
-            var response = await Papi.PatronReadingHistoryGetAsync(Settings.PatronBarcode, password: Settings.PatronPin);
-            Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.PatronReadingHistoryGetRows.Count());
+            var response = await Papi.PatronReadingHistoryGetAsync(Settings.PatronBarcode, password: Settings.PatronPin, cancellationToken: TestContext.CancellationToken);
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.PatronReadingHistoryGetRows);
         }
     }
 }

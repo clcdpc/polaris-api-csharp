@@ -11,7 +11,7 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.Synch_BibsByIdGetAsync(478907);
+            var response = await Papi.Synch_BibsByIdGetAsync(478907, cancellationToken: TestContext.CancellationToken);
             Assert.IsTrue(response.Response.IsSuccessStatusCode);
         }
     }

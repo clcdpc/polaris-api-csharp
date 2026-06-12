@@ -24,7 +24,5 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
             Assert.Contains("100/7/bib", response.Response.RequestMessage.RequestUri.ToString());
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

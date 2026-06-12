@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task DatesClosedGetTest()
         {
-            var response = await Papi.DatesClosedGetAsync(7);
-            Assert.IsTrue(response.Data.DatesClosedRows.Any());
+            var response = await Papi.DatesClosedGetAsync(7, TestContext.CancellationToken);
+            Assert.IsNotEmpty(response.Data.DatesClosedRows);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using Clc.Polaris.Api.Tests;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,6 +6,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Tests;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
@@ -30,37 +30,20 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             try
             {
-                blockedRequest = blockedClient.PatronSearchAsync(
-                    "name=Blocked",
-                    orgId: 9,
-                    cancellationToken: TestContext.CancellationToken);
+                blockedRequest = blockedClient.PatronSearchAsync("name=Blocked", orgId: 9, cancellationToken: TestContext.CancellationToken);
+                await handler.BlockedAuthenticationStarted.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.CancellationToken);
 
-                await handler.BlockedAuthenticationStarted.Task.WaitAsync(
-                    TimeSpan.FromSeconds(5),
-                    TestContext.CancellationToken);
+                independentRequest = independentClient.PatronSearchAsync("name=Independent", orgId: 9, cancellationToken: TestContext.CancellationToken);
+                var completed = await Task.WhenAny(independentRequest, Task.Delay(TimeSpan.FromSeconds(1), TestContext.CancellationToken));
 
-                independentRequest = independentClient.PatronSearchAsync(
-                    "name=Independent",
-                    orgId: 9,
-                    cancellationToken: TestContext.CancellationToken);
-
-                var completed = await Task.WhenAny(
-                    independentRequest,
-                    Task.Delay(TimeSpan.FromSeconds(1), TestContext.CancellationToken));
-
-                Assert.AreSame(
-                    independentRequest,
-                    completed,
-                    "An authentication request for a different protected-token cache key should not wait behind the blocked cache key.");
+                Assert.AreSame(independentRequest, completed, "An authentication request for a different protected-token cache key should not wait behind the blocked cache key.");
 
                 await independentRequest.ConfigureAwait(false);
 
                 Assert.IsTrue(independentRequest.IsCompletedSuccessfully);
                 Assert.AreEqual(2, handler.AuthenticationRequestCount);
                 Assert.AreEqual(1, handler.NonAuthenticationRequestCount);
-                Assert.Contains(
-                    "/protected/v1/1033/100/9/independent-token/search/patrons/Boolean",
-                    handler.ProtectedRequests.Single().RequestUri!.AbsolutePath);
+                Assert.Contains("/protected/v1/1033/100/9/independent-token/search/patrons/Boolean", handler.ProtectedRequests.Single().RequestUri!.AbsolutePath);
 
                 handler.CompleteBlockedAuthentication.TrySetResult();
 
@@ -101,19 +84,14 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             private int _authenticationRequestCount;
             private int _nonAuthenticationRequestCount;
 
-            public TaskCompletionSource BlockedAuthenticationStarted { get; } =
-                new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-            public TaskCompletionSource CompleteBlockedAuthentication { get; } =
-                new(TaskCreationOptions.RunContinuationsAsynchronously);
+            public TaskCompletionSource BlockedAuthenticationStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            public TaskCompletionSource CompleteBlockedAuthentication { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
             public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
             public List<HttpRequestMessage> ProtectedRequests { get; } = [];
 
-            protected override async Task<HttpResponseMessage> SendAsync(
-                HttpRequestMessage request,
-                CancellationToken cancellationToken)
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 if (request.RequestUri!.AbsolutePath.Contains("/authenticator/staff", StringComparison.Ordinal))
                 {
@@ -128,21 +106,17 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
                         BlockedAuthenticationStarted.TrySetResult();
                         await CompleteBlockedAuthentication.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
 
+                        var responseJson = CreateProtectedTokenJson(accessToken: "blocked-token", accessSecret: "blocked-secret", expirationDate: ValidProtectedTokenExpirationDate);
                         return new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(
-                                "{\"PAPIErrorCode\":0,\"AccessToken\":\"blocked-token\",\"AccessSecret\":\"blocked-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}",
-                                Encoding.UTF8,
-                                "application/json")
+                            Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
                         };
                     }
 
+                    var independentResponseJson = CreateProtectedTokenJson(accessToken: "independent-token", accessSecret: "independent-secret", expirationDate: ValidProtectedTokenExpirationDate);
                     return new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(
-                            "{\"PAPIErrorCode\":0,\"AccessToken\":\"independent-token\",\"AccessSecret\":\"independent-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}",
-                            Encoding.UTF8,
-                            "application/json")
+                        Content = new StringContent(independentResponseJson, Encoding.UTF8, "application/json")
                     };
                 }
 
@@ -155,11 +129,9 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 };
             }
         }
-
-        public TestContext TestContext { get; set; } = null!;
     }
 }

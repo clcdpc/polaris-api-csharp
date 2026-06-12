@@ -15,6 +15,8 @@ namespace Clc.Polaris.Api.Tests
         protected PapiSettings PapiSettings = null!;
         protected IPapiClient Papi = null!;
 
+        public TestContext TestContext { get; set; } = null!;
+
         protected static IConfiguration InitConfiguration()
         {
             var config = new ConfigurationBuilder()

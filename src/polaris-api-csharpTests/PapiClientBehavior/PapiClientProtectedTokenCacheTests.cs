@@ -1,5 +1,6 @@
 ﻿using System;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
@@ -7,108 +8,99 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     [UnitTest]
     [DoNotParallelize]
-    public sealed class PapiClientProtectedTokenCacheTests
+    public sealed class PapiClientProtectedTokenCacheTests : PapiClientTestBase
     {
         [TestInitialize]
         public void TestInitialize()
         {
-            PapiClient.ClearProtectedTokenCache();
+            ProtectedTokenCache.ClearForTesting();
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            PapiClient.ClearProtectedTokenCache();
+            ProtectedTokenCache.ClearForTesting();
         }
 
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesExpiredToken()
         {
-            PapiClient.AddProtectedTokenToCacheForTesting("expired", CreateToken(DateTime.UtcNow.AddMinutes(-5)));
-            PapiClient.AddProtectedTokenToCacheForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("expired", CreateToken(ExpiredProtectedTokenExpirationDate));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
-            var removedCount = PapiClient.PruneProtectedTokenCache();
+            var removedCount = ProtectedTokenCache.PruneExpired();
 
             Assert.AreEqual(1, removedCount);
-            Assert.IsFalse(PapiClient.ProtectedTokenCacheContainsKey("expired"));
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid"));
+            Assert.IsFalse(ProtectedTokenCache.ContainsKey("expired"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid"));
         }
 
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesTokenWithoutExpirationDate()
         {
-            PapiClient.AddProtectedTokenToCacheForTesting("missing-expiration", CreateToken(expirationDate: null));
-            PapiClient.AddProtectedTokenToCacheForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("missing-expiration", CreateToken(expirationDate: null));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
-            var removedCount = PapiClient.PruneProtectedTokenCache();
+            var removedCount = ProtectedTokenCache.PruneExpired();
 
             Assert.AreEqual(1, removedCount);
-            Assert.IsFalse(PapiClient.ProtectedTokenCacheContainsKey("missing-expiration"));
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid"));
+            Assert.IsFalse(ProtectedTokenCache.ContainsKey("missing-expiration"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid"));
         }
 
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesTokenWithoutAccessToken()
         {
-            PapiClient.AddProtectedTokenToCacheForTesting(
-                "missing-access-token",
-                CreateToken(DateTime.UtcNow.AddMinutes(5), accessToken: ""));
+            ProtectedTokenCache.AddForTesting("missing-access-token", CreateToken(ValidProtectedTokenExpirationDate, accessToken: ""));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
-            PapiClient.AddProtectedTokenToCacheForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
-
-            var removedCount = PapiClient.PruneProtectedTokenCache();
+            var removedCount = ProtectedTokenCache.PruneExpired();
 
             Assert.AreEqual(1, removedCount);
-            Assert.IsFalse(PapiClient.ProtectedTokenCacheContainsKey("missing-access-token"));
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid"));
+            Assert.IsFalse(ProtectedTokenCache.ContainsKey("missing-access-token"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid"));
         }
 
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesTokenWithoutAccessSecret()
         {
-            PapiClient.AddProtectedTokenToCacheForTesting(
-                "missing-access-secret",
-                CreateToken(DateTime.UtcNow.AddMinutes(5), accessSecret: ""));
+            ProtectedTokenCache.AddForTesting("missing-access-secret", CreateToken(ValidProtectedTokenExpirationDate, accessSecret: ""));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
-            PapiClient.AddProtectedTokenToCacheForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
-
-            var removedCount = PapiClient.PruneProtectedTokenCache();
+            var removedCount = ProtectedTokenCache.PruneExpired();
 
             Assert.AreEqual(1, removedCount);
-            Assert.IsFalse(PapiClient.ProtectedTokenCacheContainsKey("missing-access-secret"));
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid"));
+            Assert.IsFalse(ProtectedTokenCache.ContainsKey("missing-access-secret"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid"));
         }
 
         [TestMethod]
         public void PruneProtectedTokenCache_RemovesTokenInsideExpirationSkew()
         {
-            PapiClient.AddProtectedTokenToCacheForTesting("inside-skew", CreateToken(DateTime.UtcNow.AddSeconds(30)));
-            PapiClient.AddProtectedTokenToCacheForTesting("valid", CreateToken(DateTime.UtcNow.AddMinutes(5)));
+            ProtectedTokenCache.AddForTesting("inside-skew", CreateToken(DateTime.UtcNow.AddSeconds(30)));
+            ProtectedTokenCache.AddForTesting("valid", CreateToken(ValidProtectedTokenExpirationDate));
 
-            var removedCount = PapiClient.PruneProtectedTokenCache();
+            var removedCount = ProtectedTokenCache.PruneExpired();
 
             Assert.AreEqual(1, removedCount);
-            Assert.IsFalse(PapiClient.ProtectedTokenCacheContainsKey("inside-skew"));
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid"));
+            Assert.IsFalse(ProtectedTokenCache.ContainsKey("inside-skew"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid"));
         }
 
         [TestMethod]
         public void PruneProtectedTokenCache_DoesNotRemoveUsableTokens()
         {
-            PapiClient.AddProtectedTokenToCacheForTesting("valid-1", CreateToken(DateTime.UtcNow.AddMinutes(5)));
-            PapiClient.AddProtectedTokenToCacheForTesting("valid-2", CreateToken(DateTime.UtcNow.AddMinutes(10)));
+            ProtectedTokenCache.AddForTesting("valid-1", CreateToken(ValidProtectedTokenExpirationDate));
+            ProtectedTokenCache.AddForTesting("valid-2", CreateToken(ValidProtectedTokenExpirationDate));
 
-            var removedCount = PapiClient.PruneProtectedTokenCache();
+            var removedCount = ProtectedTokenCache.PruneExpired();
 
             Assert.AreEqual(0, removedCount);
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid-1"));
-            Assert.IsTrue(PapiClient.ProtectedTokenCacheContainsKey("valid-2"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid-1"));
+            Assert.IsTrue(ProtectedTokenCache.ContainsKey("valid-2"));
         }
 
-        private static ProtectedToken CreateToken(
-            DateTime? expirationDate,
-            string accessToken = "access-token",
-            string accessSecret = "access-secret")
+        private static ProtectedToken CreateToken(DateTime? expirationDate, string accessToken = "access-token", string accessSecret = "access-secret")
         {
             return new ProtectedToken
             {

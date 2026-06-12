@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api.Tests
 
             var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
-            StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
+            Assert.Contains(nameof(PapiClient.Hostname), exception.Message);
         }
 
         [TestMethod]
@@ -40,7 +40,7 @@ namespace Clc.Polaris.Api.Tests
 
             var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
-            StringAssert.Contains(exception.Message, nameof(PapiClient.AccessID));
+            Assert.Contains(nameof(PapiClient.AccessID), exception.Message);
         }
 
         [TestMethod]
@@ -58,7 +58,7 @@ namespace Clc.Polaris.Api.Tests
 
             var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
-            StringAssert.Contains(exception.Message, nameof(PapiClient.AccessKey));
+            Assert.Contains(nameof(PapiClient.AccessKey), exception.Message);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace Clc.Polaris.Api.Tests
 
             var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
-            StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
+            Assert.Contains(nameof(PapiClient.Hostname), exception.Message);
         }
 
         [TestMethod]
@@ -94,7 +94,7 @@ namespace Clc.Polaris.Api.Tests
 
             var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
-            StringAssert.Contains(exception.Message, nameof(PapiClient.Hostname));
+            Assert.Contains(nameof(PapiClient.Hostname), exception.Message);
         }
 
         [TestMethod]
@@ -114,7 +114,7 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.IsTrue(formattedRequest.Headers.ContainsKey("PolarisDate"));
             Assert.IsTrue(formattedRequest.Headers.ContainsKey("Authorization"));
-            StringAssert.StartsWith(formattedRequest.Headers["Authorization"], "PWS access-id:");
+            Assert.StartsWith("PWS access-id:", formattedRequest.Headers["Authorization"]);
         }
     }
 }

@@ -10,10 +10,10 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task BibSearchTest()
         {
-            var response = await Papi.BibSearchAsync(new BibSearchOptions { Term = "dogs", PageSize = 10 });
-            Assert.IsTrue(response.Data.PAPIErrorCode == 10);
-            Assert.IsTrue(response.Data.WordList == "dogs ");
-            Assert.IsTrue(response.Data.TotalRecordsFound > 10000);
+            var response = await Papi.BibSearchAsync(new BibSearchOptions { Term = "dogs", PageSize = 10 }, TestContext.CancellationToken);
+            Assert.AreEqual(10, response.Data.PAPIErrorCode);
+            Assert.AreEqual("dogs ", response.Data.WordList);
+            Assert.IsGreaterThan(10000, response.Data.TotalRecordsFound);
         }
     }
 }

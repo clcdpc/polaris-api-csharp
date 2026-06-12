@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Clc.Polaris.Api;
@@ -17,6 +18,8 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 {
     public abstract class PapiClientTestBase
     {
+        public TestContext TestContext { get; set; } = null!;
+
         protected static PapiClient CreateClient(HttpMessageHandler? handler = null)
         {
             var settings = new TestPapiSettings();
@@ -28,7 +31,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             };
         }
 
-        protected static PapiClient CreateUrlEncodingClient(CaptureHttpMessageHandler handler)
+        protected static PapiClient CreateUrlEncodingClient(CapturingHttpMessageHandler handler)
         {
             var settings = new PapiSettings
             {
@@ -93,20 +96,42 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             };
         }
 
+        protected static DateTime ValidProtectedTokenExpirationDate => DateTime.Now.AddHours(1);
+
+        protected static DateTime ExpiredProtectedTokenExpirationDate => DateTime.Now.AddMinutes(-1);
+
+        protected static string CreateJson(object value)
+        {
+            return JsonSerializer.Serialize(value);
+        }
+
+        protected static string CreatePapiResponseJson(int papiErrorCode = 0)
+        {
+            return CreateJson(new
+            {
+                PAPIErrorCode = papiErrorCode
+            });
+        }
+
+        protected static string CreateEmptyJsonObject()
+        {
+            return CreateJson(new { });
+        }
+
         protected static string CreateProtectedTokenJson(string accessToken, string accessSecret, DateTime expirationDate)
         {
-            return
-                "{" +
-                $"\"PAPIErrorCode\":0," +
-                $"\"AccessToken\":\"{accessToken}\"," +
-                $"\"AccessSecret\":\"{accessSecret}\"," +
-                $"\"AuthExpDate\":\"{expirationDate:O}\"" +
-                "}";
+            return CreateJson(new
+            {
+                PAPIErrorCode = 0,
+                AccessToken = accessToken,
+                AccessSecret = accessSecret,
+                AuthExpDate = expirationDate.ToString("O", CultureInfo.InvariantCulture)
+            });
         }
 
         protected static string CreateProtectedTokenJson(ProtectedToken token)
         {
-            return CreateProtectedTokenJson(token.AccessToken!, token.AccessSecret!, token.ExpirationDate!.Value);
+            return CreateProtectedTokenJson(accessToken: token.AccessToken!, accessSecret: token.AccessSecret!, expirationDate: token.ExpirationDate!.Value);
         }
 
         protected static async Task ExecuteRawPapiRequestAsync(PapiClient client, PapiRestRequest request)
@@ -134,10 +159,10 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             var matchingRequests = handler.CapturedRequests
                 .Where(request => !request.IsStaffAuthenticationRequest && request.AbsoluteUri.Contains(queryMarker, StringComparison.Ordinal))
                 .ToArray();
-            Assert.IsTrue(matchingRequests.Length > 0, $"Expected at least one final request containing '{queryMarker}'.");
+            Assert.IsNotEmpty(matchingRequests, $"Expected at least one final request containing '{queryMarker}'.");
             foreach (var request in matchingRequests)
             {
-                StringAssert.Contains(request.Path, $"/protected/v1/1033/100/1/{expectedToken}/search/patrons/Boolean");
+                Assert.Contains($"/protected/v1/1033/100/1/{expectedToken}/search/patrons/Boolean", request.Path);
                 Assert.IsFalse(request.Path.Contains(ProtectedToken.Placeholder, StringComparison.Ordinal));
                 AssertAuthorizationHash(request, expectedSecret, "access-key", "access-id");
             }
@@ -159,12 +184,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected static void ClearProtectedTokenState()
         {
-            var cache = GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache");
-            cache?.Clear();
-
-            var locksProperty = typeof(PapiClient).GetProperty("ProtectedTokenCacheLocks", BindingFlags.NonPublic | BindingFlags.Static);
-            var locks = locksProperty?.GetValue(null);
-            locks?.GetType().GetMethod("Clear")?.Invoke(locks, null);
+            ProtectedTokenCache.ClearForTesting();
         }
 
         protected static void SetCachedToken(string hostname, string accessId, string accessKey, PolarisUser? staffUser, ProtectedToken token)
@@ -172,7 +192,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             var cacheKey = BuildCacheKey(hostname, accessId, accessKey, staffUser);
             if (cacheKey != null)
             {
-                GetProtectedTokenCache().TryAdd(cacheKey, token);
+                ProtectedTokenCache.AddForTesting(cacheKey, token);
             }
         }
 
@@ -180,19 +200,12 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
         {
             token = null;
             var cacheKey = BuildCacheKey(hostname, accessId, accessKey, staffUser);
-            return cacheKey != null && GetProtectedTokenCache().TryGetValue(cacheKey, out token);
+            return cacheKey != null && ProtectedTokenCache.TryGet(cacheKey, useCache: true, out token);
         }
 
-        protected static ConcurrentDictionary<string, ProtectedToken> GetProtectedTokenCache()
+        protected static int GetProtectedTokenCacheCount()
         {
-            return GetPrivateStaticProperty<ConcurrentDictionary<string, ProtectedToken>>("ProtectedTokenCache")
-                ?? throw new InvalidOperationException("Protected token cache was not available.");
-        }
-
-        protected static T? GetPrivateStaticProperty<T>(string propertyName) where T : class
-        {
-            var cacheProperty = typeof(PapiClient).GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Static);
-            return cacheProperty?.GetValue(null) as T;
+            return ProtectedTokenCache.CountForTesting();
         }
 
         protected static string? BuildCacheKey(string hostname, string accessId, string accessKey, PolarisUser? staffUser)
@@ -212,9 +225,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected static string? BuildCacheKey(PapiClient client)
         {
-            var buildCacheKeyMethod = typeof(PapiClient).GetMethod("BuildProtectedTokenCacheKey", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?? throw new InvalidOperationException("Protected token cache-key builder was not available.");
-            return buildCacheKeyMethod.Invoke(client, Array.Empty<object>()) as string;
+            return ProtectedTokenCache.BuildKey(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount);
         }
 
         protected sealed class TestPapiSettings : IPapiSettings
@@ -226,22 +237,6 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             public int WorkstationId { get; set; } = 1;
             public int OrganizationId { get; set; } = 1;
             public PolarisUser? PolarisOverrideAccount { get; set; }
-        }
-
-        protected sealed class CaptureHttpMessageHandler : HttpMessageHandler
-        {
-            public HttpRequestMessage? LastRequest { get; private set; }
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                LastRequest = request;
-                var response = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}")
-                };
-                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                return Task.FromResult(response);
-            }
         }
 
         protected sealed class CapturingHttpMessageHandler : HttpMessageHandler
@@ -256,7 +251,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
             public CapturingHttpMessageHandler(string? responseJson = null)
             {
-                _responseJson = responseJson ?? CreateProtectedTokenJson("new-token", "new-secret", DateTime.Now.AddHours(1));
+                _responseJson = responseJson ?? CreateProtectedTokenJson(accessToken: "new-token", accessSecret: "new-secret", expirationDate: ValidProtectedTokenExpirationDate);
             }
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -307,13 +302,13 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
             private readonly string _nonAuthenticationResponseJson;
             private int _authenticationRequestCount;
             private int _nonAuthenticationRequestCount;
-            private readonly ConcurrentQueue<string> _requestPaths = new ConcurrentQueue<string>();
-            private readonly ConcurrentQueue<CapturedPapiRequest> _capturedRequests = new ConcurrentQueue<CapturedPapiRequest>();
+            private readonly ConcurrentQueue<string> _requestPaths = new();
+            private readonly ConcurrentQueue<CapturedPapiRequest> _capturedRequests = new();
 
             public int AuthenticationRequestCount => _authenticationRequestCount;
             public int NonAuthenticationRequestCount => _nonAuthenticationRequestCount;
-            public string[] RequestPaths => _requestPaths.ToArray();
-            public CapturedPapiRequest[] CapturedRequests => _capturedRequests.ToArray();
+            public string[] RequestPaths => [.. _requestPaths];
+            public CapturedPapiRequest[] CapturedRequests => [.. _capturedRequests];
 
             public ProtectedTokenHttpMessageHandler(
                 HttpStatusCode authenticationStatusCode = HttpStatusCode.OK,
@@ -322,9 +317,9 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
                 string? nonAuthenticationResponseJson = null)
             {
                 _authenticationStatusCode = authenticationStatusCode;
-                _authenticationResponseJson = authenticationResponseJson ?? CreateProtectedTokenJson("protected-token", "protected-secret", DateTime.Now.AddHours(1));
+                _authenticationResponseJson = authenticationResponseJson ?? CreateProtectedTokenJson(accessToken: "protected-token", accessSecret: "protected-secret", expirationDate: ValidProtectedTokenExpirationDate);
                 _nonAuthenticationStatusCode = nonAuthenticationStatusCode;
-                _nonAuthenticationResponseJson = nonAuthenticationResponseJson ?? "{\"PAPIErrorCode\":0}";
+                _nonAuthenticationResponseJson = nonAuthenticationResponseJson ?? CreatePapiResponseJson();
             }
 
             public ProtectedTokenHttpMessageHandler(Func<CapturedPapiRequest, (HttpStatusCode StatusCode, string ResponseJson)> authenticationResponseFactory)
@@ -335,7 +330,7 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                var body = request.Content == null ? string.Empty : await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var body = request.Content == null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 var capturedRequest = new CapturedPapiRequest(request, body);
                 _requestPaths.Enqueue(capturedRequest.Path);
                 _capturedRequests.Enqueue(capturedRequest);
@@ -344,10 +339,10 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
                 {
                     Interlocked.Increment(ref _authenticationRequestCount);
                     await Task.Delay(50, cancellationToken).ConfigureAwait(false);
-                    var authenticationResponse = _authenticationResponseFactory?.Invoke(capturedRequest) ?? (_authenticationStatusCode, _authenticationResponseJson);
-                    return new HttpResponseMessage(authenticationResponse.StatusCode)
+                    var (StatusCode, ResponseJson) = _authenticationResponseFactory?.Invoke(capturedRequest) ?? (_authenticationStatusCode, _authenticationResponseJson);
+                    return new HttpResponseMessage(StatusCode)
                     {
-                        Content = new StringContent(authenticationResponse.ResponseJson, Encoding.UTF8, "application/json")
+                        Content = new StringContent(ResponseJson, Encoding.UTF8, "application/json")
                     };
                 }
 
@@ -361,8 +356,8 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
 
         protected sealed class ProtectedTokenCancellationHttpMessageHandler : HttpMessageHandler
         {
-            public List<HttpRequestMessage> Requests { get; } = new();
-            public List<CancellationToken> CancellationTokens { get; } = new();
+            public List<HttpRequestMessage> Requests { get; } = [];
+            public List<CancellationToken> CancellationTokens { get; } = [];
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
@@ -371,8 +366,8 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
                 var requestNumber = Requests.Count;
 
                 var responseJson = requestNumber == 1
-                    ? "{\"PAPIErrorCode\":0,\"AccessToken\":\"protected-token\",\"AccessSecret\":\"protected-secret\",\"AuthExpDate\":\"2030-01-01T00:00:00Z\"}"
-                    : "{\"PAPIErrorCode\":0}";
+                    ? CreateProtectedTokenJson(accessToken: "protected-token", accessSecret: "protected-secret", expirationDate: ValidProtectedTokenExpirationDate)
+                    : CreatePapiResponseJson();
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
