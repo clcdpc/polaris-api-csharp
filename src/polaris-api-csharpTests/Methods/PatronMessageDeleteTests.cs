@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         [DoNotParallelize]
         public async Task PatronMessageDeleteTest()
         {
-            var response = await Papi.PatronMessageDeleteAsync(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -1);
+            var response = await Papi.PatronMessageDeleteAsync(Settings.PatronBarcode, PatronMessageType.freetext, 1234, Settings.PatronPin, TestContext.CancellationToken);
+            Assert.AreEqual(-1, response.Data.PAPIErrorCode);
         }
     }
 }

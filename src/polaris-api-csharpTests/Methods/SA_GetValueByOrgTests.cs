@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.SA_GetValueByOrgAsync("ORGEMAIL");
-            Assert.IsTrue(response.Data.Value == Settings.OrgEmail);
+            var response = await Papi.SA_GetValueByOrgAsync("ORGEMAIL", cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(Settings.OrgEmail, response.Data.Value);
         }
     }
 }

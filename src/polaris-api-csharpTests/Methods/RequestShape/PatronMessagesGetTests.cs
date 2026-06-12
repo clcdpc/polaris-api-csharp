@@ -18,14 +18,14 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
         [TestMethod]
         public async Task PatronMessages_RequestShape_PreservesBooleanLikeQueryValue()
         {
-            var handler = new CapturingHttpMessageHandler("{\"PAPIErrorCode\":0}");
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
 
-            var response = await client.PatronMessagesGetAsync("ABC 123", unreadOnly: true, password: "1234");
+            var response = await client.PatronMessagesGetAsync("ABC 123", unreadOnly: true, password: "1234", TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
-            StringAssert.Contains(handler.LastRequest.RequestUri!.AbsolutePath, "/public/v1/1033/100/1/patron/ABC+123/messages");
+            Assert.Contains("/public/v1/1033/100/1/patron/ABC+123/messages", handler.LastRequest.RequestUri!.AbsolutePath);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
             Assert.AreEqual("1", query["unreadonly"]);
             Assert.IsNull(handler.LastRequest.Content);
@@ -46,7 +46,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
                 Password = "secret"
             };
 
-            var response = await client.PatronMessagesGetAsync("ABC123", password: "patron-password");
+            var response = await client.PatronMessagesGetAsync("ABC123", password: "patron-password", cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(0, handler.AuthenticationRequestCount);
@@ -70,7 +70,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
                     AuthenticationRequestCount++;
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent("{}", Encoding.UTF8, "application/json")
+                        Content = new StringContent(CreateEmptyJsonObject(), Encoding.UTF8, "application/json")
                     });
                 }
 
@@ -86,7 +86,7 @@ namespace Clc.Polaris.Api.Tests.Methods.RequestShape
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"PAPIErrorCode\":0}", Encoding.UTF8, "application/json")
+                    Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 });
             }
         }

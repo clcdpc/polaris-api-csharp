@@ -9,8 +9,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task PatronValidateTest()
         {
-            var response = await Papi.PatronValidateAsync(Settings.PatronBarcode, Settings.PatronPin);
-            Assert.IsTrue(response.Data.PatronID == Settings.PatronId);
+            var response = await Papi.PatronValidateAsync(Settings.PatronBarcode, Settings.PatronPin, TestContext.CancellationToken);
+            Assert.AreEqual(Settings.PatronId, response.Data.PatronID);
         }
     }
 }

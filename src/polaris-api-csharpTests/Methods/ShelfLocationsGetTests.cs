@@ -10,8 +10,8 @@ namespace Clc.Polaris.Api.Tests
         [ReadOnlyIntegrationTest]
         public async Task ShelfLocationsGetTest()
         {
-            var response = await Papi.ShelfLocationsGetAsync(7);
-            Assert.IsTrue(response.Data.PAPIErrorCode == response.Data.ShelfLocationsRows.Count());
+            var response = await Papi.ShelfLocationsGetAsync(7, TestContext.CancellationToken);
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.ShelfLocationsRows);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.AreEqual("/public/v1/1033/100/1/apikeyvalidate", formatted.Path);
             Assert.IsTrue(formatted.Headers.ContainsKey("PolarisDate"));
             Assert.IsTrue(formatted.Headers.ContainsKey("Authorization"));
-            StringAssert.StartsWith(formatted.Headers["Authorization"], "PWS access-id:");
+            Assert.StartsWith("PWS access-id:", formatted.Headers["Authorization"]);
         }
 
         [TestMethod]

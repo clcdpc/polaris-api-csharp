@@ -44,7 +44,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var hostname = $"https://example-{Guid.NewGuid():N}.test";
             var staff = CreateStaffUser();
 
-            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-a", "secret-a", DateTime.Now.AddHours(1)));
+            var handlerA = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-a", accessSecret: "secret-a", expirationDate: ValidProtectedTokenExpirationDate));
             var clientA = CreateProtectedClient(handlerA);
             clientA.Hostname = hostname;
             clientA.AccessID = "access-a";
@@ -59,7 +59,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.IsNotNull(cachedTokenA);
             Assert.AreEqual("token-a", cachedTokenA.AccessToken);
 
-            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson("token-b", "secret-b", DateTime.Now.AddHours(1)));
+            var handlerB = new ProtectedTokenHttpMessageHandler(HttpStatusCode.OK, CreateProtectedTokenJson(accessToken: "token-b", accessSecret: "secret-b", expirationDate: ValidProtectedTokenExpirationDate));
             var clientB = CreateProtectedClient(handlerB);
             clientB.Hostname = hostname;
             clientB.AccessID = "access-b";
@@ -110,12 +110,12 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             {
                 AccessToken = "cached-token",
                 AccessSecret = "cached-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             SetCachedToken(hostname, "access-id", "access-key", staff, cachedToken);
 
-            var failingHandler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, "{\"PAPIErrorCode\":1}");
+            var failingHandler = new ProtectedTokenHttpMessageHandler(HttpStatusCode.Unauthorized, CreatePapiResponseJson(1));
             var cacheDisabledClient = CreateProtectedClient(failingHandler, hostname, staff);
             cacheDisabledClient.UseProtectedTokenCache = false;
 
@@ -140,8 +140,5 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.Contains(
                 "/protected/v1/1033/100/1/cached-token/search/patrons/Boolean",
                 cacheEnabledHandler.CapturedRequests.Single(request => !request.IsStaffAuthenticationRequest).Path);
-        }
-
-        public TestContext TestContext { get; set; }
-    }
+        }}
 }

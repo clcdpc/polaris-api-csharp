@@ -18,8 +18,8 @@ namespace Clc.Polaris.Api.Tests
                 TxnGroupQualifier = "test",
                 TxnQualifier = "test"
             };
-            var response = await Papi.HoldRequestReplyAsync(hold, 7, HoldRequestReplyAnswer.Yes, HoldRequestReplyState.AcceptEvenWithExistingHolds);
-            Assert.IsTrue(response.Data.PAPIErrorCode == -4101);
+            var response = await Papi.HoldRequestReplyAsync(hold, 7, HoldRequestReplyAnswer.Yes, HoldRequestReplyState.AcceptEvenWithExistingHolds, TestContext.CancellationToken);
+            Assert.AreEqual(-4101, response.Data.PAPIErrorCode);
         }
     }
 }

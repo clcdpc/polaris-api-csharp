@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.Patron_GetBarcodeFromIdAsync(Settings.PatronId);
-            Assert.IsTrue(response.Data.Barcode == Settings.PatronBarcode);
+            var response = await Papi.Patron_GetBarcodeFromIdAsync(Settings.PatronId, TestContext.CancellationToken);
+            Assert.AreEqual(Settings.PatronBarcode, response.Data.Barcode);
         }
     }
 }

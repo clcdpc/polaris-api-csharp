@@ -23,13 +23,13 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
         [TestMethod]
         public async Task AuthenticateStaffUserAsync_ReturnsTokenButDoesNotSetClientToken()
         {
-            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson("returned-token", "returned-secret", DateTime.Now.AddHours(1)));
+            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson(accessToken: "returned-token", accessSecret: "returned-secret", expirationDate: ValidProtectedTokenExpirationDate));
             var client = CreateClient(handler);
             client.Token = new ProtectedToken
             {
                 AccessToken = "existing-token",
                 AccessSecret = "existing-secret",
-                ExpirationDate = DateTime.Now.AddHours(1)
+                ExpirationDate = ValidProtectedTokenExpirationDate
             };
 
             var response = await client.AuthenticateStaffUserAsync(CreateStaffUser(), TestContext.CancellationToken);
@@ -66,7 +66,5 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             Assert.EndsWith("/protected/v1/1033/100/1/authenticator/staff", request.Path);
             AssertAuthorizationHash(request, string.Empty, client.AccessKey, client.AccessID);
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

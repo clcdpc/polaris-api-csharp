@@ -11,8 +11,8 @@ namespace Clc.Polaris.Api.Tests
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var response = await Papi.PatronRenewBlocksGetAsync(Settings.PatronId);
-            Assert.IsTrue(response.Data.PAPIErrorCode == 0);
+            var response = await Papi.PatronRenewBlocksGetAsync(Settings.PatronId, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
         }
     }
 }
