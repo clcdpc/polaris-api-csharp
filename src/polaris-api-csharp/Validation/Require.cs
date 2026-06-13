@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Validation
     /// <summary>
     /// Allows us to require properties of parameter objects
     /// </summary>
-    public class Require
+    public static class Require
     {
         /// <summary>
         /// Verify argument is provided

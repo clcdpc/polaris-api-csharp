@@ -1,9 +1,7 @@
 ﻿using Clc.Polaris.Api.Models;
-using Clc.Polaris.Models;
 using Clc.Rest;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

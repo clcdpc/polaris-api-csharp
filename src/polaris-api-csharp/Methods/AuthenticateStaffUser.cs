@@ -1,13 +1,7 @@
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
-
-using System;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
 {

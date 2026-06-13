@@ -1,12 +1,10 @@
 
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Net;
-using System.Xml.Linq;
 
 namespace Clc.Polaris.Api
 {

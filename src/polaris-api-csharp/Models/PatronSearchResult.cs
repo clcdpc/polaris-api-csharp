@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -9,7 +6,7 @@ namespace Clc.Polaris.Api.Models
     /// Result of a PatronSearch call
     /// </summary>
 	public class PatronSearchResult : PapiResponseCommon
-	{
+    {
         /// <summary>
         /// List of keywords
         /// </summary>
@@ -24,13 +21,13 @@ namespace Clc.Polaris.Api.Models
         /// Patron search results
         /// </summary>
 		public List<PatronSearchRow> PatronSearchRows { get; set; } = new();
-	}
+    }
 
     /// <summary>
     /// Patron search result
     /// </summary>
 	public class PatronSearchRow
-	{
+    {
         /// <summary>
         /// Patron ID
         /// </summary>

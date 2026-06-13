@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Clc.Polaris.Api.Models
+﻿namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Staff member credentials for protected methods and public method override
@@ -28,7 +22,7 @@ namespace Clc.Polaris.Api.Models
 
         public PolarisUser()
         {
-            
+
         }
 
         public PolarisUser(string domain, string username, string password)

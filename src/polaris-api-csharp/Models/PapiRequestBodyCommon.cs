@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Clc.Polaris.Models
+﻿namespace Clc.Polaris.Models
 {
     public class PapiRequestBodyCommon
     {

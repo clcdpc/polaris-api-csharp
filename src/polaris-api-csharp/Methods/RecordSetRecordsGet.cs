@@ -1,12 +1,8 @@
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
-using System;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Clc.Polaris.Api
 {
@@ -17,8 +13,8 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int? userId = null, int? workstationId = null, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default)
         {
             Require.Positive(recordSetId);
-            Require.Positive(userId);
-            Require.Positive(workstationId);
+            Require.PositiveIfProvided(userId);
+            Require.PositiveIfProvided(workstationId);
             Require.NonNegative(startIndex);
             Require.Positive(numRecords);
 

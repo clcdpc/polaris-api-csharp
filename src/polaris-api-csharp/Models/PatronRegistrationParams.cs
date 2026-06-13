@@ -1,8 +1,5 @@
 ﻿using Clc.Polaris.Api.Validation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Clc.Polaris.Api.Models
 {

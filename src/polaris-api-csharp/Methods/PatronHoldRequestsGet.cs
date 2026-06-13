@@ -1,12 +1,11 @@
 
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System.Net;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
 namespace Clc.Polaris.Api
 {
-	public partial class PapiClient
+    public partial class PapiClient
     {
 
 

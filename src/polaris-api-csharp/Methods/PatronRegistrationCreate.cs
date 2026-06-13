@@ -1,19 +1,13 @@
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Xml.Linq;
-
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Clc.Rest;
-using Clc.Polaris.Api.Models;
-
-using Clc.Polaris.Models;
 
 namespace Clc.Polaris.Api
 {
-	public partial class PapiClient
+    public partial class PapiClient
     {
         public async Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateAsync(PatronRegistrationParams _params, CancellationToken cancellationToken = default)
         {

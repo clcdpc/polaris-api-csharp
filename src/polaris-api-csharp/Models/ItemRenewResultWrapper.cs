@@ -11,17 +11,17 @@ namespace Clc.Polaris.Api.Models
     /// Lists of items that could and couldn't be renewed.
     /// </summary>
     public class ItemRenewResultBody
-	{
-		/// <summary>
-		/// A list of items that could not be renewed.
-		/// </summary>
-		public List<ItemRenewBlockRow> BlockRows { get; set; } = new(); // = new List<ItemRenewBlockRow>();
+    {
+        /// <summary>
+        /// A list of items that could not be renewed.
+        /// </summary>
+        public List<ItemRenewBlockRow> BlockRows { get; set; } = new(); // = new List<ItemRenewBlockRow>();
 
         /// <summary>
         /// A list of successfully renewed items.
         /// </summary>
         public List<ItemRenewDueDateRow> DueDateRows { get; set; } = new(); // = new List<ItemRenewDueDateRow>();
-	}
+    }
 
     /// <summary>
     /// An item that could not be renewed by the Polaris API.

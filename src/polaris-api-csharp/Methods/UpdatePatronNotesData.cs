@@ -1,14 +1,9 @@
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using Clc.Polaris.Models;
 using Clc.Rest;
-using Clc.Polaris.Api.Validation;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api
 {
