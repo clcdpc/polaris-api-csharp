@@ -55,17 +55,17 @@ namespace Clc.Polaris.Api.Models
 		/// <summary>
 		/// ID of the workstation where this hold request was created.
 		/// </summary>
-		public int WorkstationID { get; set; } = 1;
+		public int? WorkstationID { get; set; }
 
 		/// <summary>
 		/// ID of the Polaris user that created this request.
 		/// </summary>
-		public int UserID { get; set; } = 1;
+		public int? UserID { get; set; }
 
 		/// <summary>
 		/// ID of branch where this hold request was created.
 		/// </summary>
-		public int RequestingOrgID { get; set; } = 1;
+		public int? RequestingOrgID { get; set; }
 
 		/// <summary>
 		/// GUID of search target. ONLY USED IF NOT LOCAL.

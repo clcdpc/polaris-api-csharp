@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
             Require.PositiveIfProvided(userId);
             Require.PositiveIfProvided(workstationId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/blocks";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/blocks";
             var body = new CreatePatronBlocksRequest((int)blockType, blockValue);
             var request = PapiRestRequest.Post(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);

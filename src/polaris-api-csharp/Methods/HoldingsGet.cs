@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
         {
             Require.Positive(bibId);
 
-            var url = $"/public/v1/1033/100/1/bib/{bibId}/holdings";
+            var url = $"/public/v1/1033/100/{OrganizationId}/bib/{bibId}/holdings";
             var request = PapiRestRequest.Get(url);
             return await ExecutePapiAsync<BibHoldingsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }

@@ -14,5 +14,6 @@ namespace Clc.Polaris.Api
         public string FreeTextBlock { get; set; } = string.Empty;
         public string PatronListName { get; set; } = string.Empty;
         public string OrgEmail { get; set; } = string.Empty;
+        public int RecordSetId { get; set; }
     }
 }

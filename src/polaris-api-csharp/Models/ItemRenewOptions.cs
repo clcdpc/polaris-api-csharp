@@ -29,6 +29,18 @@ namespace Clc.Polaris.Api.Models
 
         public RenewData RenewData { get; set; } = new RenewData();
 
+        public ItemRenewOptions()
+        {
+            
+        }
+
+        public ItemRenewOptions(int logonBranchId, int logonUserId, int logonWorkstationId)
+        {
+            LogonBranchID = logonBranchId;
+            LogonUserID = logonUserId;
+            LogonWorkstationID = logonWorkstationId;
+        }
+
     }
 
     public class RenewData

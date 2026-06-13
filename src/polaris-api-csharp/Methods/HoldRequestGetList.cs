@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
         {
             Require.Positive(branchId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/circulation/requests/list";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/circulation/requests/list";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("branch", branchId);
             request.QueryParameters.Add("branchtype", (int)branchType);

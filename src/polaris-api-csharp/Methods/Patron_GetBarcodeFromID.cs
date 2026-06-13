@@ -15,7 +15,7 @@ namespace Clc.Polaris.Api
         {
             Require.Positive(patronId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/barcode";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/barcode";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("patronid", patronId);
             return await ExecutePapiAsync<GetBarcodeAndPatronIDResult>(request, cancellationToken).ConfigureAwait(false);

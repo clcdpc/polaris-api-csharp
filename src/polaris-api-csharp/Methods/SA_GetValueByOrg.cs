@@ -24,7 +24,7 @@ namespace Clc.Polaris.Api
         {
             Require.PositiveIfProvided(organizationId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/organization/{organizationId ?? OrganizationId}/sysadmin/attribute/{attribute}";
             var request = PapiRestRequest.Get(url);
             return await ExecutePapiAsync<StringResult>(request, cancellationToken).ConfigureAwait(false);
         }

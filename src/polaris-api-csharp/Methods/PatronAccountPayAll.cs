@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             Require.PositiveIfProvided(workstationId);
             Require.PositiveIfProvided(userId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/account/lumpsumpayment";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/account/lumpsumpayment";
             var body = new PatronAccountPayData { TxnAmount = txnAmount, PaymentMethodId = paymentMethod, FreeTextNote = note };
             var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);

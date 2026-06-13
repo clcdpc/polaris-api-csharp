@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             Require.Positive(recordStoreId);
             Require.Positive(localControlNumber);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistaddtitle/";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistaddtitle/";
             var body = new PatronTitleListAddTitleData { RecordStoreId = recordStoreId, LocalControlNumber = localControlNumber };
             var request = PapiRestRequest.Post(url, body: body, password: password);
             return await ExecutePapiAsync<PatronTitleListAddTitleResult>(request, cancellationToken).ConfigureAwait(false);

@@ -78,5 +78,16 @@ namespace Clc.Polaris.Api.Validation
                 NonNegative(value.Value, name);
             }
         }
+
+        public static int PositiveIfProvidedOrDefault(int? value, int defaultValue, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value == null)
+            {
+                return defaultValue;
+            }
+
+            Positive(value.Value, name);
+            return value.Value;
+        }
     }
 }

@@ -31,7 +31,7 @@ namespace Clc.Polaris.Api
             Require.Positive(fromPosition);
             Require.Positive(toRecordStoreId);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistmovetitle/";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistmovetitle/";
             var body = new PatronTitleListMoveTitleData { FromRecordStoreId = fromRecordStoreId, FromPosition = fromPosition, ToRecordStoreId = toRecordStoreId };
             var request = PapiRestRequest.Post(url, body: body, password: password);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);

@@ -270,5 +270,47 @@ namespace Clc.Polaris.Api.Validation.Tests
 
             Require.NonNegativeIfProvided(positiveValue);
         }
+
+        [TestMethod]
+        public void PositiveIfProvidedOrDefault_NullNullableInteger_ReturnsDefaultValue()
+        {
+            int? nullValue = null;
+            var defaultValue = 42;
+
+            var result = Require.PositiveIfProvidedOrDefault(nullValue, defaultValue);
+
+            Assert.AreEqual(defaultValue, result);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvidedOrDefault_PositiveNullableInteger_ReturnsProvidedValue()
+        {
+            int? positiveValue = 7;
+            var defaultValue = 42;
+
+            var result = Require.PositiveIfProvidedOrDefault(positiveValue, defaultValue);
+
+            Assert.AreEqual(positiveValue.Value, result);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvidedOrDefault_ZeroNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? zeroValue = 0;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.PositiveIfProvidedOrDefault(zeroValue, 42));
+
+            Assert.AreEqual(nameof(zeroValue), exception.ParamName);
+        }
+
+        [TestMethod]
+        public void PositiveIfProvidedOrDefault_NegativeNullableInteger_ThrowsArgumentOutOfRangeException()
+        {
+            int? negativeValue = -1;
+
+            var exception = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Require.PositiveIfProvidedOrDefault(negativeValue, 42));
+
+            Assert.AreEqual(nameof(negativeValue), exception.ParamName);
+        }
     }
 }

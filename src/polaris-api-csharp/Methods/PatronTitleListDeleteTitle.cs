@@ -29,7 +29,7 @@ namespace Clc.Polaris.Api
             Require.Positive(listId);
             Require.Positive(position);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistdeletetitle";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistdeletetitle";
             var request = PapiRestRequest.Delete(url, password: password);
             request.QueryParameters.Add("list", listId);
             request.QueryParameters.Add("position", position);

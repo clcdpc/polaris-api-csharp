@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
             Require.Positive(startPosition);
             Require.Positive(endPosition);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistgettitles";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistgettitles";
             var request = PapiRestRequest.Get(url, password: password);
             request.QueryParameters.Add("list", listId);
             request.QueryParameters.Add("startPosition", startPosition);

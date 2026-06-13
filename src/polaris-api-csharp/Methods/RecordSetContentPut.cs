@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api
                 Require.Positive(recordId);
             }
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/recordsets/{recordSetId}";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/recordsets/{recordSetId}";
             var body = new { records = string.Join(",", recordList) };
             var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("action", action);

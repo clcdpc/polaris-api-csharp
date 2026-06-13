@@ -17,10 +17,10 @@ namespace Clc.Polaris.Api
             ArgumentNullException.ThrowIfNull(holdParams);
             Require.Positive(holdParams.PatronID);
             Require.Positive(holdParams.BibID);
-            Require.PositiveIfProvided(holdParams.PickupOrgID == 0 ? null : holdParams.PickupOrgID);
-            Require.Positive(holdParams.WorkstationID);
-            Require.Positive(holdParams.UserID);
-            Require.Positive(holdParams.RequestingOrgID);
+            Require.NonNegative(holdParams.PickupOrgID);
+            holdParams.WorkstationID = Require.PositiveIfProvidedOrDefault(holdParams.WorkstationID, WorkstationId);
+            holdParams.UserID = Require.PositiveIfProvidedOrDefault(holdParams.UserID, UserId);
+            holdParams.RequestingOrgID = Require.PositiveIfProvidedOrDefault(holdParams.RequestingOrgID, OrganizationId);
 
             var url = $"/public/v1/1033/100/{holdParams.RequestingOrgID}/holdrequest";
             var request = PapiRestRequest.Post(url, body: holdParams);

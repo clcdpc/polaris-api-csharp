@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api
             Require.NonNegative(startIndex);
             Require.Positive(numRecords);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/recordsets/{recordSetId}/records";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/recordsets/{recordSetId}/records";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("startIndex", startIndex);
             request.QueryParameters.Add("numRecords", numRecords);

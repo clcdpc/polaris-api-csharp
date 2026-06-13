@@ -20,7 +20,7 @@ namespace Clc.Polaris.Api
         {
             Require.Positive(listId);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistdeletealltitles";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistdeletealltitles";
             var request = PapiRestRequest.Delete(url, password: password);
             request.QueryParameters.Add("list", listId);
             return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);

@@ -32,7 +32,7 @@ namespace Clc.Polaris.Api
                 isBarcodeLookup = true;
             }
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/cataloging/items/{itemIdentifier}/barcode";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/cataloging/items/{itemIdentifier}/barcode";
             var body = new ItemUpdateBarcodeData
             {
                 ItemBarcode = newBarcode,
@@ -40,7 +40,7 @@ namespace Clc.Polaris.Api
             };
 
             var request = PapiRestRequest.Put(url, body: body);
-            request.QueryParameters.Add("wsid", transactionBranchId ?? WorkstationId);
+            request.QueryParameters.Add("wsid", WorkstationId);
 
             if (isBarcodeLookup)
             {

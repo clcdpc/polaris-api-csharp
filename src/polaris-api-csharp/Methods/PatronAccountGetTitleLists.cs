@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronAccountGetTitleListsResult>> PatronAccountGetTitleListsAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patronaccountgettitlelists";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patronaccountgettitlelists";
             var request = PapiRestRequest.Get(url, password: password);
             return await ExecutePapiAsync<PatronAccountGetTitleListsResult>(request, cancellationToken).ConfigureAwait(false);
         }

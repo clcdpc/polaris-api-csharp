@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
             Require.Positive(maxItems);
             Require.PositiveIfProvided(startItemRecordId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/cataloging/remotestorage/items";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/cataloging/remotestorage/items";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("branch", branchId);
             request.QueryParameters.Add("startdate", startDate);

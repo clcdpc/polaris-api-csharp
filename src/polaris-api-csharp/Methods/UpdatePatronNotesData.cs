@@ -18,7 +18,7 @@ namespace Clc.Polaris.Api
         {
             Require.PositiveIfProvided(workstationId);
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/notes";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/notes";
             var body = new UpdatePatronNotesData();
 
             if (!string.IsNullOrWhiteSpace(nonBlockingNote))

@@ -24,7 +24,7 @@ namespace Clc.Polaris.Api
             Require.Positive(_params.PatronBranchID);
             Require.PositiveIfProvided(_params.RequestPickupBranchID);
 
-            var url = "/public/v1/1033/100/1/patron";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron";
             var request = PapiRestRequest.Post(url, body: _params);
             request.BlockStaffOverride = true;
             return await ExecutePapiAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);
@@ -39,7 +39,7 @@ namespace Clc.Polaris.Api
             Require.Positive(_params.PatronBranchID);
             Require.PositiveIfProvided(_params.RequestPickupBranchID);
 
-            var url = "/public/v2/1033/100/1/patron";
+            var url = "/public/v2/1033/100/{OrganizationId}/patron";
             var request = PapiRestRequest.Post(url, body: _params);
             request.BlockStaffOverride = true;
             return await ExecutePapiAsync<PatronRegistrationCreateResult>(request, cancellationToken).ConfigureAwait(false);

@@ -26,7 +26,7 @@ namespace Clc.Polaris.Api
             Require.PositiveIfProvided(updateParams.RequestPickupBranchID);
             Require.PositiveIfProvided(updateParams.PatronBranchID);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}";
             var request = PapiRestRequest.Put(url, body: updateParams, password: password);
             request.QueryParameters.Add("ignoresa", ignoresa);
             return await ExecutePapiAsync<PatronUpdateResult>(request, cancellationToken).ConfigureAwait(false);

@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api
             Require.PositiveIfProvided(userId);
             Require.PositiveIfProvided(workstationId);
 
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/holdrequests/{requestId}/pickupbranch";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/holdrequests/{requestId}/pickupbranch";
             var request = PapiRestRequest.Put(url, password: password);
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);

@@ -25,7 +25,7 @@ namespace Clc.Polaris.Api
                 Require.Positive(bibId);
             }
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/synch/bibs/MARCxml";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/synch/bibs/MARCxml";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("bibids", string.Join(",", bibIds));
             if (includeItems)
