@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Clc.Polaris.Api.Models
+﻿namespace Clc.Polaris.Api.Models
 {
     public class PatronTitleListCopyAllTitlesData
     {

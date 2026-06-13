@@ -1,13 +1,9 @@
 
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System;
+using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
 
 namespace Clc.Polaris.Api
 {
@@ -17,7 +13,10 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronTitleListAddTitleResult>> PatronTitleListAddTitleAsync(string barcode, int recordStoreId, int localControlNumber, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistaddtitle/";
+            Require.Positive(recordStoreId);
+            Require.Positive(localControlNumber);
+
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistaddtitle/";
             var body = new PatronTitleListAddTitleData { RecordStoreId = recordStoreId, LocalControlNumber = localControlNumber };
             var request = PapiRestRequest.Post(url, body: body, password: password);
             return await ExecutePapiAsync<PatronTitleListAddTitleResult>(request, cancellationToken).ConfigureAwait(false);

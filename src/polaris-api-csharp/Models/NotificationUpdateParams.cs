@@ -2,10 +2,10 @@
 
 namespace Clc.Polaris.Api.Models
 {
-	/// <summary>
-	/// The parameters required to perform a NotificationUpdate.
-	/// </summary>
-	public class NotificationUpdateParams
+    /// <summary>
+    /// The parameters required to perform a NotificationUpdate.
+    /// </summary>
+    public class NotificationUpdateParams
     {
         /// <summary>
         /// The type of notification it was.
@@ -44,10 +44,10 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public int DeliveryOptionId { get; set; }
 
-		/// <summary>
-		/// How the message was delivered. In the currently implementation this is the patron's phone number.
-		/// </summary>
-		public string DeliveryString { get; set; } = string.Empty;
+        /// <summary>
+        /// How the message was delivered. In the currently implementation this is the patron's phone number.
+        /// </summary>
+        public string DeliveryString { get; set; } = string.Empty;
 
         /// <summary>
         /// Any additional data/notes.

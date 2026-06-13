@@ -1,7 +1,3 @@
-using System.Linq;
-using Clc.Polaris.Api.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace Clc.Polaris.Api.Tests
 {
     [TestClass]

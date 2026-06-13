@@ -1,10 +1,8 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
-using Clc.Polaris.Api.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
@@ -14,7 +12,11 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<RemoteStorageItemsGetResult>> RemoteStorageItemsGetAsync(int branchId, string startDate, string endDate, int maxItems, int listType, int? startItemRecordId = null, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/cataloging/remotestorage/items";
+            Require.Positive(branchId);
+            Require.Positive(maxItems);
+            Require.PositiveIfProvided(startItemRecordId);
+
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/cataloging/remotestorage/items";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("branch", branchId);
             request.QueryParameters.Add("startdate", startDate);

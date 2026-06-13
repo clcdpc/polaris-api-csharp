@@ -1,11 +1,12 @@
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
-	{
+    {
         /// <summary>
         /// Returns holdings information for a supplied record.
         /// </summary>
@@ -16,7 +17,9 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<BibHoldingsGetResult>> HoldingsGetAsync(int bibId, CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/bib/{bibId}/holdings";
+            Require.Positive(bibId);
+
+            var url = $"/public/v1/1033/100/{OrganizationId}/bib/{bibId}/holdings";
             var request = PapiRestRequest.Get(url);
             return await ExecutePapiAsync<BibHoldingsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }

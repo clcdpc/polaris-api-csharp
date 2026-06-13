@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Clc.Polaris.Api.Tests
+﻿namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitTest]

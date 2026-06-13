@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Clc.Polaris.Api.Validation;
+using System;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -237,6 +235,13 @@ namespace Clc.Polaris.Api.Models
 
         public PatronRegistrationParams(int patronBranchId, string nameFirst, string nameLast, int logonBranchId = 1, int logonUserId = 1, int logonWorkstationId = 1)
         {
+            Require.Positive(patronBranchId);
+            Require.Positive(logonBranchId);
+            Require.Positive(logonUserId);
+            Require.Positive(logonWorkstationId);
+            Require.Argument(nameFirst);
+            Require.Argument(nameLast);
+
             LogonBranchID = logonBranchId;
             LogonUserID = logonUserId;
             LogonWorkstationID = logonWorkstationId;

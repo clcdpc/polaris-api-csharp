@@ -1,12 +1,7 @@
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
 
 namespace Clc.Polaris.Api
 {
@@ -16,7 +11,7 @@ namespace Clc.Polaris.Api
 
         public async Task<IRestResponse<PatronILLRequestsGetResult>> PatronILLRequestsGetAsync(string barcode, ILLStatus status = ILLStatus.All, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{EncodeBarcodePathSegment(barcode)}/illrequests/{status}";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/illrequests/{status}";
             var request = PapiRestRequest.Get(url, password: password);
             return await ExecutePapiAsync<PatronILLRequestsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }

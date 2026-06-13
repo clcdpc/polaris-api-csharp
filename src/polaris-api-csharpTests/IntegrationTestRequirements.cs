@@ -1,5 +1,4 @@
 using Clc.Polaris.Api.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
 {

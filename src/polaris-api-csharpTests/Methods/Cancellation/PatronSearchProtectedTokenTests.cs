@@ -1,14 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Tests;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.Methods.Cancellation
 {
@@ -142,5 +133,6 @@ namespace Clc.Polaris.Api.Tests.Methods.Cancellation
                     Content = new StringContent(CreatePapiResponseJson(), Encoding.UTF8, "application/json")
                 };
             }
-        }}
+        }
+    }
 }

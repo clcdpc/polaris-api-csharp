@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api.Models
 {
-    
+
     public class PatronILLRequestsGetResult : PapiResponseCommon
     {
         public List<PatronILLRequestsGetRow> PatronILLRequestsGetRows { get; set; } = new();
@@ -35,5 +32,5 @@ namespace Clc.Polaris.Api.Models
         public string? CallNumber { get; set; }
         public string? VolumeAndIssue { get; set; }
         public DateTime? PickupByDate { get; set; }
-    }    
+    }
 }

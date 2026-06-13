@@ -1,5 +1,6 @@
 ﻿using Clc.Polaris.Api.Configuration;
 using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
 using Clc.Rest;
 using Clc.Rest.Models;
 using System;
@@ -27,9 +28,39 @@ namespace Clc.Polaris.Api
         /// </summary>
         public string Hostname { get; set; } = string.Empty;
 
-        public int UserId { get; set; } = 1;
-        public int WorkstationId { get; set; } = 1;
-        public int OrganizationId { get; set; } = 1;
+        private int _userId = 1;
+        private int _workstationId = 1;
+        private int _organizationId = 1;
+
+        public int UserId
+        {
+            get => _userId;
+            set
+            {
+                Require.Positive(value);
+                _userId = value;
+            }
+        }
+
+        public int WorkstationId
+        {
+            get => _workstationId;
+            set
+            {
+                Require.Positive(value);
+                _workstationId = value;
+            }
+        }
+
+        public int OrganizationId
+        {
+            get => _organizationId;
+            set
+            {
+                Require.Positive(value);
+                _organizationId = value;
+            }
+        }
 
         public bool AllowStaffOverrideRequests { get; set; } = true;
 

@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.Validation
     /// <summary>
     /// Allows us to require properties of parameter objects
     /// </summary>
-    public class Require
+    public static class Require
     {
         /// <summary>
         /// Verify argument is provided
@@ -25,6 +25,69 @@ namespace Clc.Polaris.Api.Validation
             {
                 throw new ArgumentException("Value cannot be empty or whitespace.", name);
             }
+        }
+
+        public static void Positive(int value, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value < 1)
+            {
+                throw new ArgumentOutOfRangeException(name, value, "Value must be greater than zero.");
+            }
+        }
+
+        public static void Positive(int? value, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+
+            Positive(value.Value, name);
+        }
+
+        public static void PositiveIfProvided(int? value, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value != null)
+            {
+                Positive(value.Value, name);
+            }
+        }
+
+        public static void NonNegative(int value, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(name, value, "Value cannot be negative.");
+            }
+        }
+
+        public static void NonNegative(int? value, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+
+            NonNegative(value.Value, name);
+        }
+
+        public static void NonNegativeIfProvided(int? value, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value != null)
+            {
+                NonNegative(value.Value, name);
+            }
+        }
+
+        public static int PositiveIfProvidedOrDefault(int? value, int defaultValue, [CallerArgumentExpression(nameof(value))] string? name = null)
+        {
+            if (value == null)
+            {
+                return defaultValue;
+            }
+
+            Positive(value.Value, name);
+            return value.Value;
         }
     }
 }

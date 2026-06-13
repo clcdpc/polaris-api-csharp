@@ -1,18 +1,9 @@
-using System;
+using Clc.Polaris.Api.Configuration;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Clc.Polaris.Api;
-using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.TestInfrastructure
 {
@@ -147,6 +138,65 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
                 .ToDictionary(parts => WebUtility.UrlDecode(parts[0]), parts => parts.Length > 1 ? WebUtility.UrlDecode(parts[1]) : string.Empty);
         }
 
+        protected static HttpRequestMessage GetLastRequest(CapturingHttpMessageHandler handler)
+        {
+            Assert.IsNotNull(handler.LastRequest);
+            return handler.LastRequest!;
+        }
+
+        protected static Uri GetLastRequestUri(CapturingHttpMessageHandler handler)
+        {
+            var request = GetLastRequest(handler);
+
+            Assert.IsNotNull(request.RequestUri);
+            return request.RequestUri!;
+        }
+
+        protected static string GetLastRequestBody(CapturingHttpMessageHandler handler)
+        {
+            Assert.IsNotNull(handler.LastRequestContent);
+            return handler.LastRequestContent!;
+        }
+
+        protected static void AssertLastRequestPathContains(CapturingHttpMessageHandler handler, string expectedPath)
+        {
+            Assert.Contains(expectedPath, GetLastRequestUri(handler).AbsolutePath);
+        }
+
+        protected static void AssertLastRequestQueryContains(CapturingHttpMessageHandler handler, string expectedQueryPart)
+        {
+            Assert.Contains(expectedQueryPart, GetLastRequestUri(handler).Query);
+        }
+
+        protected static void AssertLastRequestQueryParameter(CapturingHttpMessageHandler handler, string name, string expectedValue)
+        {
+            var query = ParseQuery(GetLastRequestUri(handler).Query);
+
+            Assert.IsTrue(query.TryGetValue(name, out var actualValue), $"Expected query parameter '{name}'.");
+            Assert.AreEqual(expectedValue, actualValue);
+        }
+
+        protected static void AssertLastRequestBodyContains(CapturingHttpMessageHandler handler, string expectedContent)
+        {
+            Assert.Contains(expectedContent, GetLastRequestBody(handler));
+        }
+
+        protected static void AssertLastRequestBodyJsonPropertyValue(CapturingHttpMessageHandler handler, string propertyName, int expectedValue)
+        {
+            using var document = JsonDocument.Parse(GetLastRequestBody(handler));
+
+            Assert.IsTrue(TryGetProperty(document.RootElement, propertyName, out var property), $"Expected JSON body property '{propertyName}'.");
+            Assert.AreEqual(expectedValue, property.GetInt32());
+        }
+
+        protected static void AssertLastRequestBodyJsonPropertyValue(CapturingHttpMessageHandler handler, string propertyName, string expectedValue)
+        {
+            using var document = JsonDocument.Parse(GetLastRequestBody(handler));
+
+            Assert.IsTrue(TryGetProperty(document.RootElement, propertyName, out var property), $"Expected JSON body property '{propertyName}'.");
+            Assert.AreEqual(expectedValue, property.GetString());
+        }
+
         protected static void AssertAuthorizationHashesSentUri(HttpRequestMessage request, string password)
         {
             var date = request.Headers.GetValues("PolarisDate").Single();
@@ -226,6 +276,25 @@ namespace Clc.Polaris.Api.Tests.TestInfrastructure
         protected static string? BuildCacheKey(PapiClient client)
         {
             return ProtectedTokenCache.BuildKey(client.Hostname, client.AccessID, client.AccessKey, client.StaffOverrideAccount);
+        }
+
+        private static bool TryGetProperty(JsonElement element, string propertyName, out JsonElement property)
+        {
+            if (element.TryGetProperty(propertyName, out property))
+            {
+                return true;
+            }
+
+            foreach (var candidate in element.EnumerateObject())
+            {
+                if (string.Equals(candidate.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+                {
+                    property = candidate.Value;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected sealed class TestPapiSettings : IPapiSettings

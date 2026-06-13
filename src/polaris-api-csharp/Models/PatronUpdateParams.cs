@@ -1,5 +1,4 @@
-﻿using Clc.Polaris.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Clc.Polaris.Api.Models

@@ -1,9 +1,4 @@
-﻿using System;
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Clc.Polaris.Api.Tests
+﻿namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitTest]

@@ -1,11 +1,8 @@
-using Clc.Rest;
 using Clc.Polaris.Api.Models;
-using System;
+using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Clc.Polaris.Api
 {
@@ -13,14 +10,20 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int userId = 1, int workstationId = 1, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int? userId = null, int? workstationId = null, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/recordsets/{recordSetId}/records";
+            Require.Positive(recordSetId);
+            Require.PositiveIfProvided(userId);
+            Require.PositiveIfProvided(workstationId);
+            Require.NonNegative(startIndex);
+            Require.Positive(numRecords);
+
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/recordsets/{recordSetId}/records";
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("startIndex", startIndex);
             request.QueryParameters.Add("numRecords", numRecords);
-            request.QueryParameters.Add("userid", userId);
-            request.QueryParameters.Add("wsid", workstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             return await ExecutePapiAsync<RecordSetRecordsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }

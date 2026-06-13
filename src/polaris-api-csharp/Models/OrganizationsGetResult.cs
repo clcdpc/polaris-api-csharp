@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -9,18 +6,18 @@ namespace Clc.Polaris.Api.Models
     /// Result of an OrganizationsGet call
     /// </summary>
 	public class OrganizationsGetResult : PapiResponseCommon
-	{
+    {
         /// <summary>
         /// List of organization data
         /// </summary>
 		public List<OrganizationsGetRow> OrganizationsGetRows { get; set; } = new();
-	}
+    }
 
     /// <summary>
     /// Organization data
     /// </summary>
 	public class OrganizationsGetRow
-	{
+    {
         /// <summary>
         /// OrganizationID
         /// </summary>
@@ -55,5 +52,5 @@ namespace Clc.Polaris.Api.Models
         {
             return $"{OrganizationID} - {Abbreviation} - {Name}";
         }
-    }	
+    }
 }

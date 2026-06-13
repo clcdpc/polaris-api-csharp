@@ -1,9 +1,7 @@
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
-using System;
 using System.Globalization;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,13 +16,11 @@ namespace Clc.Polaris.Api
             string itemIdentifier;
             var isBarcodeLookup = false;
 
+            Require.PositiveIfProvided(itemRecordId);
+            Require.PositiveIfProvided(transactionBranchId);
+
             if (itemRecordId is int itemRecordIdentifier)
             {
-                if (itemRecordIdentifier <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(itemRecordId));
-                }
-
                 itemIdentifier = itemRecordIdentifier.ToString(CultureInfo.InvariantCulture);
             }
             else
@@ -34,7 +30,7 @@ namespace Clc.Polaris.Api
                 isBarcodeLookup = true;
             }
 
-            var url = $"/protected/v1/1033/100/1/{ProtectedToken.Placeholder}/cataloging/items/{itemIdentifier}/barcode";
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/cataloging/items/{itemIdentifier}/barcode";
             var body = new ItemUpdateBarcodeData
             {
                 ItemBarcode = newBarcode,
@@ -42,7 +38,7 @@ namespace Clc.Polaris.Api
             };
 
             var request = PapiRestRequest.Put(url, body: body);
-            request.QueryParameters.Add("wsid", transactionBranchId ?? WorkstationId);
+            request.QueryParameters.Add("wsid", WorkstationId);
 
             if (isBarcodeLookup)
             {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -12,6 +7,6 @@ namespace Clc.Polaris.Api.Models
     /// </summary>
     [XmlRoot(ElementName = "PatronAccountPayResult")]
     public class PatronAccountPayResult : PapiResponseCommon
-    { 
+    {
     }
 }
