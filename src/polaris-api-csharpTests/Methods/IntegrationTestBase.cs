@@ -1,9 +1,5 @@
-using System;
-using System.Linq;
-using Clc.Polaris.Api;
 using Clc.Polaris.Api.Configuration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests
 {

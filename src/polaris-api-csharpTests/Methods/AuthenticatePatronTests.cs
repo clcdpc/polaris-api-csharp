@@ -1,9 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Clc.Polaris.Api.Tests
+﻿namespace Clc.Polaris.Api.Tests
 {
     [TestClass]
     [UnitTest]

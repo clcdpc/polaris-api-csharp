@@ -1,10 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Clc.Polaris.Api.Tests.PapiClientBehavior
+﻿namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitTest]
@@ -64,8 +58,8 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/987654/barcode");
             AssertLastRequestQueryParameter(handler, "wsid", "22");
-            AssertLastRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
-            AssertLastRequestBodyContains(handler, "\"TransactionBranchId\":73");
+            AssertLastRequestBodyJsonPropertyValue(handler, "ItemBarcode", "NEW123456");
+            AssertLastRequestBodyJsonPropertyValue(handler, "TransactionBranchId", 73);
         }
 
         [TestMethod]
@@ -79,8 +73,8 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/OLD123456/barcode");
             AssertLastRequestQueryParameter(handler, "wsid", "22");
             AssertLastRequestQueryParameter(handler, "isBarcode", "1");
-            AssertLastRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
-            AssertLastRequestBodyContains(handler, "\"TransactionBranchId\":73");
+            AssertLastRequestBodyJsonPropertyValue(handler, "ItemBarcode", "NEW123456");
+            AssertLastRequestBodyJsonPropertyValue(handler, "TransactionBranchId", 73);
         }
 
         [TestMethod]
@@ -92,8 +86,8 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             await client.ItemUpdateBarcodeAsync(newBarcode: "NEW123456", itemRecordId: 987654, transactionBranchId: 55, cancellationToken: TestContext.CancellationToken);
 
             AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/987654/barcode");
-            AssertLastRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
-            AssertLastRequestBodyContains(handler, "\"TransactionBranchId\":55");
+            AssertLastRequestBodyJsonPropertyValue(handler, "ItemBarcode", "NEW123456");
+            AssertLastRequestBodyJsonPropertyValue(handler, "TransactionBranchId", 55);
         }
 
         [TestMethod]
@@ -314,9 +308,10 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
         private static void AssertPathContainsConfiguredOrganization(CapturingHttpMessageHandler handler, string expectedPath)
         {
+            AssertLastRequestPathContains(handler, expectedPath);
+
             var actualPath = GetLastRequestUri(handler).AbsolutePath;
 
-            Assert.Contains(expectedPath, actualPath);
             Assert.Contains($"/100/{TestOrganizationId}/", actualPath);
             Assert.IsFalse(actualPath.Contains("/100/1/", StringComparison.Ordinal), $"Request path still used hardcoded organization 1. Actual path: {actualPath}");
         }
@@ -327,6 +322,77 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             Assert.Contains($"/100/{TestOrganizationId}/", actualPath);
             Assert.IsFalse(actualPath.Contains("/100/1/", StringComparison.Ordinal), $"{methodName} still used hardcoded organization 1. Actual path: {actualPath}");
+        }
+
+        [TestMethod]
+        public async Task ApiVersionGetAsync_UsesConfiguredOrganizationIdInRoute()
+        {
+            var handler = new CapturingHttpMessageHandler(CreateJson(new { PAPIErrorCode = 0, Version = "1.0" }));
+            var client = CreateOrganizationIdRouteClient(handler);
+
+            await client.ApiVersionGetAsync(cancellationToken: TestContext.CancellationToken);
+
+            AssertPathContainsConfiguredOrganization(handler, "/public/v1/1033/100/73/api");
+        }
+
+        [TestMethod]
+        public async Task ApiKeyValidateAsync_UsesConfiguredOrganizationIdInRoute()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateOrganizationIdRouteClient(handler);
+
+            await client.ApiKeyValidateAsync(cancellationToken: TestContext.CancellationToken);
+
+            AssertPathContainsConfiguredOrganization(handler, "/public/v1/1033/100/73/apikeyvalidate");
+        }
+
+        [TestMethod]
+        public async Task AuthenticateStaffUserAsync_UsesConfiguredOrganizationIdInRoute()
+        {
+            var handler = new CapturingHttpMessageHandler(CreateProtectedTokenJson(TestProtectedAccessToken, TestProtectedAccessSecret, ValidProtectedTokenExpirationDate));
+            var client = CreateOrganizationIdRouteClient(handler);
+
+            await client.AuthenticateStaffUserAsync(CreateStaffUser(), cancellationToken: TestContext.CancellationToken);
+
+            AssertPathContainsConfiguredOrganization(handler, "/protected/v1/1033/100/73/authenticator/staff");
+        }
+
+        [TestMethod]
+        public async Task PatronRegistrationCreateAsync_UsesConfiguredOrganizationIdInRoute()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateOrganizationIdRouteClient(handler);
+
+            await client.PatronRegistrationCreateAsync(new PatronRegistrationParams
+            {
+                LogonBranchID = 1,
+                LogonUserID = 2,
+                LogonWorkstationID = 3,
+                PatronBranchID = 4,
+                NameFirst = "Test",
+                NameLast = "Patron"
+            }, cancellationToken: TestContext.CancellationToken);
+
+            AssertPathContainsConfiguredOrganization(handler, "/public/v1/1033/100/73/patron");
+        }
+
+        [TestMethod]
+        public async Task PatronRegistrationCreateV2Async_UsesConfiguredOrganizationIdInRoute()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateOrganizationIdRouteClient(handler);
+
+            await client.PatronRegistrationCreateV2Async(new PatronRegistrationData
+            {
+                LogonBranchID = 1,
+                LogonUserID = 2,
+                LogonWorkstationID = 3,
+                PatronBranchID = 4,
+                NameFirst = "Test",
+                NameLast = "Patron"
+            }, cancellationToken: TestContext.CancellationToken);
+
+            AssertPathContainsConfiguredOrganization(handler, "/public/v2/1033/100/73/patron");
         }
     }
 }

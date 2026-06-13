@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 
-namespace Clc.Polaris.Models
+namespace Clc.Polaris.Api.Models
 {
     public class PatronRegistrationData
     {

@@ -1,7 +1,4 @@
-using Clc.Polaris.Api.Tests;
 using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.Validation
 {

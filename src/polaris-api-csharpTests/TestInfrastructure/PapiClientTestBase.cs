@@ -1,18 +1,9 @@
-using System;
+using Clc.Polaris.Api.Configuration;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Clc.Polaris.Api;
-using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.TestInfrastructure
 {

@@ -1,11 +1,3 @@
-using System;
-using System.Net.Http;
-using Clc.Polaris.Api;
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Tests;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]

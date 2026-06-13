@@ -1,7 +1,4 @@
-﻿using System;
-using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Clc.Polaris.Api.Configuration;
 
 namespace Clc.Polaris.Api.Tests
 {
@@ -10,221 +7,97 @@ namespace Clc.Polaris.Api.Tests
     public sealed class PapiClientConfigurationValidationTests
     {
         [TestMethod]
-        public void UserId_SetToZero_ThrowsArgumentOutOfRangeException()
+        [DataRow(nameof(PapiClient.UserId), 0)]
+        [DataRow(nameof(PapiClient.UserId), -1)]
+        [DataRow(nameof(PapiClient.WorkstationId), 0)]
+        [DataRow(nameof(PapiClient.WorkstationId), -1)]
+        [DataRow(nameof(PapiClient.OrganizationId), 0)]
+        [DataRow(nameof(PapiClient.OrganizationId), -1)]
+        public void PositiveIdProperty_SetToInvalidValue_ThrowsArgumentOutOfRangeException(string propertyName, int value)
         {
             var client = new PapiClient();
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => client.UserId = 0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => SetPositiveIdProperty(client, propertyName, value));
         }
 
         [TestMethod]
-        public void UserId_SetToNegative_ThrowsArgumentOutOfRangeException()
+        [DataRow(nameof(PapiClient.UserId))]
+        [DataRow(nameof(PapiClient.WorkstationId))]
+        [DataRow(nameof(PapiClient.OrganizationId))]
+        public void PositiveIdProperty_SetToOne_Succeeds(string propertyName)
         {
             var client = new PapiClient();
 
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => client.UserId = -1);
+            SetPositiveIdProperty(client, propertyName, 1);
+
+            Assert.AreEqual(1, GetPositiveIdProperty(client, propertyName));
         }
 
         [TestMethod]
-        public void UserId_SetToOne_Succeeds()
-        {
-            var client = new PapiClient
-            {
-                UserId = 1
-            };
-
-            Assert.AreEqual(1, client.UserId);
-        }
-
-        [TestMethod]
-        public void WorkstationId_SetToZero_ThrowsArgumentOutOfRangeException()
-        {
-            var client = new PapiClient();
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => client.WorkstationId = 0);
-        }
-
-        [TestMethod]
-        public void WorkstationId_SetToNegative_ThrowsArgumentOutOfRangeException()
-        {
-            var client = new PapiClient();
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => client.WorkstationId = -1);
-        }
-
-        [TestMethod]
-        public void WorkstationId_SetToOne_Succeeds()
-        {
-            var client = new PapiClient
-            {
-                WorkstationId = 1
-            };
-
-            Assert.AreEqual(1, client.WorkstationId);
-        }
-
-        [TestMethod]
-        public void OrganizationId_SetToZero_ThrowsArgumentOutOfRangeException()
-        {
-            var client = new PapiClient();
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => client.OrganizationId = 0);
-        }
-
-        [TestMethod]
-        public void OrganizationId_SetToNegative_ThrowsArgumentOutOfRangeException()
-        {
-            var client = new PapiClient();
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => client.OrganizationId = -1);
-        }
-
-        [TestMethod]
-        public void OrganizationId_SetToOne_Succeeds()
-        {
-            var client = new PapiClient
-            {
-                OrganizationId = 1
-            };
-
-            Assert.AreEqual(1, client.OrganizationId);
-        }
-
-        [TestMethod]
-        public void Constructor_InvalidUserIdSetting_ThrowsArgumentOutOfRangeException()
+        [DataRow(nameof(PapiSettings.UserId))]
+        [DataRow(nameof(PapiSettings.WorkstationId))]
+        [DataRow(nameof(PapiSettings.OrganizationId))]
+        public void Constructor_InvalidPositiveIdSetting_ThrowsArgumentOutOfRangeException(string propertyName)
         {
             var settings = CreateSettings();
-            settings.UserId = 0;
+            SetPositiveIdSetting(settings, propertyName, 0);
 
             Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new PapiClient(settings));
         }
 
         [TestMethod]
-        public void Constructor_InvalidWorkstationIdSetting_ThrowsArgumentOutOfRangeException()
+        [DataRow("", "access-id", "access-key", nameof(PapiClient.Hostname))]
+        [DataRow("https://example.org", "", "access-key", nameof(PapiClient.AccessID))]
+        [DataRow("https://example.org", "access-id", "", nameof(PapiClient.AccessKey))]
+        [DataRow("example.org", "access-id", "access-key", nameof(PapiClient.Hostname))]
+        [DataRow("ftp://example.org", "access-id", "access-key", nameof(PapiClient.Hostname))]
+        public void PreformatRestRequest_AuthenticatedRequestWithInvalidConfiguration_ThrowsInvalidOperationException(
+            string hostname,
+            string accessId,
+            string accessKey,
+            string expectedConfigurationName)
         {
-            var settings = CreateSettings();
-            settings.WorkstationId = 0;
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new PapiClient(settings));
-        }
-
-        [TestMethod]
-        public void Constructor_InvalidOrganizationIdSetting_ThrowsArgumentOutOfRangeException()
-        {
-            var settings = CreateSettings();
-            settings.OrganizationId = 0;
-
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new PapiClient(settings));
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_AuthenticatedRequestWithoutHostname_ThrowsInvalidOperationException()
-        {
-            var client = new PapiClient
-            {
-                AccessID = "access-id",
-                AccessKey = "access-key",
-                Hostname = ""
-            };
-
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
-            request.AuthRequired = true;
+            var client = CreateClient(hostname, accessId, accessKey);
+            var request = CreateAuthenticatedRequest();
 
             var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
 
-            Assert.Contains(nameof(PapiClient.Hostname), exception.Message);
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_AuthenticatedRequestWithoutAccessID_ThrowsInvalidOperationException()
-        {
-            var client = new PapiClient
-            {
-                AccessID = "",
-                AccessKey = "access-key",
-                Hostname = "https://example.org"
-            };
-
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
-            request.AuthRequired = true;
-
-            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
-
-            Assert.Contains(nameof(PapiClient.AccessID), exception.Message);
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_AuthenticatedRequestWithoutAccessKey_ThrowsInvalidOperationException()
-        {
-            var client = new PapiClient
-            {
-                AccessID = "access-id",
-                AccessKey = "",
-                Hostname = "https://example.org"
-            };
-
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
-            request.AuthRequired = true;
-
-            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
-
-            Assert.Contains(nameof(PapiClient.AccessKey), exception.Message);
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_AuthenticatedRequestWithRelativeHostname_ThrowsInvalidOperationException()
-        {
-            var client = new PapiClient
-            {
-                AccessID = "access-id",
-                AccessKey = "access-key",
-                Hostname = "example.org"
-            };
-
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
-            request.AuthRequired = true;
-
-            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
-
-            Assert.Contains(nameof(PapiClient.Hostname), exception.Message);
-        }
-
-        [TestMethod]
-        public void PreformatRestRequest_AuthenticatedRequestWithUnsupportedHostnameScheme_ThrowsInvalidOperationException()
-        {
-            var client = new PapiClient
-            {
-                AccessID = "access-id",
-                AccessKey = "access-key",
-                Hostname = "ftp://example.org"
-            };
-
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
-            request.AuthRequired = true;
-
-            var exception = Assert.ThrowsExactly<InvalidOperationException>(() => client.PreformatRestRequest(request));
-
-            Assert.Contains(nameof(PapiClient.Hostname), exception.Message);
+            Assert.Contains(expectedConfigurationName, exception.Message);
         }
 
         [TestMethod]
         public void PreformatRestRequest_AuthenticatedRequestWithValidConfiguration_AddsAuthorizationHeaders()
         {
-            var client = new PapiClient
-            {
-                AccessID = "access-id",
-                AccessKey = "access-key",
-                Hostname = "https://example.org"
-            };
+            var client = CreateClient(
+                hostname: "https://example.org",
+                accessId: "access-id",
+                accessKey: "access-key");
 
-            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
-            request.AuthRequired = true;
+            var request = CreateAuthenticatedRequest();
 
             var formattedRequest = client.PreformatRestRequest(request);
 
             Assert.IsTrue(formattedRequest.Headers.ContainsKey("PolarisDate"));
             Assert.IsTrue(formattedRequest.Headers.ContainsKey("Authorization"));
             Assert.StartsWith("PWS access-id:", formattedRequest.Headers["Authorization"]);
+        }
+
+        private static PapiClient CreateClient(string hostname, string accessId, string accessKey)
+        {
+            return new PapiClient
+            {
+                AccessID = accessId,
+                AccessKey = accessKey,
+                Hostname = hostname
+            };
+        }
+
+        private static PapiRestRequest CreateAuthenticatedRequest()
+        {
+            var request = PapiRestRequest.Get("/public/v1/1033/100/1/test");
+            request.AuthRequired = true;
+
+            return request;
         }
 
         private static PapiSettings CreateSettings()
@@ -238,6 +111,59 @@ namespace Clc.Polaris.Api.Tests
                 UserId = 1,
                 WorkstationId = 1
             };
+        }
+
+        private static void SetPositiveIdProperty(PapiClient client, string propertyName, int value)
+        {
+            switch (propertyName)
+            {
+                case nameof(PapiClient.UserId):
+                    client.UserId = value;
+                    break;
+
+                case nameof(PapiClient.WorkstationId):
+                    client.WorkstationId = value;
+                    break;
+
+                case nameof(PapiClient.OrganizationId):
+                    client.OrganizationId = value;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, "Unsupported PapiClient property.");
+            }
+        }
+
+        private static int GetPositiveIdProperty(PapiClient client, string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(PapiClient.UserId) => client.UserId,
+                nameof(PapiClient.WorkstationId) => client.WorkstationId,
+                nameof(PapiClient.OrganizationId) => client.OrganizationId,
+                _ => throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, "Unsupported PapiClient property.")
+            };
+        }
+
+        private static void SetPositiveIdSetting(PapiSettings settings, string propertyName, int value)
+        {
+            switch (propertyName)
+            {
+                case nameof(PapiSettings.UserId):
+                    settings.UserId = value;
+                    break;
+
+                case nameof(PapiSettings.WorkstationId):
+                    settings.WorkstationId = value;
+                    break;
+
+                case nameof(PapiSettings.OrganizationId):
+                    settings.OrganizationId = value;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, "Unsupported PapiSettings property.");
+            }
         }
     }
 }

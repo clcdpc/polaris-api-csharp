@@ -1,10 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Clc.Polaris.Api.Tests.PapiClientBehavior
+﻿namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitTest]
@@ -138,5 +132,78 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.PickupOrgID), 0);
         }
+
+        [TestMethod]
+        public async Task HoldRequestCreateAsync_NullParams_ThrowsArgumentNullException()
+        {
+            var client = CreateClient();
+
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
+                await client.HoldRequestCreateAsync(null!, cancellationToken: TestContext.CancellationToken));
+        }
+
+        [TestMethod]
+        [DataRow(nameof(HoldRequestCreateParams.PatronID), 0)]
+        [DataRow(nameof(HoldRequestCreateParams.PatronID), -1)]
+        [DataRow(nameof(HoldRequestCreateParams.BibID), 0)]
+        [DataRow(nameof(HoldRequestCreateParams.BibID), -1)]
+        [DataRow(nameof(HoldRequestCreateParams.PickupOrgID), -1)]
+        [DataRow(nameof(HoldRequestCreateParams.WorkstationID), -1)]
+        [DataRow(nameof(HoldRequestCreateParams.UserID), -1)]
+        [DataRow(nameof(HoldRequestCreateParams.RequestingOrgID), -1)]
+        public async Task HoldRequestCreateAsync_InvalidId_ThrowsArgumentOutOfRangeException(string propertyName, int value)
+        {
+            var client = CreateClient();
+            var holdParams = CreateValidHoldRequestCreateParams();
+
+            SetHoldRequestCreateParamValue(holdParams, propertyName, value);
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () =>
+                await client.HoldRequestCreateAsync(holdParams, cancellationToken: TestContext.CancellationToken));
+        }
+
+        private static HoldRequestCreateParams CreateValidHoldRequestCreateParams()
+        {
+            return new HoldRequestCreateParams
+            {
+                PatronID = 1,
+                BibID = 2,
+                PickupOrgID = 0
+            };
+        }
+
+        private static void SetHoldRequestCreateParamValue(HoldRequestCreateParams holdParams, string propertyName, int value)
+        {
+            switch (propertyName)
+            {
+                case nameof(HoldRequestCreateParams.PatronID):
+                    holdParams.PatronID = value;
+                    break;
+
+                case nameof(HoldRequestCreateParams.BibID):
+                    holdParams.BibID = value;
+                    break;
+
+                case nameof(HoldRequestCreateParams.PickupOrgID):
+                    holdParams.PickupOrgID = value;
+                    break;
+
+                case nameof(HoldRequestCreateParams.WorkstationID):
+                    holdParams.WorkstationID = value;
+                    break;
+
+                case nameof(HoldRequestCreateParams.UserID):
+                    holdParams.UserID = value;
+                    break;
+
+                case nameof(HoldRequestCreateParams.RequestingOrgID):
+                    holdParams.RequestingOrgID = value;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, "Unsupported HoldRequestCreateParams property.");
+            }
+        }
     }
+
 }

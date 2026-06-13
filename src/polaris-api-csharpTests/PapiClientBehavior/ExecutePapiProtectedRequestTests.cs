@@ -1,12 +1,4 @@
-using System;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Tests;
-using Clc.Polaris.Api.Tests.TestInfrastructure;
-using Clc.Rest.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
@@ -286,5 +278,6 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
             var finalRequest = handler.CapturedRequests.Single();
             Assert.IsFalse(finalRequest.Headers.ContainsKey("X-PAPI-AccessToken"));
             AssertAuthorizationHash(finalRequest, string.Empty, client.AccessKey, client.AccessID);
-        }}
+        }
+    }
 }
