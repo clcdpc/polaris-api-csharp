@@ -41,6 +41,20 @@ namespace Clc.Polaris.Api.Tests
             Settings = testSettings!;
         }
 
+        protected static int RequirePositiveSetting(int? value, string settingName)
+        {
+            if (value is not > 0)
+            {
+                Assert.Inconclusive($"Integration test setting '{settingName}' must be configured with a positive integer to run this live scenario.");
+            }
+
+            return value.Value;
+        }
+
+        protected int RequireConfiguredBib() => RequirePositiveSetting(Settings.BibId, nameof(Settings.BibId));
+
+        protected int RequireConfiguredBranch() => RequirePositiveSetting(Settings.BranchId, nameof(Settings.BranchId));
+
         protected static string CreateUniqueTestArtifactText(string? baseName = null, int maxLength = 80)
         {
             var sanitizedBaseName = SanitizeArtifactBaseName(baseName);

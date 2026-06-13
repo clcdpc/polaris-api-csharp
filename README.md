@@ -102,7 +102,9 @@ Run mutating/destructive integration tests only against a disposable Polaris dev
 dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=MutatingIntegration|TestCategory=ProtectedMutatingIntegration"
 ```
 
-`MutatingIntegration` and `ProtectedMutatingIntegration` tests may create or modify patron blocks, title lists, account entries, record-set entries, notes, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed.
+`MutatingIntegration` and `ProtectedMutatingIntegration` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed.
+
+The required baseline settings below are enough for the basic live integration tests. The nullable optional IDs enable broader disposable-environment lifecycle coverage. Tests that need an optional ID call `Assert.Inconclusive` with a targeted message when that ID is not configured, rather than making the whole integration suite require that data.
 
 A local `appsettings.Test.json` follows this shape:
 
@@ -123,8 +125,31 @@ A local `appsettings.Test.json` follows this shape:
   "PatronPin": "1234",
   "FreeTextBlock": "Local integration test block",
   "PatronListName": "Local integration test list",
-  "OrgEmail": "library@example.org"
+  "OrgEmail": "library@example.org",
+  "BibId": 478907,
+  "BranchId": 7,
+  "PickupBranchId": 7,
+  "LocalControlNumber": 478907,
+  "RecordSetId": 12345,
+  "RecordSetRecordId": 478907,
+  "HoldableBibId": 478907,
+  "HoldableItemRecordId": null,
+  "HoldPickupBranchId": 7,
+  "StaffUserId": 1,
+  "StaffWorkstationId": 1
 }
+```
+
+Optional ID usage:
+
+- `BibId`, `BranchId`, `PickupBranchId`, and `LocalControlNumber` drive success-path bibliographic lookups, holdings, branch lookup, and title-list title operations.
+- `HoldableBibId`, `HoldableItemRecordId`, and `HoldPickupBranchId` identify disposable hold test data; omit them unless the patron can safely create/cancel holds for that title or item.
+- `RecordSetId`, `RecordSetRecordId`, `StaffUserId`, and `StaffWorkstationId` enable protected record-set and staff-attributed account/note/hold scenarios.
+
+Run the full live integration suite manually when disposable Polaris credentials and optional data are available:
+
+```bash
+dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --configuration Release --filter "TestCategory=ReadOnlyIntegration|TestCategory=ProtectedReadOnlyIntegration|TestCategory=MutatingIntegration|TestCategory=ProtectedMutatingIntegration" --logger trx --results-directory TestResults
 ```
 
 ## Migration guide

@@ -65,16 +65,16 @@ namespace Clc.Polaris.Api.Tests
         [ProtectedReadOnlyIntegrationTest]
         public async Task RecordSetRecordsGetAsync_ComparisonOrganizationIdMatchesOrganizationOne()
         {
-            RequireConfiguredRecordSetId();
+            var recordSetId = RequireConfiguredRecordSetId();
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
             var organizationOneClient = CreateClientWithOrganizationId(OrganizationOneId);
-            var organizationOneResponse = await organizationOneClient.RecordSetRecordsGetAsync(Settings.RecordSetId, cancellationToken: TestContext.CancellationToken);
+            var organizationOneResponse = await organizationOneClient.RecordSetRecordsGetAsync(recordSetId, cancellationToken: TestContext.CancellationToken);
             AssertSuccessfulResponse(organizationOneResponse, "organization 1");
             Assert.IsNotNull(organizationOneResponse.Data.RecordSetRecordsGetRows);
 
             var comparisonClient = CreateClientWithOrganizationId(ComparisonOrganizationId);
-            var comparisonResponse = await comparisonClient.RecordSetRecordsGetAsync(Settings.RecordSetId, cancellationToken: TestContext.CancellationToken);
+            var comparisonResponse = await comparisonClient.RecordSetRecordsGetAsync(recordSetId, cancellationToken: TestContext.CancellationToken);
             AssertSuccessfulResponse(comparisonResponse, $"organization {ComparisonOrganizationId}");
             Assert.IsNotNull(comparisonResponse.Data.RecordSetRecordsGetRows);
 
@@ -102,12 +102,14 @@ namespace Clc.Polaris.Api.Tests
             };
         }
 
-        private void RequireConfiguredRecordSetId()
+        private int RequireConfiguredRecordSetId()
         {
-            if (Settings.RecordSetId <= 0)
+            if (Settings.RecordSetId is not > 0)
             {
                 Assert.Inconclusive("RecordSetRecordsGet OrganizationId integration coverage requires TestSettings:RecordSetId to be configured with an accessible record set ID.");
             }
+
+            return Settings.RecordSetId.Value;
         }
 
         private static void AssertSuccessfulResponse<T>(IRestResponse<T> response, string label)
