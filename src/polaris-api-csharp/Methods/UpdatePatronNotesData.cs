@@ -1,6 +1,5 @@
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
-using Clc.Polaris.Models;
 using Clc.Rest;
 using System.Threading;
 using System.Threading.Tasks;
