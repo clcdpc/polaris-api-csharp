@@ -24,7 +24,7 @@ namespace Clc.Polaris.Api
 
 
             var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/readinghistory";
-            var request = PapiRestRequest.Delete(url, password: password);
+            var request = PapiRestRequest.Delete(url, password: password ?? "");
 
             if (idList.Length > 0)
             {

@@ -14,7 +14,7 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int userId = 1, int workstationId = 1, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int? userId = null, int? workstationId = null, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default)
         {
             Require.Positive(recordSetId);
             Require.Positive(userId);
@@ -26,8 +26,8 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Get(url);
             request.QueryParameters.Add("startIndex", startIndex);
             request.QueryParameters.Add("numRecords", numRecords);
-            request.QueryParameters.Add("userid", userId);
-            request.QueryParameters.Add("wsid", workstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             return await ExecutePapiAsync<RecordSetRecordsGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -22,6 +22,8 @@ namespace Clc.Polaris.Api
             Require.Positive(_params.LogonUserID);
             Require.Positive(_params.LogonWorkstationID);
             Require.Positive(_params.PatronBranchID);
+            Require.Argument(_params.NameFirst);
+            Require.Argument(_params.NameLast);
             Require.PositiveIfProvided(_params.RequestPickupBranchID);
 
             var url = $"/public/v1/1033/100/{OrganizationId}/patron";
@@ -37,6 +39,8 @@ namespace Clc.Polaris.Api
             Require.Positive(_params.LogonUserID);
             Require.Positive(_params.LogonWorkstationID);
             Require.Positive(_params.PatronBranchID);
+            Require.Argument(_params.NameFirst);
+            Require.Argument(_params.NameLast);
             Require.PositiveIfProvided(_params.RequestPickupBranchID);
 
             var url = $"/public/v2/1033/100/{OrganizationId}/patron";

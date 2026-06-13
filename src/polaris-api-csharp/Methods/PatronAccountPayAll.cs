@@ -16,7 +16,7 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<PapiResponseCommon>> PatronAccountPayAllAsync(string barcode, double txnAmount, PaymentMethod paymentMethod, int? workstationId = 1, int? userId = 1, string note = "", CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PapiResponseCommon>> PatronAccountPayAllAsync(string barcode, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
             Require.PositiveIfProvided(workstationId);
             Require.PositiveIfProvided(userId);
