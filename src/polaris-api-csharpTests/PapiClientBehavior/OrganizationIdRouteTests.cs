@@ -1,19 +1,14 @@
-﻿using Clc.Polaris.Api.Configuration;
-using Clc.Polaris.Api.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
+﻿using System;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Tests.TestInfrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Clc.Polaris.Api.Tests
+namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
     [TestClass]
     [UnitTest]
-    public class OrganizationIdRouteTests
+    public sealed class OrganizationIdRouteTests : PapiClientTestBase
     {
         private const int TestOrganizationId = 73;
         private const int TestUserId = 11;
@@ -22,19 +17,11 @@ namespace Clc.Polaris.Api.Tests
         private const string TestProtectedAccessSecret = "protected-secret";
         private const string TestBarcode = "PAT123456";
 
-        public TestContext TestContext { get; set; } = null!;
-
         [TestMethod]
         public async Task AuthenticatePatronAsync_UsesConfiguredOrganizationIdInRoute()
         {
-            var handler = new CapturingHttpMessageHandler(CreateJson(new
-            {
-                PAPIErrorCode = 0,
-                AccessToken = "patron-token",
-                AccessSecret = "patron-secret",
-                PatronID = 123
-            }));
-            var client = CreateClient(handler);
+            var handler = new CapturingHttpMessageHandler(CreateJson(new { PAPIErrorCode = 0, AccessToken = "patron-token", AccessSecret = "patron-secret", PatronID = 123 }));
+            var client = CreateOrganizationIdRouteClient(handler);
 
             await client.AuthenticatePatronAsync(TestBarcode, "1234", cancellationToken: TestContext.CancellationToken);
 
@@ -45,354 +32,233 @@ namespace Clc.Polaris.Api.Tests
         public async Task CreatePatronBlocksAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.CreatePatronBlocksAsync(
-                TestBarcode,
-                (BlockType)1,
-                "test block",
-                cancellationToken: TestContext.CancellationToken);
+            await client.CreatePatronBlocksAsync(TestBarcode, (BlockType)1, "test block", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/blocks");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/blocks");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task HoldRequestCancelAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.HoldRequestCancelAsync(
-                TestBarcode,
-                requestId: 12345,
-                password: "1234",
-                cancellationToken: TestContext.CancellationToken);
+            await client.HoldRequestCancelAsync(TestBarcode, requestId: 12345, password: "1234", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/public/v1/1033/100/73/patron/{TestBarcode}/holdrequests/12345/cancelled");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/public/v1/1033/100/73/patron/{TestBarcode}/holdrequests/12345/cancelled");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task ItemUpdateBarcodeAsync_WithItemRecordId_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.ItemUpdateBarcodeAsync(
-                newBarcode: "NEW123456",
-                itemRecordId: 987654,
-                cancellationToken: TestContext.CancellationToken);
+            await client.ItemUpdateBarcodeAsync(newBarcode: "NEW123456", itemRecordId: 987654, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/987654/barcode");
-
-            AssertQueryContains(handler, "wsid=22");
-            AssertRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
-            AssertRequestBodyContains(handler, "\"TransactionBranchId\":73");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/987654/barcode");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
+            AssertLastRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
+            AssertLastRequestBodyContains(handler, "\"TransactionBranchId\":73");
         }
 
         [TestMethod]
         public async Task ItemUpdateBarcodeAsync_WithOldBarcode_UsesConfiguredOrganizationIdInRouteAndIsBarcodeQuery()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.ItemUpdateBarcodeAsync(
-                newBarcode: "NEW123456",
-                oldBarcode: "OLD123456",
-                cancellationToken: TestContext.CancellationToken);
+            await client.ItemUpdateBarcodeAsync(newBarcode: "NEW123456", oldBarcode: "OLD123456", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/OLD123456/barcode");
-
-            AssertQueryContains(handler, "wsid=22");
-            AssertQueryContains(handler, "isBarcode=1");
-            AssertRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
-            AssertRequestBodyContains(handler, "\"TransactionBranchId\":73");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/OLD123456/barcode");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
+            AssertLastRequestQueryParameter(handler, "isBarcode", "1");
+            AssertLastRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
+            AssertLastRequestBodyContains(handler, "\"TransactionBranchId\":73");
         }
 
         [TestMethod]
         public async Task ItemUpdateBarcodeAsync_WithExplicitTransactionBranchId_UsesConfiguredOrganizationIdInRouteAndTransactionBranchInBody()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.ItemUpdateBarcodeAsync(
-                newBarcode: "NEW123456",
-                itemRecordId: 987654,
-                transactionBranchId: 55,
-                cancellationToken: TestContext.CancellationToken);
+            await client.ItemUpdateBarcodeAsync(newBarcode: "NEW123456", itemRecordId: 987654, transactionBranchId: 55, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/987654/barcode");
-
-            AssertRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
-            AssertRequestBodyContains(handler, "\"TransactionBranchId\":55");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/cataloging/items/987654/barcode");
+            AssertLastRequestBodyContains(handler, "\"ItemBarcode\":\"NEW123456\"");
+            AssertLastRequestBodyContains(handler, "\"TransactionBranchId\":55");
         }
 
         [TestMethod]
         public async Task PatronAccountCreateCreditAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronAccountCreateCreditAsync(
-                TestBarcode,
-                txnAmount: 1.25,
-                paymentMethod: PaymentMethod.Cash,
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronAccountCreateCreditAsync(TestBarcode, txnAmount: 1.25, paymentMethod: PaymentMethod.Cash, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/createcredit");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/createcredit");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task PatronAccountDepositCreditAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronAccountDepositCreditAsync(
-                TestBarcode,
-                txnAmount: 1.25,
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronAccountDepositCreditAsync(TestBarcode, txnAmount: 1.25, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/lumpsumdepositcredit");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/lumpsumdepositcredit");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task PatronAccountPayAllAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronAccountPayAllAsync(
-                TestBarcode,
-                txnAmount: 1.25,
-                paymentMethod: PaymentMethod.Cash,
-                workstationId: null,
-                userId: null,
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronAccountPayAllAsync(TestBarcode, txnAmount: 1.25, paymentMethod: PaymentMethod.Cash, workstationId: null, userId: null, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/lumpsumpayment");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/lumpsumpayment");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task PatronAccountPayAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronAccountPayAsync(
-                TestBarcode,
-                txnId: 12345,
-                txnAmount: 1.25,
-                paymentMethod: PaymentMethod.Cash,
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronAccountPayAsync(TestBarcode, txnId: 12345, txnAmount: 1.25, paymentMethod: PaymentMethod.Cash, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/12345/pay");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/12345/pay");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task PatronAccountRefundCreditAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronAccountRefundCreditAsync(
-                TestBarcode,
-                txnAmount: 1.25,
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronAccountRefundCreditAsync(TestBarcode, txnAmount: 1.25, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/lumpsumrefundcredit");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/lumpsumrefundcredit");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task PatronAccountVoidAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronAccountVoidAsync(
-                TestBarcode,
-                paymentTxnId: 12345,
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronAccountVoidAsync(TestBarcode, paymentTxnId: 12345, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/12345/void/payment");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/account/12345/void/payment");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task PatronCirculateBlocksGetAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronCirculateBlocksGetAsync(
-                TestBarcode,
-                password: "1234",
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronCirculateBlocksGetAsync(TestBarcode, password: "1234", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/public/v1/1033/100/73/patron/{TestBarcode}/circulationblocks");
+            AssertPathContainsConfiguredOrganization(handler, $"/public/v1/1033/100/73/patron/{TestBarcode}/circulationblocks");
         }
 
         [TestMethod]
         public async Task PatronItemsOutGetAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronItemsOutGetAsync(
-                TestBarcode,
-                PatronItemsOutGetStatus.All,
-                password: "1234",
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronItemsOutGetAsync(TestBarcode, PatronItemsOutGetStatus.All, password: "1234", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/public/v1/1033/100/73/patron/{TestBarcode}/itemsout/All");
+            AssertPathContainsConfiguredOrganization(handler, $"/public/v1/1033/100/73/patron/{TestBarcode}/itemsout/All");
         }
 
         [TestMethod]
         public async Task PatronValidateAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.PatronValidateAsync(
-                TestBarcode,
-                password: "1234",
-                cancellationToken: TestContext.CancellationToken);
+            await client.PatronValidateAsync(TestBarcode, password: "1234", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/public/v1/1033/100/73/patron/{TestBarcode}");
+            AssertPathContainsConfiguredOrganization(handler, $"/public/v1/1033/100/73/patron/{TestBarcode}");
         }
 
         [TestMethod]
         public async Task RecordSetContentPutAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.RecordSetContentPutAsync(
-                recordSetId: 12345,
-                records: new[] { 111, 222 },
-                action: (RecordSetContentPutActions)0,
-                cancellationToken: TestContext.CancellationToken);
+            await client.RecordSetContentPutAsync(recordSetId: 12345, records: new[] { 111, 222 }, action: (RecordSetContentPutActions)0, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/recordsets/12345");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/recordsets/12345");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task RecordSetRecordsGetAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.RecordSetRecordsGetAsync(
-                recordSetId: 12345,
-                userId: TestUserId,
-                workstationId: TestWorkstationId,
-                startIndex: 0,
-                numRecords: 1000,
-                cancellationToken: TestContext.CancellationToken);
+            await client.RecordSetRecordsGetAsync(recordSetId: 12345, userId: TestUserId, workstationId: TestWorkstationId, startIndex: 0, numRecords: 1000, cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/recordsets/12345/records");
-
-            AssertQueryContains(handler, "startIndex=0");
-            AssertQueryContains(handler, "numRecords=1000");
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/recordsets/12345/records");
+            AssertLastRequestQueryParameter(handler, "startIndex", "0");
+            AssertLastRequestQueryParameter(handler, "numRecords", "1000");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task UpdatePatronNotesDataAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.UpdatePatronNotesDataAsync(
-                TestBarcode,
-                nonBlockingNote: "test note",
-                cancellationToken: TestContext.CancellationToken);
+            await client.UpdatePatronNotesDataAsync(TestBarcode, nonBlockingNote: "test note", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/notes");
-
-            AssertQueryContains(handler, "wsid=22");
+            AssertPathContainsConfiguredOrganization(handler, $"/protected/v1/1033/100/73/{TestProtectedAccessToken}/patron/{TestBarcode}/notes");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
         }
 
         [TestMethod]
         public async Task UpdatePickupBranchIDAsync_UsesConfiguredOrganizationIdInRoute()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateClient(handler);
+            var client = CreateOrganizationIdRouteClient(handler);
 
-            await client.UpdatePickupBranchIDAsync(
-                TestBarcode,
-                requestId: 12345,
-                pickupBranchId: 44,
-                password: "1234",
-                cancellationToken: TestContext.CancellationToken);
+            await client.UpdatePickupBranchIDAsync(TestBarcode, requestId: 12345, pickupBranchId: 44, password: "1234", cancellationToken: TestContext.CancellationToken);
 
-            AssertPathContainsConfiguredOrganization(
-                handler,
-                $"/public/v1/1033/100/73/patron/{TestBarcode}/holdrequests/12345/pickupbranch");
-
-            AssertQueryContains(handler, "userid=11");
-            AssertQueryContains(handler, "wsid=22");
-            AssertQueryContains(handler, "pickupbranchid=44");
+            AssertPathContainsConfiguredOrganization(handler, $"/public/v1/1033/100/73/patron/{TestBarcode}/holdrequests/12345/pickupbranch");
+            AssertLastRequestQueryParameter(handler, "userid", "11");
+            AssertLastRequestQueryParameter(handler, "wsid", "22");
+            AssertLastRequestQueryParameter(handler, "pickupbranchid", "44");
         }
 
         [TestMethod]
@@ -422,39 +288,20 @@ namespace Clc.Polaris.Api.Tests
             foreach (var testCase in cases)
             {
                 var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-                var client = CreateClient(handler);
+                var client = CreateOrganizationIdRouteClient(handler);
 
                 await testCase.Execute(client);
 
-                var actualPath = GetLastRequest(handler).RequestUri!.AbsolutePath;
-
-                if (!actualPath.Contains($"/100/{TestOrganizationId}/", StringComparison.Ordinal))
-                {
-                    Assert.Fail($"{testCase.Name} did not use configured OrganizationId. Actual path: {actualPath}");
-                }
-
-                if (actualPath.Contains("/100/1/", StringComparison.Ordinal))
-                {
-                    Assert.Fail($"{testCase.Name} still used hardcoded organization 1. Actual path: {actualPath}");
-                }
+                AssertPathUsesConfiguredOrganization(handler, testCase.Name);
             }
         }
 
-        private static PapiClient CreateClient(CapturingHttpMessageHandler handler)
+        private static PapiClient CreateOrganizationIdRouteClient(CapturingHttpMessageHandler handler)
         {
-            var settings = new TestPapiSettings
-            {
-                OrganizationId = TestOrganizationId,
-                UserId = TestUserId,
-                WorkstationId = TestWorkstationId
-            };
-
-            var client = new PapiClient(new HttpClient(handler), settings)
-            {
-                AllowStaffOverrideRequests = false,
-                UseProtectedTokenCache = false
-            };
-
+            var client = CreateClient(handler);
+            client.OrganizationId = TestOrganizationId;
+            client.UserId = TestUserId;
+            client.WorkstationId = TestWorkstationId;
             client.Token = new ProtectedToken
             {
                 AccessToken = TestProtectedAccessToken,
@@ -467,80 +314,19 @@ namespace Clc.Polaris.Api.Tests
 
         private static void AssertPathContainsConfiguredOrganization(CapturingHttpMessageHandler handler, string expectedPath)
         {
-            var actualPath = GetLastRequest(handler).RequestUri!.AbsolutePath;
+            var actualPath = GetLastRequestUri(handler).AbsolutePath;
 
             Assert.Contains(expectedPath, actualPath);
             Assert.Contains($"/100/{TestOrganizationId}/", actualPath);
-
-            if (actualPath.Contains("/100/1/", StringComparison.Ordinal))
-            {
-                Assert.Fail($"Request path still used hardcoded organization 1. Actual path: {actualPath}");
-            }
+            Assert.IsFalse(actualPath.Contains("/100/1/", StringComparison.Ordinal), $"Request path still used hardcoded organization 1. Actual path: {actualPath}");
         }
 
-        private static void AssertQueryContains(CapturingHttpMessageHandler handler, string expectedQueryPart)
+        private static void AssertPathUsesConfiguredOrganization(CapturingHttpMessageHandler handler, string methodName)
         {
-            var actualQuery = GetLastRequest(handler).RequestUri!.Query;
-            Assert.Contains(expectedQueryPart, actualQuery);
-        }
+            var actualPath = GetLastRequestUri(handler).AbsolutePath;
 
-        private static void AssertRequestBodyContains(CapturingHttpMessageHandler handler, string expectedContent)
-        {
-            Assert.IsNotNull(handler.LastRequestContent);
-            Assert.Contains(expectedContent, handler.LastRequestContent);
-        }
-
-        private static HttpRequestMessage GetLastRequest(CapturingHttpMessageHandler handler)
-        {
-            Assert.IsNotNull(handler.LastRequest);
-            return handler.LastRequest!;
-        }
-
-        private static string CreatePapiResponseJson()
-        {
-            return "{\"PAPIErrorCode\":0}";
-        }
-
-        private static string CreateJson(object value)
-        {
-            return JsonSerializer.Serialize(value);
-        }
-
-        private sealed class TestPapiSettings : IPapiSettings
-        {
-            public string AccessId { get; set; } = "access-id";
-            public string AccessKey { get; set; } = "access-key";
-            public string Hostname { get; set; } = "https://example.test";
-            public int UserId { get; set; } = 1;
-            public int WorkstationId { get; set; } = 1;
-            public int OrganizationId { get; set; } = 1;
-            public PolarisUser? PolarisOverrideAccount { get; set; }
-        }
-
-        private sealed class CapturingHttpMessageHandler : HttpMessageHandler
-        {
-            private readonly string _responseJson;
-
-            public HttpRequestMessage? LastRequest { get; private set; }
-            public string? LastRequestContent { get; private set; }
-
-            public CapturingHttpMessageHandler(string responseJson)
-            {
-                _responseJson = responseJson;
-            }
-
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                LastRequest = request;
-                LastRequestContent = request.Content == null
-                    ? null
-                    : await request.Content.ReadAsStringAsync(cancellationToken);
-
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(_responseJson, Encoding.UTF8, "application/json")
-                };
-            }
+            Assert.Contains($"/100/{TestOrganizationId}/", actualPath);
+            Assert.IsFalse(actualPath.Contains("/100/1/", StringComparison.Ordinal), $"{methodName} still used hardcoded organization 1. Actual path: {actualPath}");
         }
     }
 }

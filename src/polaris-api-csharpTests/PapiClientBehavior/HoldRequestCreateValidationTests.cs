@@ -1,9 +1,8 @@
-﻿using Clc.Polaris.Api.Models;
+﻿using System;
+using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 {
@@ -32,13 +31,10 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             await client.HoldRequestCreateAsync(holdParams, cancellationToken: TestContext.CancellationToken);
 
-            Assert.IsNotNull(handler.LastRequest);
-            Assert.IsNotNull(handler.LastRequest.RequestUri);
-            Assert.Contains("/public/v1/1033/100/123/holdrequest", handler.LastRequest.RequestUri.AbsolutePath);
-
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.WorkstationID), 789);
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.UserID), 456);
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.RequestingOrgID), 123);
+            AssertLastRequestPathContains(handler, "/public/v1/1033/100/123/holdrequest");
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.WorkstationID), 789);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.UserID), 456);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.RequestingOrgID), 123);
 
             Assert.AreEqual(789, holdParams.WorkstationID);
             Assert.AreEqual(456, holdParams.UserID);
@@ -66,13 +62,10 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             await client.HoldRequestCreateAsync(holdParams, cancellationToken: TestContext.CancellationToken);
 
-            Assert.IsNotNull(handler.LastRequest);
-            Assert.IsNotNull(handler.LastRequest.RequestUri);
-            Assert.Contains("/public/v1/1033/100/30/holdrequest", handler.LastRequest.RequestUri.AbsolutePath);
-
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.WorkstationID), 10);
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.UserID), 20);
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.RequestingOrgID), 30);
+            AssertLastRequestPathContains(handler, "/public/v1/1033/100/30/holdrequest");
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.WorkstationID), 10);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.UserID), 20);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.RequestingOrgID), 30);
 
             Assert.AreEqual(10, holdParams.WorkstationID);
             Assert.AreEqual(20, holdParams.UserID);
@@ -143,16 +136,7 @@ namespace Clc.Polaris.Api.Tests.PapiClientBehavior
 
             await client.HoldRequestCreateAsync(holdParams, cancellationToken: TestContext.CancellationToken);
 
-            AssertJsonPropertyValue(handler.LastRequestContent, nameof(HoldRequestCreateParams.PickupOrgID), 0);
-        }
-
-        private static void AssertJsonPropertyValue(string? json, string propertyName, int expectedValue)
-        {
-            Assert.IsNotNull(json);
-
-            using var document = JsonDocument.Parse(json);
-
-            Assert.AreEqual(expectedValue, document.RootElement.GetProperty(propertyName).GetInt32());
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(HoldRequestCreateParams.PickupOrgID), 0);
         }
     }
 }
