@@ -59,16 +59,19 @@ namespace Clc.Polaris.Api.Tests
             "PatronAccountGetTest",
             "PatronBasicDataGetTest",
             "PatronCirculateBlocksGetTest",
+            "PatronCirculateBlocksGetAsync_ComparisonOrganizationIdMatchesOrganizationOne",
             "PatronCodesGetTest",
             "PatronHoldRequestsGetTest",
             "PatronILLRequestsGetTest",
             "PatronItemsOutGetTest",
+            "PatronItemsOutGetAsync_ComparisonOrganizationIdMatchesOrganizationOne",
             "PatronMessagesGetTest",
             "PatronPreferencesGetTest",
             "PatronReadingHistoryGetTest",
             "PatronSavedSearchesGetTest",
             "PatronTitleListGetTitlesTest",
             "PatronValidateTest",
+            "PatronValidateAsync_ComparisonOrganizationIdMatchesOrganizationOne",
             "PickupBranchesGetTest",
             "PickupBranchesGetAsync_ReturnsConfiguredPickupBranchWhenProvided",
             "ShelfLocationsGetTest",
@@ -78,11 +81,17 @@ namespace Clc.Polaris.Api.Tests
         private static readonly string[] KnownProtectedReadOnlyIntegrationTests =
         [
             "AuthenticateStaffUserTest",
+            "AuthenticateStaffUser_ConfiguredOverrideAccountSucceeds",
             "HoldRequestGetListTest",
             "Patron_GetBarcodeFromIdTest",
+            "PatronAccountGet_StaffOverrideSucceedsWithoutPatronPassword",
+            "PatronAccountGet_StaffOverrideSameClientCanMakeBackToBackPublicOverrideCalls",
             "PatronRenewBlocksGetTest",
             "PatronSearchTest",
+            "PatronSearch_WithProtectedTokenFindsConfiguredPatron",
+            "PatronSearch_SameClientCanMakeBackToBackProtectedCalls",
             "RecordSetRecordsGetTest",
+            "RecordSetRecordsGetAsync_ComparisonOrganizationIdMatchesOrganizationOne",
             "SA_GetValueByOrgTest",
             "Synch_BibsByIdGetAsync_ReturnsConfiguredBib",
         ];
@@ -92,6 +101,7 @@ namespace Clc.Polaris.Api.Tests
             "HoldRequestCancelTest",
             "HoldRequestCreateTest",
             "HoldRequestCreateTest2",
+            "HoldRequestLifecycle_CleansExistingConfiguredHoldThenCreatesSuspendsReactivatesAndCancels",
             "HoldRequestReactivateTest",
             "HoldRequestReplyTest",
             "HoldRequestSuspendTest",
@@ -105,6 +115,8 @@ namespace Clc.Polaris.Api.Tests
             "PatronTitleListCopyTitleTest",
             "PatronTitleListDeleteAllTitlesTest",
             "PatronTitleListDeleteTitleTest",
+            "PatronTitleListLifecycle_CanCreateReadAndDeleteList",
+            "PatronTitleListLifecycle_CanPopulateCopyMoveClearAndDeleteLists",
             "PatronTitleListMoveTitleTest",
             "PatronUpdateTest",
             "PatronUpdateUserNameTest",
@@ -117,6 +129,7 @@ namespace Clc.Polaris.Api.Tests
             "CreatePatronBlocksTest_LibraryAssignedBlock",
             "NotificationUpdateTest",
             "PatronAccountCreateCreditTest",
+            "PatronAccountCreditAndDeposit_CreateRowsVisibleInAccountReadback",
             "PatronAccountDepositCreditTest",
             "PatronAccountPayTest",
             "PatronAccountPayAllTest",
@@ -126,6 +139,7 @@ namespace Clc.Polaris.Api.Tests
             "RecordSetContentAddTest_List",
             "RecordSetContentRemoveTest",
             "RecordSetContentRemoveTest_List",
+            "RecordSetLifecycle_CanAddAndRemoveConfiguredRecordWithoutChangingInitialMembership",
         ];
 
         [TestMethod]
@@ -223,6 +237,44 @@ namespace Clc.Polaris.Api.Tests
             AssertMethodsHaveCategory(KnownProtectedReadOnlyIntegrationTests, TestCategories.ProtectedReadOnlyIntegration);
             AssertMethodsHaveCategory(KnownMutatingIntegrationTests, TestCategories.MutatingIntegration);
             AssertMethodsHaveCategory(KnownProtectedMutatingIntegrationTests, TestCategories.ProtectedMutatingIntegration);
+        }
+
+        [TestMethod]
+        public void EveryIntegrationTestIsListedInKnownIntegrationTests()
+        {
+            var knownIntegrationTests = KnownReadOnlyIntegrationTests
+                .Concat(KnownProtectedReadOnlyIntegrationTests)
+                .Concat(KnownMutatingIntegrationTests)
+                .Concat(KnownProtectedMutatingIntegrationTests)
+                .ToHashSet();
+
+            var unlistedIntegrationTests = GetPapiClientIntegrationTestMethods()
+                .Select(method => method.Name)
+                .Where(methodName => !knownIntegrationTests.Contains(methodName))
+                .OrderBy(methodName => methodName)
+                .ToArray();
+
+            Assert.IsEmpty(
+                unlistedIntegrationTests,
+                $"Expected every live PAPI client integration test to be listed in one of the known integration test arrays: {string.Join(", ", unlistedIntegrationTests)}");
+        }
+
+        [TestMethod]
+        public void KnownIntegrationTestListsDoNotContainDuplicateMethodNames()
+        {
+            var duplicateMethodNames = KnownReadOnlyIntegrationTests
+                .Concat(KnownProtectedReadOnlyIntegrationTests)
+                .Concat(KnownMutatingIntegrationTests)
+                .Concat(KnownProtectedMutatingIntegrationTests)
+                .GroupBy(methodName => methodName)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .OrderBy(methodName => methodName)
+                .ToArray();
+
+            Assert.IsEmpty(
+                duplicateMethodNames,
+                $"Expected known integration test arrays not to duplicate method names across categories: {string.Join(", ", duplicateMethodNames)}");
         }
 
         private static IEnumerable<MethodInfo> GetPapiClientIntegrationTestMethods()

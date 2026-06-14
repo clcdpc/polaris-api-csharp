@@ -8,8 +8,7 @@ namespace Clc.Polaris.Api.Models
         public DateTime ActivationDate { get; set; }
 
         public HoldRequestActivationData()
-        {
-            
+        {            
         }
 
         public HoldRequestActivationData(int userId, DateTime activationDate)
