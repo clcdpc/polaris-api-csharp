@@ -133,7 +133,6 @@ A local `appsettings.Test.json` follows this shape:
   "RecordSetId": 12345,
   "RecordSetRecordId": 478907,
   "HoldableBibId": 478907,
-  "HoldableItemRecordId": null,
   "HoldPickupBranchId": 7,
   "StaffUserId": 1,
   "StaffWorkstationId": 1
