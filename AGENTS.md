@@ -315,8 +315,8 @@ dotnet build src/polaris-api-csharp/Clc.Polaris.Api.csproj
 For test changes:
 
 ```bash
-dotnet build src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Unit"
+dotnet build tests/Clc.Polaris.Api.UnitTests/Clc.Polaris.Api.UnitTests.csproj
+dotnet test tests/Clc.Polaris.Api.UnitTests/Clc.Polaris.Api.UnitTests.csproj
 ```
 
 If a command cannot be run in the environment, say so explicitly in the summary.

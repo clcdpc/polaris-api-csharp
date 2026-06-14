@@ -63,46 +63,54 @@ Protected-token-in-path endpoints use `ProtectedToken.Placeholder` internally. M
 
 ## Local tests
 
+The test suite is split into two MSTest projects:
+
+- `tests/Clc.Polaris.Api.UnitTests/Clc.Polaris.Api.UnitTests.csproj` contains deterministic tests that are safe to run on every PR, including request-shape, route, query-string, header, cancellation, validation, protected-token substitution, authorization-hash, model, and coverage-governance tests.
+- `tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj` contains tests that call a real Polaris environment and require credentials, configured test IDs, and/or disposable state.
+
 Run unit tests from the repository root:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=Unit"
+dotnet test tests/Clc.Polaris.Api.UnitTests/Clc.Polaris.Api.UnitTests.csproj
 ```
 
-Integration tests require a live Polaris dev environment plus local dev credentials and test data in `src/polaris-api-csharpTests/appsettings.Test.json`, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
+Live integration tests require a live Polaris dev environment plus local dev credentials and test data in `tests/Clc.Polaris.Api.LiveIntegrationTests/appsettings.Test.json` or equivalent environment variables, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
 
-The live-test categories are mutually exclusive so each live test appears under exactly one trait in Visual Studio Test Explorer:
+The live-test category taxonomy is composable:
 
-- `ReadOnlyIntegration`: live test that only reads/returns data and does not mutate Polaris state.
-- `ProtectedReadOnlyIntegration`: read-only live test that requires staff/protected credentials.
-- `MutatingIntegration`: live test that creates, updates, cancels, deletes, clears, pays, voids, moves, renews, submits, or otherwise changes Polaris state.
-- `ProtectedMutatingIntegration`: mutating live test that requires staff/protected credentials.
+- `ReadOnly`: live test that only reads/returns data and does not intentionally mutate Polaris state.
+- `Mutating`: live test that creates, updates, cancels, deletes, clears, pays, voids, moves, renews, submits, or otherwise changes Polaris state.
+- `RequiresStaffOverride`: live test that requires staff override/protected credentials.
+- `RequiresDisposableData`: live test that should only run against disposable or safe-to-dirty test data.
+- `Lifecycle`: live test that exercises a multi-step workflow across related operations.
+- `Smoke`: small, low-risk read-only subset for quick environment validation.
 
-Run read-only integration tests that do not require staff credentials when you have local Polaris dev settings configured:
+Run all live integration tests when the configured Polaris environment is safe for both read-only and mutating scenarios:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ReadOnlyIntegration"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=Mutating" --logger trx --results-directory TestResults
 ```
 
-Run protected read-only integration tests only when `PapiSettings.PolarisOverrideAccount` is configured with staff override credentials:
+Useful live-test filters:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ProtectedReadOnlyIntegration"
+# Read-only only
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=ReadOnly"
+
+# Staff override/protected credentials only
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=RequiresStaffOverride"
+
+# Mutating/disposable data only
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Mutating"
+
+# Lifecycle workflows only
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Lifecycle"
+
+# Smoke only
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Smoke"
 ```
 
-Run all read-only integration tests when both standard and staff/protected local credentials are available:
-
-```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=ReadOnlyIntegration|TestCategory=ProtectedReadOnlyIntegration"
-```
-
-Run mutating/destructive integration tests only against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty:
-
-```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --filter "TestCategory=MutatingIntegration|TestCategory=ProtectedMutatingIntegration"
-```
-
-`MutatingIntegration` and `ProtectedMutatingIntegration` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed.
+`Mutating` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Only run mutating tests against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty.
 
 The required baseline settings below are enough for the basic live integration tests. The nullable optional IDs enable broader disposable-environment lifecycle coverage. Tests that need an optional ID call `Assert.Inconclusive` with a targeted message when that ID is not configured, rather than making the whole integration suite require that data.
 
@@ -148,7 +156,7 @@ Optional ID usage:
 Run the full live integration suite manually when disposable Polaris credentials and optional data are available:
 
 ```bash
-dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --configuration Release --filter "TestCategory=ReadOnlyIntegration|TestCategory=ProtectedReadOnlyIntegration|TestCategory=MutatingIntegration|TestCategory=ProtectedMutatingIntegration" --logger trx --results-directory TestResults
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=Mutating" --logger trx --results-directory TestResults
 ```
 
 ## Migration guide
