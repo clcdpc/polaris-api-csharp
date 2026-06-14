@@ -12,5 +12,16 @@ namespace Clc.Polaris.Api.Tests
             Assert.IsGreaterThan(300, response.Data.CollectionsRows.Count);
             Assert.HasCount(response.Data.PAPIErrorCode, response.Data.CollectionsRows);
         }
+
+        [TestMethod]
+        [ReadOnlyIntegrationTest]
+        public async Task CollectionsGetAsync_ReturnsRowsForConfiguredBranch()
+        {
+            var branchId = RequireConfiguredBranch();
+
+            var response = await Papi.CollectionsGetAsync(branchId, TestContext.CancellationToken);
+
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.CollectionsRows);
+        }
     }
 }

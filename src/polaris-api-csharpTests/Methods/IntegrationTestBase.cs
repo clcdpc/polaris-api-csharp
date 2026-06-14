@@ -13,6 +13,10 @@ namespace Clc.Polaris.Api.Tests
 
         public TestContext TestContext { get; set; } = null!;
 
+        protected int RequireConfiguredStaffUser() => RequirePositiveSetting(Settings.StaffUserId, nameof(Settings.StaffUserId));
+
+        protected int RequireConfiguredStaffWorkstation() => RequirePositiveSetting(Settings.StaffWorkstationId, nameof(Settings.StaffWorkstationId));
+
         protected static IConfiguration InitConfiguration()
         {
             var config = new ConfigurationBuilder()
@@ -40,6 +44,20 @@ namespace Clc.Polaris.Api.Tests
             PapiSettings = papiSettings!;
             Settings = testSettings!;
         }
+
+        protected static int RequirePositiveSetting(int? value, string settingName)
+        {
+            if (value is not > 0)
+            {
+                Assert.Inconclusive($"Integration test setting '{settingName}' must be configured with a positive integer to run this live scenario.");
+            }
+
+            return value.Value;
+        }
+
+        protected int RequireConfiguredBib() => RequirePositiveSetting(Settings.BibId, nameof(Settings.BibId));
+
+        protected int RequireConfiguredBranch() => RequirePositiveSetting(Settings.BranchId, nameof(Settings.BranchId));
 
         protected static string CreateUniqueTestArtifactText(string? baseName = null, int maxLength = 80)
         {

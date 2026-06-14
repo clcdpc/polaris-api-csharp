@@ -10,5 +10,16 @@ namespace Clc.Polaris.Api.Tests
             var response = await Papi.ShelfLocationsGetAsync(7, TestContext.CancellationToken);
             Assert.HasCount(response.Data.PAPIErrorCode, response.Data.ShelfLocationsRows);
         }
+
+        [TestMethod]
+        [ReadOnlyIntegrationTest]
+        public async Task ShelfLocationsGetAsync_ReturnsRowsForConfiguredBranch()
+        {
+            var branchId = RequireConfiguredBranch();
+
+            var response = await Papi.ShelfLocationsGetAsync(branchId, TestContext.CancellationToken);
+
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.ShelfLocationsRows);
+        }
     }
 }
