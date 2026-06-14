@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Infrastructure
         public const string Mutating = "Mutating";
         public const string ProtectedMutating = "ProtectedMutating";
         public const string Lifecycle = "Lifecycle";
-        public const string ProtectedLifeCycle = "ProtectedLifeCycle";
+        public const string ProtectedLifecycle = "ProtectedLifecycle";
         public const string Governance = "Governance";
     }
 }

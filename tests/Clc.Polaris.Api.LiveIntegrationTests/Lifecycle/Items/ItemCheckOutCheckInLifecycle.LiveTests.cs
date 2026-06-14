@@ -4,7 +4,7 @@
     public sealed class ItemCheckOutCheckInLifecycleTests : IntegrationTestBase
     {
         [TestMethod]
-        [ProtectedLifeCycleLiveTest]
+        [ProtectedLifecycleLiveTest]
         [DoNotParallelize]
         public async Task ItemCheckOutCheckInLifecycle_ChecksOutVerifiesItemsOutAndChecksIn()
         {

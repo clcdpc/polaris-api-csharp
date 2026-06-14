@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Infrastructure
             LiveTestCategories.Mutating,
             LiveTestCategories.ProtectedMutating,
             LiveTestCategories.Lifecycle,
-            LiveTestCategories.ProtectedLifeCycle,
+            LiveTestCategories.ProtectedLifecycle,
         ];
 
         [TestMethod]

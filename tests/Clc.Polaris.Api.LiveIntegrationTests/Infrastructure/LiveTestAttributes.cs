@@ -31,9 +31,9 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Infrastructure
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class ProtectedLifeCycleLiveTestAttribute : TestCategoryBaseAttribute
+    public sealed class ProtectedLifecycleLiveTestAttribute : TestCategoryBaseAttribute
     {
-        public override IList<string> TestCategories => [LiveTestCategories.ProtectedLifeCycle];
+        public override IList<string> TestCategories => [LiveTestCategories.ProtectedLifecycle];
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
