@@ -83,12 +83,10 @@ namespace Clc.Polaris.Api.Tests
             "AuthenticateStaffUser_ConfiguredOverrideAccountSucceeds",
             "HoldRequestGetListTest",
             "Patron_GetBarcodeFromIdTest",
-            "PatronAccountGet_StaffOverrideSucceedsWithoutPatronPassword",
-            "PatronAccountGet_StaffOverrideSameClientCanMakeBackToBackPublicOverrideCalls",
+            "PatronAccountGet_StaffOverrideWithoutPatronPasswordCanMakeBackToBackCalls",
             "PatronRenewBlocksGetTest",
             "PatronSearchTest",
-            "PatronSearch_WithProtectedTokenFindsConfiguredPatron",
-            "PatronSearch_SameClientCanMakeBackToBackProtectedCalls",
+            "PatronSearch_SameClientCanMakeBackToBackProtectedCallsAndFindConfiguredPatron",
             "RecordSetRecordsGetTest",
             "RecordSetRecordsGetAsync_ComparisonOrganizationIdMatchesOrganizationOne",
             "SA_GetValueByOrgTest",
@@ -97,8 +95,6 @@ namespace Clc.Polaris.Api.Tests
 
         private static readonly string[] KnownMutatingIntegrationTests =
         [
-            "HoldRequestCreateTest",
-            "HoldRequestCreateTest2",
             "HoldRequestLifecycle_CleansExistingConfiguredHoldThenCreatesSuspendsReactivatesAndCancels",
             "HoldRequestReplyTest",
             "ItemRenewTest",

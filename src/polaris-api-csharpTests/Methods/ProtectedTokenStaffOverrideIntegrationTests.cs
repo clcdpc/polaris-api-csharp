@@ -20,19 +20,7 @@ namespace Clc.Polaris.Api.Tests
 
         [TestMethod]
         [ProtectedReadOnlyIntegrationTest]
-        public async Task PatronSearch_WithProtectedTokenFindsConfiguredPatron()
-        {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
-            var response = await Papi.PatronSearchAsync($"PRID={Settings.PatronId}", cancellationToken: TestContext.CancellationToken);
-
-            Assert.AreEqual(response.Data.PatronSearchRows.Count, response.Data.PAPIErrorCode);
-            Assert.IsNotNull(response.Data.PatronSearchRows.SingleOrDefault(row => row.PatronID == Settings.PatronId));
-        }
-
-        [TestMethod]
-        [ProtectedReadOnlyIntegrationTest]
-        public async Task PatronSearch_SameClientCanMakeBackToBackProtectedCalls()
+        public async Task PatronSearch_SameClientCanMakeBackToBackProtectedCallsAndFindConfiguredPatron()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
@@ -48,19 +36,7 @@ namespace Clc.Polaris.Api.Tests
 
         [TestMethod]
         [ProtectedReadOnlyIntegrationTest]
-        public async Task PatronAccountGet_StaffOverrideSucceedsWithoutPatronPassword()
-        {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
-            var client = CreateStaffOverrideClient();
-            var response = await client.PatronAccountGetAsync(Settings.PatronBarcode, password: string.Empty, cancellationToken: TestContext.CancellationToken);
-
-            Assert.AreEqual(0, response.Data.PAPIErrorCode);
-        }
-
-        [TestMethod]
-        [ProtectedReadOnlyIntegrationTest]
-        public async Task PatronAccountGet_StaffOverrideSameClientCanMakeBackToBackPublicOverrideCalls()
+        public async Task PatronAccountGet_StaffOverrideWithoutPatronPasswordCanMakeBackToBackCalls()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
