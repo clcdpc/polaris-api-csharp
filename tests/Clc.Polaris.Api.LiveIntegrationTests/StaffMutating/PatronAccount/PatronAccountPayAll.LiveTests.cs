@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class PatronAccountPayAllTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffMutatingLiveTest]
+        [ProtectedMutatingLiveTest]
         [DoNotParallelize]
         public async Task PatronAccountPayAllTest()
         {

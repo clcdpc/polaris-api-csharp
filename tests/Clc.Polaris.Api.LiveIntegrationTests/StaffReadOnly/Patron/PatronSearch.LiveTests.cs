@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class PatronSearchTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task PatronSearchTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

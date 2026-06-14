@@ -79,36 +79,36 @@ Live integration tests require a live Polaris dev environment plus local dev cre
 Live integration test categories are intentionally single-category for Visual Studio Test Explorer usability:
 
 - `ReadOnly`: live Polaris calls that should not intentionally mutate state.
-- `StaffReadOnly`: read-only live calls requiring staff/protected credentials.
+- `ProtectedReadOnly`: read-only live calls requiring protected PAPI credentials or staff override.
 - `Mutating`: live calls that intentionally mutate state and require disposable data.
-- `StaffMutating`: mutating live calls requiring staff/protected credentials.
+- `ProtectedMutating`: mutating live calls requiring protected PAPI credentials or staff override.
 - `Lifecycle`: multi-step mutating workflows using normal credentials.
-- `StaffLifecycle`: multi-step mutating workflows requiring staff/protected credentials.
+- `ProtectedLifecycle`: multi-step mutating workflows requiring protected PAPI credentials or staff override.
 - `Governance`: deterministic live-test infrastructure checks that do not call Polaris.
 
 Run all live integration tests when the configured Polaris environment is safe for both read-only and mutating scenarios:
 
 ```bash
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly|TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle" --logger trx --results-directory TestResults
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=ProtectedReadOnly|TestCategory=Mutating|TestCategory=ProtectedMutating|TestCategory=Lifecycle|TestCategory=ProtectedLifecycle" --logger trx --results-directory TestResults
 ```
 
 Useful live-test filters:
 
 ```bash
 # Read-only only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=ReadOnly|TestCategory=ProtectedReadOnly"
 
 # Mutating/disposable data only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Mutating|TestCategory=ProtectedMutating|TestCategory=Lifecycle|TestCategory=ProtectedLifecycle"
 
 # Lifecycle workflows only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Lifecycle|TestCategory=StaffLifecycle"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Lifecycle|TestCategory=ProtectedLifecycle"
 
 # Governance only
 dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Governance"
 ```
 
-`Mutating`, `StaffMutating`, `Lifecycle`, and `StaffLifecycle` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Only run mutating tests against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty.
+`Mutating`, `ProtectedMutating`, `Lifecycle`, and `ProtectedLifecycle` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Only run mutating tests against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty.
 
 The required baseline settings below are enough for the basic live integration tests. The nullable optional IDs enable broader disposable-environment lifecycle coverage. Tests that need an optional ID call `Assert.Inconclusive` with a targeted message when that ID is not configured, rather than making the whole integration suite require that data.
 
@@ -154,7 +154,7 @@ Optional ID usage:
 Run the full live integration suite manually when disposable Polaris credentials and optional data are available:
 
 ```bash
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly|TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle" --logger trx --results-directory TestResults
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=ProtectedReadOnly|TestCategory=Mutating|TestCategory=ProtectedMutating|TestCategory=Lifecycle|TestCategory=ProtectedLifecycle" --logger trx --results-directory TestResults
 ```
 
 ## Migration guide

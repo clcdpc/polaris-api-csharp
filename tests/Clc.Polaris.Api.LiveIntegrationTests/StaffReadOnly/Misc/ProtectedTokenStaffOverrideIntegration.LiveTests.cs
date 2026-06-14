@@ -6,7 +6,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class ProtectedTokenStaffOverrideIntegrationTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task AuthenticateStaffUser_ConfiguredOverrideAccountSucceeds()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         }
 
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task PatronSearch_SameClientCanMakeBackToBackProtectedCallsAndFindConfiguredPatron()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -35,7 +35,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         }
 
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task PatronAccountGet_StaffOverrideWithoutPatronPasswordCanMakeBackToBackCalls()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

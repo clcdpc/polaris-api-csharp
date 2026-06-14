@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class PatronRenewBlocksGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task PatronRenewBlocksGetTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

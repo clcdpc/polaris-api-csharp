@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class RecordSetLifecycleTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffLifecycleLiveTest]
+        [ProtectedLifeCycleLiveTest]
         [DoNotParallelize]
         public async Task RecordSetLifecycle_CanAddAndRemoveConfiguredRecordWithoutChangingInitialMembership()
         {

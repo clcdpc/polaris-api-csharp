@@ -62,7 +62,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         }
 
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task RecordSetRecordsGetAsync_ComparisonOrganizationIdMatchesOrganizationOne()
         {
             var recordSetId = RequireConfiguredRecordSetId();

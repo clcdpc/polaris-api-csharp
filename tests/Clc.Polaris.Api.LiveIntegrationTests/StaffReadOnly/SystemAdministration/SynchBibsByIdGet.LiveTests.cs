@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class Synch_BibsByIdGetTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task Synch_BibsByIdGetAsync_ReturnsConfiguredBib()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

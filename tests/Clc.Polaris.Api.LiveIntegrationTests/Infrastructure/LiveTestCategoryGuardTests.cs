@@ -8,11 +8,11 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Infrastructure
         private static readonly string[] LiveCategories =
         [
             LiveTestCategories.ReadOnly,
-            LiveTestCategories.StaffReadOnly,
+            LiveTestCategories.ProtectedReadOnly,
             LiveTestCategories.Mutating,
-            LiveTestCategories.StaffMutating,
+            LiveTestCategories.ProtectedMutating,
             LiveTestCategories.Lifecycle,
-            LiveTestCategories.StaffLifecycle,
+            LiveTestCategories.ProtectedLifeCycle,
         ];
 
         [TestMethod]

@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class Patron_GetBarcodeFromIdTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task Patron_GetBarcodeFromIdTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);

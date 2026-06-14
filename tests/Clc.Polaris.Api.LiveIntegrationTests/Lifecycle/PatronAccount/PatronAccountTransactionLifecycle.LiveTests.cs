@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class PatronAccountTransactionLifecycleTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffLifecycleLiveTest]
+        [ProtectedLifeCycleLiveTest]
         [DoNotParallelize]
         public async Task PatronAccountCreditAndDeposit_CreateRowsVisibleInAccountReadback()
         {

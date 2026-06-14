@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     public sealed class SA_GetValueByOrgTests : IntegrationTestBase
     {
         [TestMethod]
-        [StaffReadOnlyLiveTest]
+        [ProtectedReadOnlyLiveTest]
         public async Task SA_GetValueByOrgTest()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
