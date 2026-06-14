@@ -76,41 +76,39 @@ dotnet test tests/Clc.Polaris.Api.UnitTests/Clc.Polaris.Api.UnitTests.csproj
 
 Live integration tests require a live Polaris dev environment plus local dev credentials and test data in `tests/Clc.Polaris.Api.LiveIntegrationTests/appsettings.Test.json` or equivalent environment variables, so they are not run by default in CI. Keep this file local only: do not commit real secrets, and remember that `appsettings.Test.json` is ignored by git.
 
-The live-test category taxonomy is composable:
+Live integration test categories are intentionally single-category for Visual Studio Test Explorer usability:
 
-- `ReadOnly`: live test that only reads/returns data and does not intentionally mutate Polaris state.
-- `Mutating`: live test that creates, updates, cancels, deletes, clears, pays, voids, moves, renews, submits, or otherwise changes Polaris state.
-- `RequiresStaffOverride`: live test that requires staff override/protected credentials.
-- `RequiresDisposableData`: live test that should only run against disposable or safe-to-dirty test data.
-- `Lifecycle`: live test that exercises a multi-step workflow across related operations.
-- `Smoke`: small, low-risk read-only subset for quick environment validation.
+- `ReadOnly`: live Polaris calls that should not intentionally mutate state.
+- `StaffReadOnly`: read-only live calls requiring staff/protected credentials.
+- `Mutating`: live calls that intentionally mutate state and require disposable data.
+- `StaffMutating`: mutating live calls requiring staff/protected credentials.
+- `Lifecycle`: multi-step mutating workflows using normal credentials.
+- `StaffLifecycle`: multi-step mutating workflows requiring staff/protected credentials.
+- `Governance`: deterministic live-test infrastructure checks that do not call Polaris.
 
 Run all live integration tests when the configured Polaris environment is safe for both read-only and mutating scenarios:
 
 ```bash
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=Mutating" --logger trx --results-directory TestResults
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly|TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle" --logger trx --results-directory TestResults
 ```
 
 Useful live-test filters:
 
 ```bash
 # Read-only only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=ReadOnly"
-
-# Staff override/protected credentials only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=RequiresStaffOverride"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly"
 
 # Mutating/disposable data only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Mutating"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle"
 
 # Lifecycle workflows only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Lifecycle"
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Lifecycle|TestCategory=StaffLifecycle"
 
-# Smoke only
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Smoke"
+# Governance only
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --filter "TestCategory=Governance"
 ```
 
-`Mutating` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Only run mutating tests against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty.
+`Mutating`, `StaffMutating`, `Lifecycle`, and `StaffLifecycle` tests may create or modify patron blocks, notes, title lists, account entries, record-set entries, hold requests, pickup-branch values, or similar artifacts in Polaris. These artifacts may be left behind; cleanup is not guaranteed. Same-day collision avoidance is handled by unique test names and notes, not by assuming prior artifacts were removed. Only run mutating tests against a disposable Polaris dev environment that is refreshed nightly or otherwise safe to dirty.
 
 The required baseline settings below are enough for the basic live integration tests. The nullable optional IDs enable broader disposable-environment lifecycle coverage. Tests that need an optional ID call `Assert.Inconclusive` with a targeted message when that ID is not configured, rather than making the whole integration suite require that data.
 
@@ -156,7 +154,7 @@ Optional ID usage:
 Run the full live integration suite manually when disposable Polaris credentials and optional data are available:
 
 ```bash
-dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=Mutating" --logger trx --results-directory TestResults
+dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly|TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle" --logger trx --results-directory TestResults
 ```
 
 ## Migration guide

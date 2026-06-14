@@ -5,15 +5,19 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Infrastructure
     [TestClass]
     public class LiveTestCategoryGuardTests
     {
-        private static readonly string[] PrimaryLiveCategories =
+        private static readonly string[] LiveCategories =
         [
             LiveTestCategories.ReadOnly,
+            LiveTestCategories.StaffReadOnly,
             LiveTestCategories.Mutating,
+            LiveTestCategories.StaffMutating,
+            LiveTestCategories.Lifecycle,
+            LiveTestCategories.StaffLifecycle,
         ];
 
         [TestMethod]
-        [ReadOnlyLiveTest]
-        public void IntegrationTestBaseTests_HaveExactlyOnePrimaryLiveCategory()
+        [GovernanceTest]
+        public void IntegrationTestBaseTests_HaveExactlyOneLiveCategory()
         {
             var uncategorizedOrAmbiguousTests = typeof(IntegrationTestBase).Assembly
                 .GetTypes()
@@ -23,16 +27,16 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Infrastructure
                 .Select(method => new
                 {
                     MethodName = $"{method.DeclaringType!.FullName}.{method.Name}",
-                    PrimaryCategories = MethodCategories(method).Intersect(PrimaryLiveCategories).ToArray(),
+                    Categories = MethodCategories(method).Intersect(LiveCategories).ToArray(),
                 })
-                .Where(method => method.PrimaryCategories.Length != 1)
-                .Select(method => $"{method.MethodName} ({method.PrimaryCategories.Length}: {string.Join(", ", method.PrimaryCategories)})")
+                .Where(method => method.Categories.Length != 1)
+                .Select(method => $"{method.MethodName} ({method.Categories.Length}: {string.Join(", ", method.Categories)})")
                 .OrderBy(methodName => methodName)
                 .ToArray();
 
             Assert.IsEmpty(
                 uncategorizedOrAmbiguousTests,
-                $"Expected each live integration test to have exactly one primary live category ({string.Join(", ", PrimaryLiveCategories)}): {string.Join(", ", uncategorizedOrAmbiguousTests)}");
+                $"Expected each live integration test to have exactly one live category ({string.Join(", ", LiveCategories)}): {string.Join(", ", uncategorizedOrAmbiguousTests)}");
         }
 
         private static IEnumerable<string> MethodCategories(MethodInfo method)

@@ -6,14 +6,14 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Configuration
     public class IntegrationTestRequirementsTests
     {
         [TestMethod]
-        [ReadOnlyLiveTest]
+        [GovernanceTest]
         public void HasRequiredStaffOverrideAccount_ReturnsFalseWhenSettingsAreNull()
         {
             Assert.IsFalse(IntegrationTestRequirements.HasRequiredStaffOverrideAccount(null));
         }
 
         [TestMethod]
-        [ReadOnlyLiveTest]
+        [GovernanceTest]
         public void HasRequiredStaffOverrideAccount_ReturnsFalseWhenOverrideAccountIsMissing()
         {
             var settings = new PapiSettings();
@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Configuration
         }
 
         [TestMethod]
-        [ReadOnlyLiveTest]
+        [GovernanceTest]
         [DataRow("", "user", "password")]
         [DataRow("domain", "", "password")]
         [DataRow("domain", "user", "")]
@@ -37,7 +37,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.Configuration
         }
 
         [TestMethod]
-        [ReadOnlyLiveTest]
+        [GovernanceTest]
         public void HasRequiredStaffOverrideAccount_ReturnsTrueWhenAllCredentialFieldsArePresent()
         {
             var settings = CreateSettings("domain", "user", "password");
