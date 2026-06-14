@@ -39,7 +39,7 @@ jobs:
         run: dotnet build tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --no-restore -warnaserror
 
       - name: Run live integration tests
-        run: dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --no-build --filter "TestCategory=ReadOnly|TestCategory=StaffReadOnly|TestCategory=Mutating|TestCategory=StaffMutating|TestCategory=Lifecycle|TestCategory=StaffLifecycle" --logger trx --results-directory TestResults
+        run: dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --no-build --filter "TestCategory=ReadOnly|TestCategory=ProtectedReadOnly|TestCategory=Mutating|TestCategory=ProtectedMutating|TestCategory=Lifecycle|TestCategory=ProtectedLifecycle" --logger trx --results-directory TestResults
 
       - name: Upload TRX results
         if: always()
