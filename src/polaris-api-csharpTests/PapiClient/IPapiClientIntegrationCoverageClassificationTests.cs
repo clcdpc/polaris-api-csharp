@@ -37,7 +37,7 @@ namespace Clc.Polaris.Api.Tests
             [nameof(IPapiClient.HoldRequestReplyAsync)] = new(LiveCoverageClassification.MutatingIntegration),
             [nameof(IPapiClient.HoldRequestSuspendAsync)] = new(LiveCoverageClassification.MutatingIntegration),
             [nameof(IPapiClient.ItemCheckInPostAsync)] = new(LiveCoverageClassification.ProtectedMutatingIntegration),
-            [nameof(IPapiClient.ItemCheckOutPostAsync)] = new(LiveCoverageClassification.MutatingIntegration),
+            [nameof(IPapiClient.ItemCheckOutPostAsync)] = new(LiveCoverageClassification.ProtectedMutatingIntegration),
             [nameof(IPapiClient.ItemRenewAsync)] = new(LiveCoverageClassification.MutatingIntegration),
             [nameof(IPapiClient.ItemStatusesGetAsync)] = new(LiveCoverageClassification.ReadOnlyIntegration),
             [nameof(IPapiClient.ItemUpdateBarcodeAsync)] = new(LiveCoverageClassification.MutatingIntegration),

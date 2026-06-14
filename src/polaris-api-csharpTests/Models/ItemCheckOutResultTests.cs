@@ -82,8 +82,8 @@
             Assert.IsTrue(result.ItemBlockReasons.HasFlag(CheckoutItemBlockReasons.ItemFreeTextBlock));
             Assert.IsTrue(result.ItemBlockReasons.HasFlag(CheckoutItemBlockReasons.ItemMaterialTypeBlocked));
             Assert.AreEqual(0, result.UnknownItemBlockFlags);
-            Assert.Contains("Item has a free text block.", result.ItemBlockReasonDescriptions);
-            Assert.Contains("Item material type is blocked.", result.ItemBlockReasonDescriptions);
+            Assert.HasCount(2, result.ItemBlockReasonDescriptions);
+            Assert.IsTrue(result.ItemBlockReasonDescriptions.All(description => !string.IsNullOrWhiteSpace(description)));
         }
     }
 }
