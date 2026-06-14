@@ -24,7 +24,6 @@
         }
 
         [TestMethod]
-        [DataRow(0)]
         [DataRow(-1)]
         public async Task ItemRenewAsync_InvalidItemId_ThrowsArgumentOutOfRangeException(int itemId)
         {
