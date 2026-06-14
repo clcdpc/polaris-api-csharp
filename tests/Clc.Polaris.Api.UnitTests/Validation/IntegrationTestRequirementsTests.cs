@@ -1,6 +1,7 @@
 using Clc.Polaris.Api.Configuration;
+using Clc.Polaris.Api.LiveIntegrationTests;
 
-namespace Clc.Polaris.Api.LiveIntegrationTests.Validation
+namespace Clc.Polaris.Api.UnitTests.Validation
 {
     [TestClass]
     public class IntegrationTestRequirementsTests
