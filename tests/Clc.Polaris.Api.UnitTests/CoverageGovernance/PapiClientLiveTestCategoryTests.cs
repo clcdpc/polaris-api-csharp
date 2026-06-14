@@ -1,8 +1,10 @@
+using Clc.Polaris.Api.LiveIntegrationTests;
+using Clc.Polaris.Api.LiveIntegrationTests.Infrastructure;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-namespace Clc.Polaris.Api.LiveIntegrationTests
+namespace Clc.Polaris.Api.UnitTests
 {
     [TestClass]
     public class PapiClientIntegrationTestCategoryTests
@@ -10,30 +12,25 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         private const string LegacyIntegrationCategory = "Integration";
         private const string LegacyProtectedIntegrationCategory = "ProtectedIntegration";
 
-        private static readonly string[] IntegrationCategoryNames =
+        private static readonly string[] PrimaryRiskCategoryNames =
         [
             LiveTestCategories.ReadOnly,
-            LiveTestCategories.RequiresStaffOverride,
             LiveTestCategories.Mutating,
-            LiveTestCategories.RequiresStaffOverride,
         ];
 
-        private static readonly string[] ProtectedIntegrationCategoryNames =
+        private static readonly string[] StaffOverrideCategoryNames =
         [
-            LiveTestCategories.RequiresStaffOverride,
             LiveTestCategories.RequiresStaffOverride,
         ];
 
         private static readonly string[] MutatingCategoryNames =
         [
             LiveTestCategories.Mutating,
-            LiveTestCategories.RequiresStaffOverride,
         ];
 
         private static readonly string[] ReadOnlyCategoryNames =
         [
             LiveTestCategories.ReadOnly,
-            LiveTestCategories.RequiresStaffOverride,
         ];
 
         private static readonly string[] KnownReadOnlyLiveTests =
@@ -124,7 +121,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         public void LiveIntegrationTestsInheritIntegrationTestBase()
         {
             var incorrectlyBasedMethods = GetAllTestMethods()
-                .Where(method => MethodCategories(method).Intersect(IntegrationCategoryNames).Any())
+                .Where(method => MethodCategories(method).Intersect(PrimaryRiskCategoryNames).Any())
                 .Where(method => method.DeclaringType == null || !typeof(IntegrationTestBase).IsAssignableFrom(method.DeclaringType))
                 .Select(method => $"{method.DeclaringType?.FullName}.{method.Name}")
                 .OrderBy(methodName => methodName)
@@ -142,7 +139,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
                 .Select(method => new
                 {
                     method.Name,
-                    Categories = MethodCategories(method).Intersect(IntegrationCategoryNames).ToArray(),
+                    Categories = MethodCategories(method).Intersect(PrimaryRiskCategoryNames).ToArray(),
                 })
                 .Where(method => method.Categories.Length != 1)
                 .Select(method => $"{method.Name} ({method.Categories.Length}: {string.Join(", ", method.Categories)})")
@@ -150,7 +147,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
 
             Assert.IsEmpty(
                 incorrectlyCategorized,
-                $"Expected every live PAPI client integration test method to have exactly one integration category ({string.Join(", ", IntegrationCategoryNames)}): {string.Join(", ", incorrectlyCategorized)}");
+                $"Expected every live PAPI client integration test method to have exactly one integration category ({string.Join(", ", PrimaryRiskCategoryNames)}): {string.Join(", ", incorrectlyCategorized)}");
         }
 
         [TestMethod]
@@ -178,18 +175,18 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         }
 
         [TestMethod]
-        public void StaffOverrideIntegrationTestsHaveProtectedIntegrationCategory()
+        public void StaffOverrideIntegrationTestsHaveRequiresStaffOverrideCategory()
         {
             var unprotectedMethods = PapiClientIntegrationTestSourceMethods()
                 .Where(method => method.Value.Contains("IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings)"))
                 .Select(method => GetPapiClientIntegrationTestMethod(method.Key))
-                .Where(method => !MethodCategories(method).Intersect(ProtectedIntegrationCategoryNames).Any())
+                .Where(method => !MethodCategories(method).Intersect(StaffOverrideCategoryNames).Any())
                 .Select(method => method.Name)
                 .ToArray();
 
             Assert.IsEmpty(
                 unprotectedMethods,
-                $"Expected tests requiring a staff override account to use {LiveTestCategories.RequiresStaffOverride} or {LiveTestCategories.RequiresStaffOverride}: {string.Join(", ", unprotectedMethods)}");
+                $"Expected tests requiring a staff override account to use {LiveTestCategories.RequiresStaffOverride}: {string.Join(", ", unprotectedMethods)}");
         }
 
         [TestMethod]
@@ -226,10 +223,10 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         [TestMethod]
         public void KnownIntegrationTestsHaveExpectedCategories()
         {
-            AssertMethodsHaveCategory(KnownReadOnlyLiveTests, LiveTestCategories.ReadOnly);
-            AssertMethodsHaveCategory(KnownStaffReadOnlyLiveTests, LiveTestCategories.RequiresStaffOverride);
-            AssertMethodsHaveCategory(KnownMutatingLiveTests, LiveTestCategories.Mutating);
-            AssertMethodsHaveCategory(KnownStaffMutatingLiveTests, LiveTestCategories.RequiresStaffOverride);
+            AssertMethodsHaveCategories(KnownReadOnlyLiveTests, LiveTestCategories.ReadOnly);
+            AssertMethodsHaveCategories(KnownStaffReadOnlyLiveTests, LiveTestCategories.ReadOnly, LiveTestCategories.RequiresStaffOverride);
+            AssertMethodsHaveCategories(KnownMutatingLiveTests, LiveTestCategories.Mutating, LiveTestCategories.RequiresDisposableData);
+            AssertMethodsHaveCategories(KnownStaffMutatingLiveTests, LiveTestCategories.Mutating, LiveTestCategories.RequiresStaffOverride, LiveTestCategories.RequiresDisposableData);
         }
 
         [TestMethod]
@@ -294,15 +291,21 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
             return method;
         }
 
-        private static void AssertMethodsHaveCategory(IEnumerable<string> methodNames, string expectedCategory)
+        private static void AssertMethodsHaveCategories(IEnumerable<string> methodNames, params string[] expectedCategories)
         {
-            var missingCategory = methodNames
-                .Where(methodName => !MethodCategories(GetPapiClientIntegrationTestMethod(methodName)).Contains(expectedCategory))
+            var missingCategories = methodNames
+                .Select(methodName => new
+                {
+                    MethodName = methodName,
+                    MissingCategories = expectedCategories.Except(MethodCategories(GetPapiClientIntegrationTestMethod(methodName))).ToArray(),
+                })
+                .Where(method => method.MissingCategories.Length != 0)
+                .Select(method => $"{method.MethodName} ({string.Join(", ", method.MissingCategories)})")
                 .ToArray();
 
             Assert.IsEmpty(
-                missingCategory,
-                $"Expected these PAPI client integration test methods to be marked with {expectedCategory}: {string.Join(", ", missingCategory)}");
+                missingCategories,
+                $"Expected these PAPI client integration test methods to be marked with {string.Join(", ", expectedCategories)}: {string.Join(", ", missingCategories)}");
         }
 
         private static IEnumerable<string> MethodCategories(MethodInfo method)
@@ -315,12 +318,13 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         private static Dictionary<string, string> PapiClientIntegrationTestSourceMethods([CallerFilePath] string categoryTestSourcePath = "")
         {
             var methods = GetPapiClientIntegrationTestMethods().Select(method => method.Name).ToHashSet();
-            var methodsDirectory = Path.GetDirectoryName(categoryTestSourcePath)!;
+            var liveProjectDirectory = FindLiveIntegrationTestProjectDirectory(categoryTestSourcePath);
             var sourceMethods = new Dictionary<string, string>();
 
-            foreach (var testSourcePath in Directory.EnumerateFiles(methodsDirectory, "*Tests.cs"))
+            foreach (var testSourcePath in Directory.EnumerateFiles(liveProjectDirectory, "*.cs", SearchOption.AllDirectories))
             {
-                if (Path.GetFileName(testSourcePath) == Path.GetFileName(categoryTestSourcePath))
+                if (testSourcePath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    || testSourcePath.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -348,6 +352,25 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
             }
 
             return sourceMethods;
+        }
+
+        private static string FindLiveIntegrationTestProjectDirectory(string categoryTestSourcePath)
+        {
+            var directory = new DirectoryInfo(Path.GetDirectoryName(categoryTestSourcePath)!);
+
+            while (directory != null)
+            {
+                var candidate = Path.Combine(directory.FullName, "tests", "Clc.Polaris.Api.LiveIntegrationTests");
+                if (Directory.Exists(candidate))
+                {
+                    return candidate;
+                }
+
+                directory = directory.Parent;
+            }
+
+            Assert.Fail($"Expected to find the live integration test project from {categoryTestSourcePath}.");
+            return string.Empty;
         }
 
         private static int FindClosingBrace(string source, int openingBraceIndex)

@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Clc.Polaris.Api.UnitTests</RootNamespace>
-    <AssemblyName>Clc.Polaris.Api.Tests</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS8602</NoWarn>
@@ -21,5 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\polaris-api-csharp\Clc.Polaris.Api.csproj" />
+    <ProjectReference Include="..\Clc.Polaris.Api.LiveIntegrationTests\Clc.Polaris.Api.LiveIntegrationTests.csproj" />
   </ItemGroup>
 </Project>
