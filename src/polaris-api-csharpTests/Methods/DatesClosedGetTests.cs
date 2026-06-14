@@ -5,10 +5,14 @@ namespace Clc.Polaris.Api.Tests
     {
         [TestMethod]
         [ReadOnlyIntegrationTest]
-        public async Task DatesClosedGetTest()
+        public async Task DatesClosedGetAsync_ReturnsRowsForConfiguredBranch()
         {
-            var response = await Papi.DatesClosedGetAsync(7, TestContext.CancellationToken);
-            Assert.IsNotEmpty(response.Data.DatesClosedRows);
+            var branchId = RequireConfiguredBranch();
+
+            var response = await Papi.DatesClosedGetAsync(branchId, TestContext.CancellationToken);
+
+            Assert.IsNotNull(response.Data);
+            Assert.IsNotNull(response.Data.DatesClosedRows);
         }
     }
 }

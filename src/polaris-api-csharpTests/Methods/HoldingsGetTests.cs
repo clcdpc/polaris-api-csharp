@@ -5,9 +5,13 @@ namespace Clc.Polaris.Api.Tests
     {
         [TestMethod]
         [ReadOnlyIntegrationTest]
-        public async Task HoldingsGetTest()
+        public async Task HoldingsGetAsync_ReturnsHoldingsForConfiguredBib()
         {
-            var response = await Papi.HoldingsGetAsync(478907, TestContext.CancellationToken);
+            var bibId = RequireConfiguredBib();
+
+            var response = await Papi.HoldingsGetAsync(bibId, TestContext.CancellationToken);
+
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsNotEmpty(response.Data.BibHoldingsGetRows);
         }
     }

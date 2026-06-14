@@ -41,15 +41,20 @@ namespace Clc.Polaris.Api.Tests
         [
             "ApiKeyValidateTest",
             "ApiVersionGetTest",
-            "BibGetTest",
-            "BibGetTest_PassBranchId",
+            "BibGetAsync_DefaultBranchReturnsConfiguredBib",
+            "BibGetAsync_ExplicitBranchReturnsConfiguredBib",
             "BibSearchTest",
+            "BibSearchAsync_KeywordWithSpacesPagingAndBranchReturnsRows",
             "CollectionsGetTest",
-            "DatesClosedGetTest",
-            "HoldingsGetTest",
+            "CollectionsGetAsync_ReturnsRowsForConfiguredBranch",
+            "DatesClosedGetAsync_ReturnsRowsForConfiguredBranch",
+            "HoldingsGetAsync_ReturnsHoldingsForConfiguredBib",
             "ItemStatusesGetAsyncTest",
             "LimitFiltersGetTest",
+            "LimitFiltersGetAsync_ReturnsRowsForConfiguredBranch",
             "MARCTypeOfMaterialsGetAsyncTest",
+            "MaterialTypesGetTest",
+            "MaterialTypesGetAsync_ReturnsRowsForConfiguredBranch",
             "OrganizationsGetTest",
             "PatronAccountGetTest",
             "PatronBasicDataGetTest",
@@ -65,7 +70,9 @@ namespace Clc.Polaris.Api.Tests
             "PatronTitleListGetTitlesTest",
             "PatronValidateTest",
             "PickupBranchesGetTest",
+            "PickupBranchesGetAsync_ReturnsConfiguredPickupBranchWhenProvided",
             "ShelfLocationsGetTest",
+            "ShelfLocationsGetAsync_ReturnsRowsForConfiguredBranch",
         ];
 
         private static readonly string[] KnownProtectedReadOnlyIntegrationTests =
@@ -77,7 +84,7 @@ namespace Clc.Polaris.Api.Tests
             "PatronSearchTest",
             "RecordSetRecordsGetTest",
             "SA_GetValueByOrgTest",
-            "Synch_BibsByIdGetTest",
+            "Synch_BibsByIdGetAsync_ReturnsConfiguredBib",
         ];
 
         private static readonly string[] KnownMutatingIntegrationTests =
