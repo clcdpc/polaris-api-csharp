@@ -69,7 +69,6 @@ namespace Clc.Polaris.Api.Tests
             "PatronPreferencesGetTest",
             "PatronReadingHistoryGetTest",
             "PatronSavedSearchesGetTest",
-            "PatronTitleListGetTitlesTest",
             "PatronValidateTest",
             "PatronValidateAsync_ComparisonOrganizationIdMatchesOrganizationOne",
             "PickupBranchesGetTest",
@@ -98,26 +97,16 @@ namespace Clc.Polaris.Api.Tests
 
         private static readonly string[] KnownMutatingIntegrationTests =
         [
-            "HoldRequestCancelTest",
             "HoldRequestCreateTest",
             "HoldRequestCreateTest2",
             "HoldRequestLifecycle_CleansExistingConfiguredHoldThenCreatesSuspendsReactivatesAndCancels",
-            "HoldRequestReactivateTest",
             "HoldRequestReplyTest",
-            "HoldRequestSuspendTest",
             "ItemRenewTest",
-            "PatronAccountCreateTitleList_CreatedListCanBeFoundAndDeleted",
             "PatronMessageDeleteTest",
             "PatronMessageUpdateStatusTest",
             "PatronReadingHistoryClearTest",
-            "PatronTitleListAddTitleTest",
-            "PatronTitleListCopyAllTitlesTest",
-            "PatronTitleListCopyTitleTest",
-            "PatronTitleListDeleteAllTitlesTest",
-            "PatronTitleListDeleteTitleTest",
             "PatronTitleListLifecycle_CanCreateReadAndDeleteList",
             "PatronTitleListLifecycle_CanPopulateCopyMoveClearAndDeleteLists",
-            "PatronTitleListMoveTitleTest",
             "PatronUpdateTest",
             "PatronUpdateUserNameTest",
         ];
@@ -128,19 +117,28 @@ namespace Clc.Polaris.Api.Tests
             "CreatePatronBlocksTest_SystemBlock",
             "CreatePatronBlocksTest_LibraryAssignedBlock",
             "NotificationUpdateTest",
-            "PatronAccountCreateCreditTest",
             "PatronAccountCreditAndDeposit_CreateRowsVisibleInAccountReadback",
-            "PatronAccountDepositCreditTest",
             "PatronAccountPayTest",
             "PatronAccountPayAllTest",
             "PatronAccountRefundCreditTest",
             "PatronAccountVoidTest",
-            "RecordSetContentAddTest",
-            "RecordSetContentAddTest_List",
-            "RecordSetContentRemoveTest",
-            "RecordSetContentRemoveTest_List",
             "RecordSetLifecycle_CanAddAndRemoveConfiguredRecordWithoutChangingInitialMembership",
         ];
+
+        [TestMethod]
+        public void LiveIntegrationTestsInheritIntegrationTestBase()
+        {
+            var incorrectlyBasedMethods = GetAllTestMethods()
+                .Where(method => MethodCategories(method).Intersect(IntegrationCategoryNames).Any())
+                .Where(method => method.DeclaringType == null || !typeof(IntegrationTestBase).IsAssignableFrom(method.DeclaringType))
+                .Select(method => $"{method.DeclaringType?.FullName}.{method.Name}")
+                .OrderBy(methodName => methodName)
+                .ToArray();
+
+            Assert.IsEmpty(
+                incorrectlyBasedMethods,
+                $"Expected every live PAPI client integration test method to be declared on a class that inherits {nameof(IntegrationTestBase)}: {string.Join(", ", incorrectlyBasedMethods)}");
+        }
 
         [TestMethod]
         public void LivePapiClientIntegrationTestsHaveExactlyOneIntegrationCategory()
@@ -279,9 +277,15 @@ namespace Clc.Polaris.Api.Tests
 
         private static IEnumerable<MethodInfo> GetPapiClientIntegrationTestMethods()
         {
+            return GetAllTestMethods()
+                .Where(method => method.DeclaringType != null && typeof(IntegrationTestBase).IsAssignableFrom(method.DeclaringType));
+        }
+
+        private static IEnumerable<MethodInfo> GetAllTestMethods()
+        {
             return typeof(IntegrationTestBase).Assembly
                 .GetTypes()
-                .Where(type => type.IsClass && !type.IsAbstract && typeof(IntegrationTestBase).IsAssignableFrom(type))
+                .Where(type => type.IsClass && !type.IsAbstract)
                 .SelectMany(type => type.GetMethods(BindingFlags.Instance | BindingFlags.Public))
                 .Where(method => method.GetCustomAttributes<TestMethodAttribute>(inherit: false).Any());
         }
