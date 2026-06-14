@@ -6,8 +6,43 @@ namespace Clc.Polaris.Api.Tests
         [TestMethod]
         [MutatingIntegrationTest]
         [DoNotParallelize]
-        public async Task PatronTitleListLifecycle_CanCreatePopulateCopyMoveClearAndDeleteLists()
+        public async Task PatronTitleListLifecycle_CanCreateReadAndDeleteList()
         {
+            var listName = CreateUniqueTestArtifactText(Settings.PatronListName, maxLength: 80);
+            PatronAccountTitleListsRow? createdList = null;
+
+            try
+            {
+                createdList = await CreateTitleListAsync(listName);
+
+                var titleLists = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, titleLists.Data.PAPIErrorCode);
+                Assert.IsNotNull(titleLists.Data.PatronAccountTitleListsRows.SingleOrDefault(list => list.RecordStoreId == createdList.RecordStoreId));
+
+                var deleteResponse = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, deleteResponse.Data.PAPIErrorCode);
+
+                var afterDelete = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, afterDelete.Data.PAPIErrorCode);
+                Assert.IsNull(afterDelete.Data.PatronAccountTitleListsRows.SingleOrDefault(list => list.RecordStoreId == createdList.RecordStoreId));
+
+                createdList = null;
+            }
+            finally
+            {
+                if (createdList != null)
+                {
+                    _ = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, createdList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                }
+            }
+        }
+
+        [TestMethod]
+        [MutatingIntegrationTest]
+        [DoNotParallelize]
+        public async Task PatronTitleListLifecycle_CanPopulateCopyMoveClearAndDeleteLists()
+        {
+            var localControlNumber = RequirePositiveSetting(Settings.LocalControlNumber, nameof(Settings.LocalControlNumber));
             var sourceListName = CreateUniqueTestArtifactText(Settings.PatronListName, maxLength: 80);
             var destinationListName = CreateUniqueTestArtifactText(Settings.PatronListName, maxLength: 80);
             PatronAccountTitleListsRow? sourceList = null;
@@ -18,48 +53,47 @@ namespace Clc.Polaris.Api.Tests
                 sourceList = await CreateTitleListAsync(sourceListName);
                 destinationList = await CreateTitleListAsync(destinationListName);
 
-                var titleLists = await Papi.PatronAccountGetTitleListsAsync(Settings.PatronBarcode, Settings.PatronPin, TestContext.CancellationToken);
-                Assert.AreEqual(0, titleLists.Data.PAPIErrorCode);
-                Assert.IsNotNull(titleLists.Data.PatronAccountTitleListsRows.SingleOrDefault(list => list.RecordStoreId == sourceList.RecordStoreId));
-                Assert.IsNotNull(titleLists.Data.PatronAccountTitleListsRows.SingleOrDefault(list => list.RecordStoreId == destinationList.RecordStoreId));
-
-                if (Settings.LocalControlNumber is not > 0)
-                {
-                    return;
-                }
-
-                var addTitle = await Papi.PatronTitleListAddTitleAsync(Settings.PatronBarcode, sourceList.RecordStoreId, Settings.LocalControlNumber.Value, Settings.PatronPin, TestContext.CancellationToken);
+                var addTitle = await Papi.PatronTitleListAddTitleAsync(Settings.PatronBarcode, sourceList.RecordStoreId, localControlNumber, Settings.PatronPin, TestContext.CancellationToken);
                 Assert.AreEqual(0, addTitle.Data.PAPIErrorCode);
 
-                var sourceTitles = await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, sourceList.RecordStoreId, password: Settings.PatronPin, cancellationToken: TestContext.CancellationToken);
-                Assert.AreEqual(0, sourceTitles.Data.PAPIErrorCode);
-                Assert.IsNotEmpty(sourceTitles.Data.PatronTitleListTitleRows);
-                Assert.IsNotNull(sourceTitles.Data.PatronTitleListTitleRows.SingleOrDefault(row => row.LocalControlNumber == Settings.LocalControlNumber.Value));
+                var sourceTitle = await GetSingleTitleListTitleAsync(sourceList.RecordStoreId, localControlNumber, "Expected source list to contain the configured local control number after add.");
 
-                var sourcePosition = sourceTitles.Data.PatronTitleListTitleRows.First(row => row.LocalControlNumber == Settings.LocalControlNumber.Value).Position;
-                var copyTitle = await Papi.PatronTitleListCopyTitleAsync(Settings.PatronBarcode, sourceList.RecordStoreId, sourcePosition, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                var copyTitle = await Papi.PatronTitleListCopyTitleAsync(Settings.PatronBarcode, sourceList.RecordStoreId, sourceTitle.Position, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
                 Assert.AreEqual(0, copyTitle.Data.PAPIErrorCode);
+
+                _ = await GetSingleTitleListTitleAsync(destinationList.RecordStoreId, localControlNumber, "Expected destination list to contain the configured local control number after copy.");
+
+                var clearDestination = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, clearDestination.Data.PAPIErrorCode);
 
                 var copyAllTitles = await Papi.PatronTitleListCopyAllTitlesAsync(Settings.PatronBarcode, sourceList.RecordStoreId, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
                 Assert.AreEqual(0, copyAllTitles.Data.PAPIErrorCode);
 
-                var destinationTitles = await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, destinationList.RecordStoreId, password: Settings.PatronPin, cancellationToken: TestContext.CancellationToken);
-                Assert.AreEqual(0, destinationTitles.Data.PAPIErrorCode);
-                Assert.IsNotEmpty(destinationTitles.Data.PatronTitleListTitleRows);
+                var sourceTitleToDelete = await GetSingleTitleListTitleAsync(sourceList.RecordStoreId, localControlNumber, "Expected source list to still contain the configured local control number after copy-all.");
 
-                var destinationPosition = destinationTitles.Data.PatronTitleListTitleRows.First().Position;
-                var moveTitle = await Papi.PatronTitleListMoveTitleAsync(Settings.PatronBarcode, destinationList.RecordStoreId, destinationPosition, sourceList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
-                Assert.AreEqual(0, moveTitle.Data.PAPIErrorCode);
-
-                var refreshedSourceTitles = await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, sourceList.RecordStoreId, password: Settings.PatronPin, cancellationToken: TestContext.CancellationToken);
-                Assert.AreEqual(0, refreshedSourceTitles.Data.PAPIErrorCode);
-                Assert.IsNotEmpty(refreshedSourceTitles.Data.PatronTitleListTitleRows);
-
-                var deleteTitle = await Papi.PatronTitleListDeleteTitleAsync(Settings.PatronBarcode, sourceList.RecordStoreId, refreshedSourceTitles.Data.PatronTitleListTitleRows.First().Position, Settings.PatronPin, TestContext.CancellationToken);
+                var deleteTitle = await Papi.PatronTitleListDeleteTitleAsync(Settings.PatronBarcode, sourceList.RecordStoreId, sourceTitleToDelete.Position, Settings.PatronPin, TestContext.CancellationToken);
                 Assert.AreEqual(0, deleteTitle.Data.PAPIErrorCode);
 
-                var deleteAllTitles = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
-                Assert.AreEqual(0, deleteAllTitles.Data.PAPIErrorCode);
+                var destinationTitleToMove = await GetSingleTitleListTitleAsync(destinationList.RecordStoreId, localControlNumber, "Expected destination list to contain the configured local control number before move.");
+
+                var moveTitle = await Papi.PatronTitleListMoveTitleAsync(Settings.PatronBarcode, destinationList.RecordStoreId, destinationTitleToMove.Position, sourceList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, moveTitle.Data.PAPIErrorCode);
+
+                _ = await GetSingleTitleListTitleAsync(sourceList.RecordStoreId, localControlNumber, "Expected source list to contain the configured local control number after move.");
+
+                var deleteAllSourceTitles = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, sourceList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, deleteAllSourceTitles.Data.PAPIErrorCode);
+
+                var deleteAllDestinationTitles = await Papi.PatronTitleListDeleteAllTitlesAsync(Settings.PatronBarcode, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, deleteAllDestinationTitles.Data.PAPIErrorCode);
+
+                var deleteSourceList = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, sourceList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, deleteSourceList.Data.PAPIErrorCode);
+                sourceList = null;
+
+                var deleteDestinationList = await Papi.PatronAccountDeleteTitleListAsync(Settings.PatronBarcode, destinationList.RecordStoreId, Settings.PatronPin, TestContext.CancellationToken);
+                Assert.AreEqual(0, deleteDestinationList.Data.PAPIErrorCode);
+                destinationList = null;
             }
             finally
             {
@@ -94,11 +128,23 @@ namespace Clc.Polaris.Api.Tests
 
                 var list = getResponse.Data.PatronAccountTitleListsRows.SingleOrDefault(row => row.RecordStoreName == candidateName);
                 Assert.IsNotNull(list, $"Expected created title list '{candidateName}' to be returned by PatronAccountGetTitleListsAsync.");
+
                 return list;
             }
 
             Assert.Fail("Expected title-list creation retry loop to return a created title list.");
             return null!;
+        }
+
+        private async Task<PatronTitleListTitleRow> GetSingleTitleListTitleAsync(int recordStoreId, int localControlNumber, string failureMessage)
+        {
+            var response = await Papi.PatronTitleListGetTitlesAsync(Settings.PatronBarcode, recordStoreId, password: Settings.PatronPin, cancellationToken: TestContext.CancellationToken);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
+
+            var matches = response.Data.PatronTitleListTitleRows.Where(row => row.LocalControlNumber == localControlNumber).ToArray();
+            Assert.HasCount(1, matches, failureMessage);
+
+            return matches[0];
         }
     }
 }

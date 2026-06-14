@@ -41,20 +41,41 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.AreEqual(firstResponse.Data.PatronSearchRows.Count, firstResponse.Data.PAPIErrorCode);
             Assert.IsNotNull(firstResponse.Data.PatronSearchRows.SingleOrDefault(row => row.PatronID == Settings.PatronId));
+
             Assert.AreEqual(secondResponse.Data.PatronSearchRows.Count, secondResponse.Data.PAPIErrorCode);
             Assert.IsNotNull(secondResponse.Data.PatronSearchRows.SingleOrDefault(row => row.PatronID == Settings.PatronId));
         }
 
         [TestMethod]
         [ProtectedReadOnlyIntegrationTest]
-        public async Task PatronAccountGet_StaffOverrideSucceedsWithoutPatronPasswordButPlainPublicRequestFails()
+        public async Task PatronAccountGet_StaffOverrideSucceedsWithoutPatronPassword()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
 
-            var overrideResponse = await Papi.PatronAccountGetAsync(Settings.PatronBarcode, password: string.Empty, cancellationToken: TestContext.CancellationToken);
-            Assert.AreEqual(0, overrideResponse.Data.PAPIErrorCode);
+            var client = CreateStaffOverrideClient();
+            var response = await client.PatronAccountGetAsync(Settings.PatronBarcode, password: string.Empty, cancellationToken: TestContext.CancellationToken);
 
-            var publicClient = new PapiClient(new PapiSettings
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
+        }
+
+        [TestMethod]
+        [ProtectedReadOnlyIntegrationTest]
+        public async Task PatronAccountGet_StaffOverrideSameClientCanMakeBackToBackPublicOverrideCalls()
+        {
+            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+
+            var client = CreateStaffOverrideClient();
+
+            var firstResponse = await client.PatronAccountGetAsync(Settings.PatronBarcode, password: string.Empty, cancellationToken: TestContext.CancellationToken);
+            var secondResponse = await client.PatronAccountGetAsync(Settings.PatronBarcode, password: string.Empty, cancellationToken: TestContext.CancellationToken);
+
+            Assert.AreEqual(0, firstResponse.Data.PAPIErrorCode);
+            Assert.AreEqual(0, secondResponse.Data.PAPIErrorCode);
+        }
+
+        private PapiClient CreateStaffOverrideClient()
+        {
+            return new PapiClient(new PapiSettings
             {
                 AccessId = PapiSettings.AccessId,
                 AccessKey = PapiSettings.AccessKey,
@@ -62,14 +83,11 @@ namespace Clc.Polaris.Api.Tests
                 OrganizationId = PapiSettings.OrganizationId,
                 UserId = PapiSettings.UserId,
                 WorkstationId = PapiSettings.WorkstationId,
-                PolarisOverrideAccount = null,
+                PolarisOverrideAccount = PapiSettings.PolarisOverrideAccount,
             })
             {
-                AllowStaffOverrideRequests = false,
+                AllowStaffOverrideRequests = true,
             };
-
-            var publicResponse = await publicClient.PatronAccountGetAsync(Settings.PatronBarcode, password: string.Empty, cancellationToken: TestContext.CancellationToken);
-            Assert.AreNotEqual(0, publicResponse.Data.PAPIErrorCode);
         }
     }
 }

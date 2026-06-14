@@ -3,15 +3,21 @@ namespace Clc.Polaris.Api.Tests
     [TestClass]
     public sealed class HoldRequestLifecycleTests : IntegrationTestBase
     {
+        private const int CancelledHoldStatusId = 16;
+
+        private static readonly int[] SuccessfulPreflightCancelCodes = [0, -4205, -4300];
+
         [TestMethod]
         [MutatingIntegrationTest]
         [DoNotParallelize]
-        public async Task HoldRequestLifecycle_CanCreateReadSuspendReactivateAndCancelConfiguredHold()
+        public async Task HoldRequestLifecycle_CleansExistingConfiguredHoldThenCreatesSuspendsReactivatesAndCancels()
         {
             var holdableBibId = RequirePositiveSetting(Settings.HoldableBibId, nameof(Settings.HoldableBibId));
             var holdPickupBranchId = RequirePositiveSetting(Settings.HoldPickupBranchId, nameof(Settings.HoldPickupBranchId));
             var requestingBranchId = Settings.BranchId ?? holdPickupBranchId;
             var holdNote = CreateUniqueTestArtifactText("hold", maxLength: 80);
+
+            var preExistingHoldIds = await CancelExistingConfiguredHoldsAsync(holdableBibId, holdPickupBranchId);
 
             var createResponse = await Papi.HoldRequestCreateAsync(new HoldRequestCreateParams
             {
@@ -25,14 +31,10 @@ namespace Clc.Polaris.Api.Tests
             }, TestContext.CancellationToken);
 
             Assert.AreEqual(0, createResponse.Data.PAPIErrorCode);
-            Assert.IsNotNull(createResponse.Data.RequestGuid);
 
-            var holdRequests = await Papi.PatronHoldRequestsGetAsync(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin, TestContext.CancellationToken);
-            Assert.AreEqual(0, holdRequests.Data.PAPIErrorCode);
-            var createdHold = holdRequests.Data.PatronHoldRequestsGetRows.SingleOrDefault(row => row.BibID == holdableBibId && row.PickupBranchID == holdPickupBranchId);
-            Assert.IsNotNull(createdHold, "Expected the created hold to be returned by PatronHoldRequestsGetAsync.");
-
+            var createdHold = await GetSingleNewConfiguredHoldAsync(holdableBibId, holdPickupBranchId, preExistingHoldIds, "Expected exactly one new non-cancelled configured hold after hold creation.");
             var requestId = createdHold.HoldRequestID;
+
             var suspendResponse = await Papi.HoldRequestSuspendAsync(Settings.PatronBarcode, requestId, DateTime.Today.AddDays(7), Settings.PatronPin, userId: Settings.StaffUserId, cancellationToken: TestContext.CancellationToken);
             Assert.AreEqual(0, suspendResponse.Data.PAPIErrorCode);
 
@@ -41,6 +43,64 @@ namespace Clc.Polaris.Api.Tests
 
             var cancelResponse = await Papi.HoldRequestCancelAsync(Settings.PatronBarcode, requestId, Settings.PatronPin, userId: Settings.StaffUserId, workstationId: Settings.StaffWorkstationId, cancellationToken: TestContext.CancellationToken);
             Assert.AreEqual(0, cancelResponse.Data.PAPIErrorCode);
+
+            var createdHoldStillActive = await GetNonCancelledHoldAsync(requestId);
+            Assert.IsNull(createdHoldStillActive, $"Expected final cancellation to remove created hold request {requestId} from the non-cancelled hold list.");
+        }
+
+        private async Task<int[]> CancelExistingConfiguredHoldsAsync(int holdableBibId, int holdPickupBranchId)
+        {
+            var existingHolds = await GetNonCancelledConfiguredHoldsAsync(holdableBibId, holdPickupBranchId);
+            var existingHoldIds = existingHolds.Select(hold => hold.HoldRequestID).ToArray();
+
+            foreach (var hold in existingHolds)
+            {
+                var cancelResponse = await Papi.HoldRequestCancelAsync(Settings.PatronBarcode, hold.HoldRequestID, Settings.PatronPin, userId: Settings.StaffUserId, workstationId: Settings.StaffWorkstationId, cancellationToken: TestContext.CancellationToken);
+
+                Assert.Contains(
+                    cancelResponse.Data.PAPIErrorCode,
+                    SuccessfulPreflightCancelCodes,
+                    $"Expected preflight cancellation of hold request {hold.HoldRequestID} to succeed or report no work to do.");
+            }
+
+            return existingHoldIds;
+        }
+
+        private async Task<PatronHoldRequestsGetRow> GetSingleNewConfiguredHoldAsync(int holdableBibId, int holdPickupBranchId, int[] preExistingHoldIds, string failureMessage)
+        {
+            var matchingHolds = await GetNonCancelledConfiguredHoldsAsync(holdableBibId, holdPickupBranchId);
+            var newMatchingHolds = matchingHolds.Where(hold => !preExistingHoldIds.Contains(hold.HoldRequestID)).ToArray();
+
+            Assert.HasCount(1, newMatchingHolds, $"{failureMessage}{Environment.NewLine}{FormatHoldDiagnostic(matchingHolds, preExistingHoldIds)}");
+
+            return newMatchingHolds[0];
+        }
+
+        private async Task<PatronHoldRequestsGetRow?> GetNonCancelledHoldAsync(int holdRequestId)
+        {
+            var holdRequests = await Papi.PatronHoldRequestsGetAsync(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin, TestContext.CancellationToken);
+            Assert.AreEqual(0, holdRequests.Data.PAPIErrorCode);
+
+            return holdRequests.Data.PatronHoldRequestsGetRows.SingleOrDefault(row => row.HoldRequestID == holdRequestId && row.StatusID != CancelledHoldStatusId);
+        }
+
+        private async Task<PatronHoldRequestsGetRow[]> GetNonCancelledConfiguredHoldsAsync(int holdableBibId, int holdPickupBranchId)
+        {
+            var holdRequests = await Papi.PatronHoldRequestsGetAsync(Settings.PatronBarcode, PatronHoldStatus.all, Settings.PatronPin, TestContext.CancellationToken);
+            Assert.AreEqual(0, holdRequests.Data.PAPIErrorCode);
+
+            return holdRequests.Data.PatronHoldRequestsGetRows
+                .Where(row => row.BibID == holdableBibId && row.PickupBranchID == holdPickupBranchId && row.StatusID != CancelledHoldStatusId)
+                .ToArray();
+        }
+
+        private static string FormatHoldDiagnostic(PatronHoldRequestsGetRow[] matchingHolds, int[] preExistingHoldIds)
+        {
+            var rows = matchingHolds
+                .Select(hold => $"HoldRequestID={hold.HoldRequestID}, BibID={hold.BibID}, PickupBranchID={hold.PickupBranchID}, StatusID={hold.StatusID}, StatusDescription='{hold.StatusDescription}', WasPreExisting={preExistingHoldIds.Contains(hold.HoldRequestID)}")
+                .ToArray();
+
+            return rows.Length == 0 ? "No non-cancelled matching holds were returned." : $"Non-cancelled matching holds:{Environment.NewLine}{string.Join(Environment.NewLine, rows)}";
         }
     }
 }

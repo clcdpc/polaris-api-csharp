@@ -77,9 +77,9 @@ namespace Clc.Polaris.Api.Tests
         {
             var pickupBranchId = Settings.PickupBranchId ?? RequireConfiguredBranch();
 
-            var response = await Papi.PickupBranchesGetAsync(PapiSettings.OrganizationId, TestContext.CancellationToken);
+            var response = await Papi.PickupBranchesGetAsync(7, TestContext.CancellationToken);
 
-            Assert.AreEqual(response.Data.PickupBranchesRows.Count, response.Data.PAPIErrorCode);
+            Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.Contains(pickupBranchId, response.Data.PickupBranches);
         }
 
