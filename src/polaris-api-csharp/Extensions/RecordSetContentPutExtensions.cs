@@ -12,8 +12,8 @@ namespace Clc.Polaris.Api
             this IPapiClient client,
             int recordSetId,
             int recordId,
-            int userId = 1,
-            int workstationId = 1,
+            int? userId = null,
+            int? workstationId = null,
             CancellationToken cancellationToken = default)
         {
             return client.RecordSetContentPutAsync(recordSetId, [recordId], RecordSetContentPutActions.Add, userId, workstationId, cancellationToken);
@@ -23,8 +23,8 @@ namespace Clc.Polaris.Api
             this IPapiClient client,
             int recordSetId,
             IEnumerable<int> records,
-            int userId = 1,
-            int workstationId = 1,
+            int? userId = null,
+            int? workstationId = null,
             CancellationToken cancellationToken = default)
         {
             return client.RecordSetContentPutAsync(recordSetId, records, RecordSetContentPutActions.Add, userId, workstationId, cancellationToken);
@@ -34,8 +34,8 @@ namespace Clc.Polaris.Api
             this IPapiClient client,
             int recordSetId,
             int recordId,
-            int userId = 1,
-            int workstationId = 1,
+            int? userId = null,
+            int? workstationId = null,
             CancellationToken cancellationToken = default)
         {
             return client.RecordSetContentPutAsync(recordSetId, [recordId], RecordSetContentPutActions.Remove, userId, workstationId, cancellationToken);
@@ -45,8 +45,8 @@ namespace Clc.Polaris.Api
             this IPapiClient client,
             int recordSetId,
             IEnumerable<int> records,
-            int userId = 1,
-            int workstationId = 1,
+            int? userId = null,
+            int? workstationId = null,
             CancellationToken cancellationToken = default)
         {
             return client.RecordSetContentPutAsync(recordSetId, records, RecordSetContentPutActions.Remove, userId, workstationId, cancellationToken);
