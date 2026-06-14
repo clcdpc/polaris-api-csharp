@@ -11,6 +11,15 @@ namespace Clc.Polaris.Api.Tests
             Assert.HasCount(response.PAPIErrorCode, response.LimitFiltersRows);
         }
 
+        [TestMethod]
+        [ReadOnlyIntegrationTest]
+        public async Task LimitFiltersGetAsync_ReturnsRowsForConfiguredBranch()
+        {
+            var branchId = RequireConfiguredBranch();
 
+            var response = await Papi.LimitFiltersGetAsync(branchId, TestContext.CancellationToken);
+
+            Assert.HasCount(response.Data.PAPIErrorCode, response.Data.LimitFiltersRows);
+        }
     }
 }
