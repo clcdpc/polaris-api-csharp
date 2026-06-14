@@ -20,6 +20,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\polaris-api-csharp\Clc.Polaris.Api.csproj" />
-    <ProjectReference Include="..\Clc.Polaris.Api.LiveIntegrationTests\Clc.Polaris.Api.LiveIntegrationTests.csproj" />
   </ItemGroup>
 </Project>
