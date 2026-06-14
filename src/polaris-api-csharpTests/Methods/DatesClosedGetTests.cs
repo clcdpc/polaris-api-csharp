@@ -5,14 +5,6 @@ namespace Clc.Polaris.Api.Tests
     {
         [TestMethod]
         [ReadOnlyIntegrationTest]
-        public async Task DatesClosedGetTest()
-        {
-            var response = await Papi.DatesClosedGetAsync(7, TestContext.CancellationToken);
-            Assert.IsNotEmpty(response.Data.DatesClosedRows);
-        }
-
-        [TestMethod]
-        [ReadOnlyIntegrationTest]
         public async Task DatesClosedGetAsync_ReturnsRowsForConfiguredBranch()
         {
             var branchId = RequireConfiguredBranch();

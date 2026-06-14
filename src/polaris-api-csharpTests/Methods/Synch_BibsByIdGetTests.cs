@@ -5,16 +5,6 @@ namespace Clc.Polaris.Api.Tests
     {
         [TestMethod]
         [ProtectedReadOnlyIntegrationTest]
-        public async Task Synch_BibsByIdGetTest()
-        {
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
-            var response = await Papi.Synch_BibsByIdGetAsync(478907, cancellationToken: TestContext.CancellationToken);
-            Assert.IsTrue(response.Response.IsSuccessStatusCode);
-        }
-
-        [TestMethod]
-        [ProtectedReadOnlyIntegrationTest]
         public async Task Synch_BibsByIdGetAsync_ReturnsConfiguredBib()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
@@ -22,6 +12,7 @@ namespace Clc.Polaris.Api.Tests
 
             var response = await Papi.Synch_BibsByIdGetAsync([bibId], includeItems: true, cancellationToken: TestContext.CancellationToken);
 
+            Assert.IsTrue(response.Response.IsSuccessStatusCode);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.IsNotNull(response.Data.GetBibsByIDRows.SingleOrDefault(row => row.BibliographicRecordID == bibId));
         }

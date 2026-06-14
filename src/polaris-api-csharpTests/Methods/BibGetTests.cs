@@ -5,26 +5,6 @@ namespace Clc.Polaris.Api.Tests
     {
         [TestMethod]
         [ReadOnlyIntegrationTest]
-        public async Task BibGetTest()
-        {
-            var response = await Papi.BibGetAsync(478907, cancellationToken: TestContext.CancellationToken);
-            Assert.AreEqual(0, response.Data.PAPIErrorCode);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
-            Assert.Contains("100/1/bib", response.Response.RequestMessage.RequestUri.ToString());
-        }
-
-        [TestMethod]
-        [ReadOnlyIntegrationTest]
-        public async Task BibGetTest_PassBranchId()
-        {
-            var response = await Papi.BibGetAsync(478907, 7, TestContext.CancellationToken);
-            Assert.AreEqual(0, response.Data.PAPIErrorCode);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
-            Assert.Contains("100/7/bib", response.Response.RequestMessage.RequestUri.ToString());
-        }
-
-        [TestMethod]
-        [ReadOnlyIntegrationTest]
         public async Task BibGetAsync_DefaultBranchReturnsConfiguredBib()
         {
             var bibId = RequireConfiguredBib();
@@ -33,6 +13,8 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.AreEqual(bibId, response.Data.ControlNumber);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
+            Assert.Contains($"/100/{Papi.OrganizationId}/bib", response.Response.RequestMessage.RequestUri.ToString());
         }
 
         [TestMethod]
@@ -46,6 +28,8 @@ namespace Clc.Polaris.Api.Tests
 
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
             Assert.AreEqual(bibId, response.Data.ControlNumber);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.Data.Title));
+            Assert.Contains($"/100/{branchId}/bib", response.Response.RequestMessage.RequestUri.ToString());
         }
     }
 }

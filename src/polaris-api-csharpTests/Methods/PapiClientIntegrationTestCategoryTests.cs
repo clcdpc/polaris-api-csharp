@@ -41,17 +41,13 @@ namespace Clc.Polaris.Api.Tests
         [
             "ApiKeyValidateTest",
             "ApiVersionGetTest",
-            "BibGetTest",
-            "BibGetTest_PassBranchId",
             "BibGetAsync_DefaultBranchReturnsConfiguredBib",
             "BibGetAsync_ExplicitBranchReturnsConfiguredBib",
             "BibSearchTest",
             "BibSearchAsync_KeywordWithSpacesPagingAndBranchReturnsRows",
             "CollectionsGetTest",
             "CollectionsGetAsync_ReturnsRowsForConfiguredBranch",
-            "DatesClosedGetTest",
             "DatesClosedGetAsync_ReturnsRowsForConfiguredBranch",
-            "HoldingsGetTest",
             "HoldingsGetAsync_ReturnsHoldingsForConfiguredBib",
             "ItemStatusesGetAsyncTest",
             "LimitFiltersGetTest",
@@ -88,7 +84,6 @@ namespace Clc.Polaris.Api.Tests
             "PatronSearchTest",
             "RecordSetRecordsGetTest",
             "SA_GetValueByOrgTest",
-            "Synch_BibsByIdGetTest",
             "Synch_BibsByIdGetAsync_ReturnsConfiguredBib",
         ];
 
