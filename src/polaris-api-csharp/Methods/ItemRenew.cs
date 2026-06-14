@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAsync(string barcode, int itemId, string password = "", ItemRenewOptions? renewOptions = null, CancellationToken cancellationToken = default)
         {
-            Require.Positive(itemId);
+            Require.NonNegative(itemId);
 
             if (renewOptions == null)
             {
