@@ -78,13 +78,13 @@ Live integration tests require a live Polaris dev environment plus local dev cre
 
 Live integration test categories are intentionally single-category for Visual Studio Test Explorer usability:
 
-- `ReadOnly`: live Polaris calls that should not intentionally mutate state.
-- `ProtectedReadOnly`: read-only live calls requiring protected PAPI credentials or staff override.
-- `Mutating`: live calls that intentionally mutate state and require disposable data.
-- `ProtectedMutating`: mutating live calls requiring protected PAPI credentials or staff override.
-- `Lifecycle`: multi-step mutating workflows using normal credentials.
-- `ProtectedLifecycle`: multi-step mutating workflows requiring protected PAPI credentials or staff override.
-- `Governance`: deterministic live-test infrastructure checks that do not call Polaris.
+- `ReadOnly`: live Polaris calls that should not intentionally mutate state
+- `ProtectedReadOnly`: read-only live calls requiring staff credentials
+- `Mutating`: live calls that intentionally mutate state and require disposable data
+- `ProtectedMutating`: mutating live calls requiring staff credentials
+- `Lifecycle`: multi-step mutating workflows using normal credentials
+- `ProtectedLifecycle`: multi-step mutating workflows requiring staff credentials
+- `Governance`: deterministic live-test infrastructure checks that do not call Polaris
 
 Run all live integration tests when the configured Polaris environment is safe for both read-only and mutating scenarios:
 
