@@ -40,8 +40,8 @@ namespace Clc.Polaris.Api.Tests
 		{
 			RequirePositiveSetting(Settings.HoldableBibId, nameof(Settings.HoldableBibId));
 			RequirePositiveSetting(Settings.HoldPickupBranchId, nameof(Settings.HoldPickupBranchId));
-			RequirePositiveSetting(Settings.StaffUserId, nameof(Settings.StaffUserId));
-			RequirePositiveSetting(Settings.StaffWorkstationId, nameof(Settings.StaffWorkstationId));
+			RequireConfiguredStaffUser();
+			RequireConfiguredStaffWorkstation();
 		}
 
 		private HoldRequestCreateParams CreateConfiguredHoldRequestCreateParams(string holdNote)

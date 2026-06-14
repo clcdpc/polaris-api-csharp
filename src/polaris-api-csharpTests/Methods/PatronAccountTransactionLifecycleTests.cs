@@ -9,6 +9,8 @@ namespace Clc.Polaris.Api.Tests
         public async Task PatronAccountCreditAndDeposit_CreateRowsVisibleInAccountReadback()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+            RequireConfiguredStaffUser();
+            RequireConfiguredStaffWorkstation();
 
             var creditNote = CreateUniqueTestArtifactText("credit", maxLength: 60);
             var creditResponse = await Papi.PatronAccountCreateCreditAsync(Settings.PatronBarcode, .01, PaymentMethod.Cash, workstationId: Settings.StaffWorkstationId, userId: Settings.StaffUserId, note: creditNote, cancellationToken: TestContext.CancellationToken);

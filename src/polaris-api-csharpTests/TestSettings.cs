@@ -15,7 +15,6 @@ namespace Clc.Polaris.Api
         public int? RecordSetId { get; set; }
         public int? RecordSetRecordId { get; set; }
         public int? HoldableBibId { get; set; }
-        public int? HoldableItemRecordId { get; set; }
         public int? HoldPickupBranchId { get; set; }
         public int? StaffUserId { get; set; }
         public int? StaffWorkstationId { get; set; }

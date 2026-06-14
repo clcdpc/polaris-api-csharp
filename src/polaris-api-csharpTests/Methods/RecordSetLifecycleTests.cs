@@ -9,6 +9,8 @@ namespace Clc.Polaris.Api.Tests
         public async Task RecordSetLifecycle_CanAddAndRemoveConfiguredRecordWithoutChangingInitialMembership()
         {
             IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
+            RequireConfiguredStaffUser();
+            RequireConfiguredStaffWorkstation();
 
             var recordSetId = RequirePositiveSetting(Settings.RecordSetId, nameof(Settings.RecordSetId));
             var recordId = Settings.RecordSetRecordId is > 0 ? Settings.RecordSetRecordId.Value : RequireConfiguredBib();

@@ -13,6 +13,10 @@ namespace Clc.Polaris.Api.Tests
 
         public TestContext TestContext { get; set; } = null!;
 
+        protected int RequireConfiguredStaffUser() => RequirePositiveSetting(Settings.StaffUserId, nameof(Settings.StaffUserId));
+
+        protected int RequireConfiguredStaffWorkstation() => RequirePositiveSetting(Settings.StaffWorkstationId, nameof(Settings.StaffWorkstationId));
+
         protected static IConfiguration InitConfiguration()
         {
             var config = new ConfigurationBuilder()
