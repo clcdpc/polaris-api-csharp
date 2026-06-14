@@ -27,19 +27,19 @@ jobs:
           APPSETTINGS_TEST_JSON: ${{ secrets.APPSETTINGS_TEST_JSON }}
         run: |
           if [[ -z "${APPSETTINGS_TEST_JSON}" ]]; then
-            echo "APPSETTINGS_TEST_JSON secret must contain src/polaris-api-csharpTests/appsettings.Test.json content." >&2
+            echo "APPSETTINGS_TEST_JSON secret must contain tests/Clc.Polaris.Api.LiveIntegrationTests/appsettings.Test.json content." >&2
             exit 1
           fi
-          printf '%s' "${APPSETTINGS_TEST_JSON}" > src/polaris-api-csharpTests/appsettings.Test.json
+          printf '%s' "${APPSETTINGS_TEST_JSON}" > tests/Clc.Polaris.Api.LiveIntegrationTests/appsettings.Test.json
 
       - name: Restore tests
-        run: dotnet restore src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj
+        run: dotnet restore tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj
 
       - name: Build tests
-        run: dotnet build src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --configuration Release --no-restore -warnaserror
+        run: dotnet build tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --no-restore -warnaserror
 
       - name: Run live integration tests
-        run: dotnet test src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj --configuration Release --no-build --filter "TestCategory=ReadOnlyIntegration|TestCategory=ProtectedReadOnlyIntegration|TestCategory=MutatingIntegration|TestCategory=ProtectedMutatingIntegration" --logger trx --results-directory TestResults
+        run: dotnet test tests/Clc.Polaris.Api.LiveIntegrationTests/Clc.Polaris.Api.LiveIntegrationTests.csproj --configuration Release --no-build --filter "TestCategory=ReadOnly|TestCategory=ProtectedReadOnly|TestCategory=Mutating|TestCategory=ProtectedMutating|TestCategory=Lifecycle|TestCategory=ProtectedLifecycle" --logger trx --results-directory TestResults
 
       - name: Upload TRX results
         if: always()

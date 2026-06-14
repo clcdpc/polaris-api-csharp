@@ -34,7 +34,7 @@ env:
   DOTNET_VERSION: 8.0.x
   BUILD_CONFIGURATION: Release
   PACKAGE_PROJECT: src/polaris-api-csharp/Clc.Polaris.Api.csproj
-  TEST_PROJECT: src/polaris-api-csharpTests/Clc.Polaris.Api.Tests.csproj
+  UNIT_TEST_PROJECT: tests/Clc.Polaris.Api.UnitTests/Clc.Polaris.Api.UnitTests.csproj
 
   TEST_RESULTS_DIR: TestResults
   PACKAGE_OUTPUT_DIR: artifacts/packages
@@ -72,7 +72,7 @@ jobs:
           echo "PACKAGE_VERSION=$package_version" >> "$GITHUB_ENV"
 
       - name: Restore
-        run: dotnet restore "$TEST_PROJECT"
+        run: dotnet restore "$UNIT_TEST_PROJECT"
 
       - name: Build package project
         run: |
@@ -92,7 +92,7 @@ jobs:
       - name: Build tests
         run: |
           build_args=(
-            "$TEST_PROJECT"
+            "$UNIT_TEST_PROJECT"
             --configuration "$BUILD_CONFIGURATION"
             --no-restore
             -warnaserror
@@ -106,10 +106,9 @@ jobs:
 
       - name: Test
         run: >
-          dotnet test "$TEST_PROJECT"
+          dotnet test "$UNIT_TEST_PROJECT"
           --configuration "$BUILD_CONFIGURATION"
           --no-build
-          --filter "TestCategory=Unit"
           --logger trx
           --results-directory "$TEST_RESULTS_DIR"
 
