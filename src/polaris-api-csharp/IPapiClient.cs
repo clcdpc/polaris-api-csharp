@@ -1,9 +1,9 @@
-﻿using Clc.Polaris.Api.Models;
-using Clc.Rest;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Rest;
 
 namespace Clc.Polaris.Api
 {
@@ -72,20 +72,24 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<PatronBasicDataGetResult>> PatronBasicDataGetAsync(string barcode, string password = "", bool addresses = false, bool notes = false, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronCirculateBlocksResult>> PatronCirculateBlocksGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronCodesGetResult>> PatronCodesGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
+        Task<IRestResponse<PatronNotesResult>> PatronNotesGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronHoldRequestsGetResult>> PatronHoldRequestsGetAsync(string barcode, PatronHoldStatus status = PatronHoldStatus.all, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronILLRequestsGetResult>> PatronILLRequestsGetAsync(string barcode, ILLStatus status = ILLStatus.All, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronItemsOutGetResult>> PatronItemsOutGetAsync(string barcode, PatronItemsOutGetStatus status = PatronItemsOutGetStatus.All, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronMessageDeleteAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronMessagesGetResult>> PatronMessagesGetAsync(string barcode, bool unreadOnly = false, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronMessageUpdateStatusAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default);
+        Task<IRestResponse<PatronLanguagesGetResult>> PatronLanguagesGetAsync(int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronPreferencesGetResult>> PatronPreferencesGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string password = "", IEnumerable<int>? ids = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronReadingHistoryGetResult>> PatronReadingHistoryGetAsync(string barcode, int page = 1, int rowsPerPage = 50, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateAsync(PatronRegistrationParams _params, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateV2Async(PatronRegistrationData _params, CancellationToken cancellationToken = default);
+        Task<IRestResponse<PatronRegistrationUpdateResult>> PatronRegistrationUpdateV2Async(string barcode, PatronRegistrationData registrationData, string password = "", bool ignoresa = true, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronRenewBlocksResult>> PatronRenewBlocksGetAsync(int patronId, int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronSavedSearchesGetResult>> PatronSavedSearchesGetAsync(string barcode, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronSearchResult>> PatronSearchAsync(string query, int page = 1, int pageSize = 10, PatronSortKeys sortBy = PatronSortKeys.PATN, int? orgId = null, CancellationToken cancellationToken = default);
+        Task<IRestResponse<PatronStatisticalClassesGetResult>> PatronStatisticalClassesGetAsync(int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronTitleListAddTitleResult>> PatronTitleListAddTitleAsync(string barcode, int recordStoreId, int localControlNumber, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronTitleListCopyAllTitlesAsync(string barcode, int fromRecordStoreId, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronTitleListCopyTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default);
@@ -95,8 +99,10 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<PapiResponseCommon>> PatronTitleListMoveTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronUpdateResult>> PatronUpdateAsync(string barcode, PatronUpdateParams updateParams, string password = "", bool ignoresa = true, CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> PatronUpdateUserNameAsync(string barcode, string newUsername, string password = "", CancellationToken cancellationToken = default);
+        Task<IRestResponse<PatronUdfConfigsGetResult>> PatronUdfConfigsGetAsync(int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronValidateResult>> PatronValidateAsync(string barcode, string password = "", CancellationToken cancellationToken = default);
         Task<IRestResponse<GetBarcodeAndPatronIDResult>> Patron_GetBarcodeFromIdAsync(int patronId, CancellationToken cancellationToken = default);
+        Task<IRestResponse<PickupAreasGetResult>> PickupAreasGetAsync(int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PickupBranchesGetResult>> PickupBranchesGetAsync(int? organizationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PapiResponseCommon>> RecordSetContentPutAsync(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<RecordSetRecordsGetResult>> RecordSetRecordsGetAsync(int recordSetId, int? userId = null, int? workstationId = null, int startIndex = 0, int numRecords = 1000, CancellationToken cancellationToken = default);
