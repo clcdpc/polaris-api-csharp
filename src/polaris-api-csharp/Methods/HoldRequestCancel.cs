@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<HoldRequestCancelResult>> HoldRequestCancelAsync(string barcode, int requestId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
-            Require.Positive(requestId);
+            Require.NonNegative(requestId);
             Require.PositiveIfProvided(userId);
             Require.PositiveIfProvided(workstationId);
 
