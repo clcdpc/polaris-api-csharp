@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api
         {
             Require.PositiveIfProvided(organizationId);
 
-            var url = $"/public/v1/1033/100/{organizationId ?? OrganizationId}/patronudfconfigs";
+            var url = $"/public/v1/1033/100/{organizationId ?? OrganizationId}/patronudfs";
             var request = PapiRestRequest.Get(url);
             request.BlockStaffOverride = true;
             return await ExecutePapiAsync<PatronUdfConfigsGetResult>(request, cancellationToken).ConfigureAwait(false);

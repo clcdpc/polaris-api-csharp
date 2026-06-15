@@ -7,7 +7,7 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
         [TestMethod]
         [DataRow("languages", "/PAPIService/REST/public/v1/1033/100/101/patronlanguages")]
         [DataRow("statisticalClasses", "/PAPIService/REST/public/v1/1033/100/101/patronstatisticalclasses")]
-        [DataRow("udfConfigs", "/PAPIService/REST/public/v1/1033/100/101/patronudfconfigs")]
+        [DataRow("udfConfigs", "/PAPIService/REST/public/v1/1033/100/101/patronudfs")]
         [DataRow("pickupAreas", "/PAPIService/REST/public/v1/1033/100/101/pickupareas")]
         public async Task ReferenceDataMethods_DefaultOrganizationId_UseExpectedGetRoutes(string methodName, string expectedPath)
         {

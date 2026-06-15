@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         {
             var response = await Papi.PatronStatisticalClassesGetAsync(cancellationToken: TestContext.CancellationToken);
 
-            Assert.AreEqual(0, response.Data.PAPIErrorCode);
+            Assert.AreEqual(response.Data.PatronStatisticalClassesRows.Count, response.Data.PAPIErrorCode);
             Assert.IsNotEmpty(response.Data.PatronStatisticalClassesRows);
         }
     }
