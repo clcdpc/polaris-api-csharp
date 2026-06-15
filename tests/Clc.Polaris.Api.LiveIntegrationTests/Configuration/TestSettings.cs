@@ -18,6 +18,10 @@ namespace Clc.Polaris.Api
         public int? HoldPickupBranchId { get; set; }
         public int? StaffUserId { get; set; }
         public int? StaffWorkstationId { get; set; }
+        public string BibGetByTypeKey { get; set; } = string.Empty;
+        public int? MultipartBibId { get; set; }
+        public int? MultipartPatronId { get; set; }
+        public int? MultipartPickupLocationId { get; set; }
         public CheckoutCheckInLifecycleTestSettings CheckoutCheckInLifecycle { get; set; } = new();
     }
 
