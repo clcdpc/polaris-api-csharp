@@ -1,9 +1,9 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 
 namespace Clc.Polaris.Api
 {
@@ -13,11 +13,11 @@ namespace Clc.Polaris.Api
         {
             ArgumentNullException.ThrowIfNull(options);
             Require.Argument(options.Term);
-            Require.Positive(options.Branch);
+            var branchId = Require.PositiveIfProvidedOrDefault(options.Branch, OrganizationId);
             Require.Positive(options.Page);
             Require.Positive(options.PageSize);
 
-            var url = $"/public/v1/1033/100/{options.Branch}/search/bibs/{options.SearchType}";
+            var url = $"/public/v1/1033/100/{branchId}/search/bibs/{options.SearchType}";
             if (options.SearchType == BibSearchTypes.keyword) { url += $"/{options.Qualifier}"; }
 
             var request = PapiRestRequest.Get(url);

@@ -40,6 +40,33 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
 
+
+        [TestMethod]
+        public async Task BibSearchAsync_DefaultBranch_UsesConfiguredOrganizationId()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateClient(handler);
+            client.OrganizationId = 101;
+            var options = new BibSearchOptions { Term = "configured branch" };
+
+            await client.BibSearchAsync(options, TestContext.CancellationToken);
+
+            Assert.Contains("/public/v1/1033/100/101/search/bibs/keyword/KW", handler.LastRequest!.RequestUri!.AbsolutePath);
+        }
+
+        [TestMethod]
+        public async Task BibSearchAsync_ExplicitBranch_PreservesSuppliedValue()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateClient(handler);
+            client.OrganizationId = 101;
+            var options = new BibSearchOptions { Term = "explicit branch", Branch = 77 };
+
+            await client.BibSearchAsync(options, TestContext.CancellationToken);
+
+            Assert.Contains("/public/v1/1033/100/77/search/bibs/keyword/KW", handler.LastRequest!.RequestUri!.AbsolutePath);
+        }
+
         [TestMethod]
         public async Task BibKeywordSearchAsync_ThroughInterface_RequestShapeIsStable()
         {

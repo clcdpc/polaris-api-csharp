@@ -2,9 +2,9 @@
 {
     public class ItemCheckInData
     {
-        public int LogonBranchID { get; set; } = 1;
-        public int LogonUserID { get; set; } = 1;
-        public int LogonWorkstationID { get; set; } = 1;
+        public int? LogonBranchID { get; set; }
+        public int? LogonUserID { get; set; }
+        public int? LogonWorkstationID { get; set; }
 
         public ItemCheckInData()
         {

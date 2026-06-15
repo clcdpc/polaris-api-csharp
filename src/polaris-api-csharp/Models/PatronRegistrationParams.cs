@@ -1,4 +1,4 @@
-﻿using Clc.Polaris.Api.Validation;
+using Clc.Polaris.Api.Validation;
 using System;
 
 namespace Clc.Polaris.Api.Models
@@ -11,17 +11,17 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Branch processing the registration
         /// </summary>
-		public int LogonBranchID { get; set; } = 1;
+		public int? LogonBranchID { get; set; }
 
         /// <summary>
         /// User processing the registration
         /// </summary>
-		public int LogonUserID { get; set; } = 1;
+		public int? LogonUserID { get; set; }
 
         /// <summary>
         /// Workstation processing the registration
         /// </summary>
-		public int LogonWorkstationID { get; set; } = 1;
+		public int? LogonWorkstationID { get; set; }
 
         /// <summary>
         /// Patron's registered branch
@@ -233,12 +233,12 @@ namespace Clc.Polaris.Api.Models
 
         }
 
-        public PatronRegistrationParams(int patronBranchId, string nameFirst, string nameLast, int logonBranchId = 1, int logonUserId = 1, int logonWorkstationId = 1)
+        public PatronRegistrationParams(int patronBranchId, string nameFirst, string nameLast, int? logonBranchId = null, int? logonUserId = null, int? logonWorkstationId = null)
         {
             Require.Positive(patronBranchId);
-            Require.Positive(logonBranchId);
-            Require.Positive(logonUserId);
-            Require.Positive(logonWorkstationId);
+            Require.PositiveIfProvided(logonBranchId);
+            Require.PositiveIfProvided(logonUserId);
+            Require.PositiveIfProvided(logonWorkstationId);
             Require.Argument(nameFirst);
             Require.Argument(nameLast);
 

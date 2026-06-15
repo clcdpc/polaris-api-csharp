@@ -1,4 +1,4 @@
-﻿namespace Clc.Polaris.Api.Models
+namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Options available when performing a bibliographic record search
@@ -33,7 +33,7 @@
         /// <summary>
         /// Branch to search
         /// </summary>
-        public int Branch { get; set; } = 1;
+        public int? Branch { get; set; }
 
         /// <summary>
         /// Page

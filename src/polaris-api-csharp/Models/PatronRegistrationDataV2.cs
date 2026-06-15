@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Clc.Polaris.Api.Models
@@ -6,9 +6,9 @@ namespace Clc.Polaris.Api.Models
     public class PatronRegistrationData
     {
         // Required
-        public int LogonBranchID { get; set; } = 1;
-        public int LogonUserID { get; set; } = 1;
-        public int LogonWorkstationID { get; set; } = 1;
+        public int? LogonBranchID { get; set; }
+        public int? LogonUserID { get; set; }
+        public int? LogonWorkstationID { get; set; }
 
         // Optional elements
         public bool? ReadingListFlag { get; set; }             // "No" in table – optional

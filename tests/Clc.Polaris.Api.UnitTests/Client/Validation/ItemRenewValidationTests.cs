@@ -23,6 +23,34 @@
             AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonWorkstationID), 22);
         }
 
+
+        [TestMethod]
+        public async Task ItemRenewAsync_EmptyRenewOptions_UsesConfiguredContextInBody()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+
+            await client.ItemRenewAsync(TestBarcode, itemId: 12345, renewOptions: new ItemRenewOptions(), cancellationToken: TestContext.CancellationToken);
+
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonBranchID), 73);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonUserID), 11);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonWorkstationID), 22);
+        }
+
+        [TestMethod]
+        public async Task ItemRenewAsync_ExplicitRenewOptions_PreservesSuppliedValues()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var renewOptions = new ItemRenewOptions(17, 18, 19);
+
+            await client.ItemRenewAsync(TestBarcode, itemId: 12345, renewOptions: renewOptions, cancellationToken: TestContext.CancellationToken);
+
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonBranchID), 17);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonUserID), 18);
+            AssertLastRequestBodyJsonPropertyValue(handler, nameof(ItemRenewOptions.LogonWorkstationID), 19);
+        }
+
         [TestMethod]
         [DataRow(-1)]
         public async Task ItemRenewAsync_InvalidItemId_ThrowsArgumentOutOfRangeException(int itemId)

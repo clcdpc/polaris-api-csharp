@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -15,19 +15,19 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Branch where the notification is being updates
         /// </summary>
-        public int LogonBranchId { get; set; } = 1;
+        public int? LogonBranchId { get; set; }
 
         /// <summary>
         /// User updating the notification
         /// </summary>
-        public int LogonUserId { get; set; } = 1;
+        public int? LogonUserId { get; set; }
 
         /// <summary>
         /// Workstation the notification is being updated on
         /// </summary>
-        public int LogonWorkstationId { get; set; } = 1;
+        public int? LogonWorkstationId { get; set; }
 
-        public int ReportingOrgID { get; set; } = 1;
+        public int? ReportingOrgID { get; set; }
 
         /// <summary>
         /// The status of the notification.
