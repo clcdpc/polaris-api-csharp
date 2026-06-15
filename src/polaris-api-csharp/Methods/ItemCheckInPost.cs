@@ -15,10 +15,7 @@ namespace Clc.Polaris.Api
             Require.PositiveIfProvided(logonUserId);
             Require.PositiveIfProvided(logonWorkstationId);
 
-            var body = new ItemCheckInData(
-                logonBranchId ?? OrganizationId,
-                logonUserId ?? UserId,
-                logonWorkstationId ?? WorkstationId);
+            var body = new ItemCheckInData(logonBranchId ?? OrganizationId, logonUserId ?? UserId, logonWorkstationId ?? WorkstationId);
             var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/item/{EncodeBarcodePathSegment(itemBarcode)}/checkin";
             var request = PapiRestRequest.Post(url, body: body);
             return await ExecutePapiAsync<ItemCheckInResult>(request, cancellationToken).ConfigureAwait(false);

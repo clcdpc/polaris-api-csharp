@@ -1,23 +1,21 @@
 
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
-
         public async Task<IRestResponse<PatronUpdateResult>> PatronUpdateAsync(string barcode, PatronUpdateParams updateParams, string password = "", bool ignoresa = true, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(updateParams);
-            Require.Positive(updateParams.LogonBranchId);
-            Require.Positive(updateParams.LogonUserId);
-            Require.Positive(updateParams.LogonWorkstationId);
+            updateParams.LogonBranchId = Require.PositiveIfProvidedOrDefault(updateParams.LogonBranchId, OrganizationId);
+            updateParams.LogonUserId = Require.PositiveIfProvidedOrDefault(updateParams.LogonUserId, UserId);
+            updateParams.LogonWorkstationId = Require.PositiveIfProvidedOrDefault(updateParams.LogonWorkstationId, WorkstationId);
             Require.PositiveIfProvided(updateParams.RequestPickupBranchID);
             Require.PositiveIfProvided(updateParams.PatronBranchID);
 

@@ -1,9 +1,9 @@
-
+using System.Threading;
+using System.Threading.Tasks;
 using Clc.Polaris.Api.Models;
 using Clc.Polaris.Api.Validation;
 using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
@@ -12,16 +12,10 @@ namespace Clc.Polaris.Api
         {
             Require.NonNegative(itemId);
 
-            if (renewOptions == null)
-            {
-                renewOptions = new ItemRenewOptions(OrganizationId, UserId, WorkstationId);
-            }
-            else
-            {
-                Require.Positive(renewOptions.LogonBranchID);
-                Require.Positive(renewOptions.LogonUserID);
-                Require.Positive(renewOptions.LogonWorkstationID);
-            }
+            renewOptions ??= new ItemRenewOptions();
+            renewOptions.LogonBranchID = Require.PositiveIfProvidedOrDefault(renewOptions.LogonBranchID, OrganizationId);
+            renewOptions.LogonUserID = Require.PositiveIfProvidedOrDefault(renewOptions.LogonUserID, UserId);
+            renewOptions.LogonWorkstationID = Require.PositiveIfProvidedOrDefault(renewOptions.LogonWorkstationID, WorkstationId);
 
             var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/itemsout/{itemId}";
             var request = PapiRestRequest.Put(url, body: renewOptions, password: password);

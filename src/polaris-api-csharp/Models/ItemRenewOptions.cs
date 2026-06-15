@@ -1,4 +1,4 @@
-﻿namespace Clc.Polaris.Api.Models
+namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Options whenr renewing an item
@@ -9,17 +9,17 @@
         /// <summary>
         /// The branch where the renewal takes place
         /// </summary>
-        public int LogonBranchID { get; set; } = 1;
+        public int? LogonBranchID { get; set; }
 
         /// <summary>
         /// The user performing the renewal
         /// </summary>
-        public int LogonUserID { get; set; } = 1;
+        public int? LogonUserID { get; set; }
 
         /// <summary>
         /// The workstation the renewal takes place
         /// </summary>
-        public int LogonWorkstationID { get; set; } = 1;
+        public int? LogonWorkstationID { get; set; }
 
         public RenewData RenewData { get; set; } = new RenewData();
 

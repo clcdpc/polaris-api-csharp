@@ -1,9 +1,9 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Clc.Polaris.Api.Models;
+using Clc.Polaris.Api.Validation;
+using Clc.Rest;
 
 namespace Clc.Polaris.Api
 {
@@ -12,9 +12,9 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateAsync(PatronRegistrationParams _params, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(_params);
-            Require.Positive(_params.LogonBranchID);
-            Require.Positive(_params.LogonUserID);
-            Require.Positive(_params.LogonWorkstationID);
+            _params.LogonBranchID = Require.PositiveIfProvidedOrDefault(_params.LogonBranchID, OrganizationId);
+            _params.LogonUserID = Require.PositiveIfProvidedOrDefault(_params.LogonUserID, UserId);
+            _params.LogonWorkstationID = Require.PositiveIfProvidedOrDefault(_params.LogonWorkstationID, WorkstationId);
             Require.Positive(_params.PatronBranchID);
             Require.Argument(_params.NameFirst);
             Require.Argument(_params.NameLast);
@@ -29,9 +29,9 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<PatronRegistrationCreateResult>> PatronRegistrationCreateV2Async(PatronRegistrationData _params, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(_params);
-            Require.Positive(_params.LogonBranchID);
-            Require.Positive(_params.LogonUserID);
-            Require.Positive(_params.LogonWorkstationID);
+            _params.LogonBranchID = Require.PositiveIfProvidedOrDefault(_params.LogonBranchID, OrganizationId);
+            _params.LogonUserID = Require.PositiveIfProvidedOrDefault(_params.LogonUserID, UserId);
+            _params.LogonWorkstationID = Require.PositiveIfProvidedOrDefault(_params.LogonWorkstationID, WorkstationId);
             Require.Positive(_params.PatronBranchID);
             Require.Argument(_params.NameFirst);
             Require.Argument(_params.NameLast);

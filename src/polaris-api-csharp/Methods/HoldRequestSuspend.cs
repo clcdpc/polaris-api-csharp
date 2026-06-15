@@ -12,7 +12,7 @@ namespace Clc.Polaris.Api
     {
         public async Task<IRestResponse<HoldRequestActivationResult>> HoldRequestSuspendAsync(string barcode, int requestId, DateTime activationDate, string password = "", int? userId = null, CancellationToken cancellationToken = default)
         {
-            Require.Positive(requestId);
+            Require.NonNegative(requestId);
             Require.PositiveIfProvided(userId);
 
             var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/holdrequests/{requestId}/inactive";
