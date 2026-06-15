@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
 {
     [TestClass]
     [UnitTest]
-    public sealed class PatronRegistrationUpdateV2Tests : PapiClientUnitTestBase
+    public sealed class PatronRegistrationUpdateV2RequestShapeTests : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task PatronRegistrationUpdateV2Async_UsesV2PutRouteQueryAndNormalizedLogonIds()

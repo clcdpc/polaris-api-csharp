@@ -2,7 +2,7 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
 {
     [TestClass]
     [UnitTest]
-    public sealed class PatronReferenceDataGetTests : PapiClientUnitTestBase
+    public sealed class PatronReferenceDataRequestShapeTests : PapiClientUnitTestBase
     {
         [TestMethod]
         [DataRow("languages", "/PAPIService/REST/public/v1/1033/100/101/patronlanguages")]

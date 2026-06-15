@@ -4,7 +4,7 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
 {
     [TestClass]
     [UnitTest]
-    public sealed class PatronNotesGetTests : PapiClientUnitTestBase
+    public sealed class PatronNotesRequestShapeTests : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task PatronNotesGetAsync_UsesEncodedBarcodePathAndPasswordHash()
