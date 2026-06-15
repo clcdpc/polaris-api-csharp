@@ -5,50 +5,42 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
     {
         [TestMethod]
         [ReadOnlyLiveTest]
-        public async Task PatronLanguagesGetAsync_ReturnsSuccessfulResponseAndRowsCollection()
+        public async Task PatronLanguagesGetAsync_ReturnsRows()
         {
             var response = await Papi.PatronLanguagesGetAsync(cancellationToken: TestContext.CancellationToken);
 
-            Assert.IsTrue(response.Response.IsSuccessStatusCode);
-            Assert.IsNotNull(response.Data);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
-            Assert.IsNotNull(response.Data.PatronLanguagesRows);
+            Assert.IsNotEmpty(response.Data.PatronLanguagesRows);
         }
 
         [TestMethod]
         [ReadOnlyLiveTest]
-        public async Task PatronStatisticalClassesGetAsync_ReturnsSuccessfulResponseAndRowsCollection()
+        public async Task PatronStatisticalClassesGetAsync_ReturnsRows()
         {
             var response = await Papi.PatronStatisticalClassesGetAsync(cancellationToken: TestContext.CancellationToken);
 
-            Assert.IsTrue(response.Response.IsSuccessStatusCode);
-            Assert.IsNotNull(response.Data);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
-            Assert.IsNotNull(response.Data.PatronStatisticalClassesRows);
+            Assert.IsNotEmpty(response.Data.PatronStatisticalClassesRows);
         }
 
         [TestMethod]
         [ReadOnlyLiveTest]
-        public async Task PatronUdfConfigsGetAsync_ReturnsSuccessfulResponseAndRowsCollection()
+        public async Task PatronUdfConfigsGetAsync_ReturnsRows()
         {
             var response = await Papi.PatronUdfConfigsGetAsync(cancellationToken: TestContext.CancellationToken);
 
-            Assert.IsTrue(response.Response.IsSuccessStatusCode);
-            Assert.IsNotNull(response.Data);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
-            Assert.IsNotNull(response.Data.PatronUdfConfigsRows);
+            Assert.IsNotEmpty(response.Data.PatronUdfConfigsRows);
         }
 
         [TestMethod]
         [ReadOnlyLiveTest]
-        public async Task PickupAreasGetAsync_ReturnsSuccessfulResponseAndRowsCollection()
+        public async Task PickupAreasGetAsync_ReturnsRows()
         {
             var response = await Papi.PickupAreasGetAsync(cancellationToken: TestContext.CancellationToken);
 
-            Assert.IsTrue(response.Response.IsSuccessStatusCode);
-            Assert.IsNotNull(response.Data);
             Assert.AreEqual(0, response.Data.PAPIErrorCode);
-            Assert.IsNotNull(response.Data.PickupAreasRows);
+            Assert.IsNotEmpty(response.Data.PickupAreasRows);
         }
     }
 }
