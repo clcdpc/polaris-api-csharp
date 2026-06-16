@@ -1,10 +1,3 @@
-
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
@@ -18,7 +11,6 @@ namespace Clc.Polaris.Api
         /// <param name="toRecordStoreId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-
 
         public async Task<IRestResponse<PatronTitleListMoveTitleResult>> PatronTitleListMoveTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default)
         {

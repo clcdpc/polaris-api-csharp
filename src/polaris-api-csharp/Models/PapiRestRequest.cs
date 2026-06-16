@@ -1,5 +1,4 @@
 using Clc.Rest.Models;
-using System;
 using System.Net.Http;
 
 namespace Clc.Polaris.Api.Models

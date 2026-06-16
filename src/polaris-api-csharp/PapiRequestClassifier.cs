@@ -1,5 +1,3 @@
-using Clc.Polaris.Api.Models;
-using System;
 using System.Net.Http;
 
 namespace Clc.Polaris.Api

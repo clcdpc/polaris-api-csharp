@@ -1,6 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -71,7 +68,6 @@ namespace Clc.Polaris.Api.Models
         /// 0 = None | 2 = Email | 8 = SMS
         /// </summary>
         public int? EReceiptOptionID { get; set; }
-
 
         public List<PatronAddress> PatronAddresses { get; set; } = new();
 

@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace Clc.Polaris.Api.Models
 {
     public class MARCTypeOfMaterialsGetResult : PapiResponseCommon

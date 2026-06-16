@@ -1,18 +1,7 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
-
         public async Task<IRestResponse<PAPIResult>> RecordSetContentPutAsync(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
             Require.Positive(recordSetId);

@@ -1,5 +1,3 @@
-﻿using Clc.Polaris.Api.Models;
-
 namespace Clc.Polaris.Api.Configuration
 {
     public class PapiSettings : IPapiSettings

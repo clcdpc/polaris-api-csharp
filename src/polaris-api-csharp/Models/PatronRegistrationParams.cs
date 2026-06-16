@@ -1,6 +1,3 @@
-using Clc.Polaris.Api.Validation;
-using System;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -137,7 +134,6 @@ namespace Clc.Polaris.Api.Models
         /// Language ID
         /// </summary>
 		public int? LanguageID { get; set; }
-
 
         public int? GenderID { get; set; }
 

@@ -1,8 +1,3 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
@@ -13,7 +8,6 @@ namespace Clc.Polaris.Api
         /// <param name="bibId">BibliograhpicRecordID of the record.</param>
         /// <returns>An object containing a list of holdings information for specified BibliographicRecordID.</returns>
         /// <seealso cref="BibHoldingsGetResult"/>
-
 
         public async Task<IRestResponse<BibHoldingsGetResult>> HoldingsGetAsync(int bibId, CancellationToken cancellationToken = default)
         {

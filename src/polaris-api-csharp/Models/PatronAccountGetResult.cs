@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api.Models
