@@ -87,7 +87,6 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
             Assert.Contains(activationDate.ToString("yyyy-MM-dd"), handler.LastRequestContent);
         }
 
-
         [TestMethod]
         public async Task HoldRequestSuspendAsync_AllRequests_UsesZeroRequestId()
         {
