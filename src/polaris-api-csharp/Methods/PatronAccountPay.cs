@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<PapiResponseCommon>> PatronAccountPayAsync(string barcode, int txnId, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PatronAccountPayResult>> PatronAccountPayAsync(string barcode, int txnId, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
             Require.Positive(txnId);
             Require.PositiveIfProvided(workstationId);
@@ -21,7 +21,7 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Put(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             request.QueryParameters.Add("userid", userId ?? UserId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PatronAccountPayResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

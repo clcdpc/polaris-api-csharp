@@ -19,7 +19,7 @@ namespace Clc.Polaris.Api
         /// <returns></returns>
 
 
-        public async Task<IRestResponse<PapiResponseCommon>> PatronTitleListDeleteTitleAsync(string barcode, int listId, int position, string password = "", CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PatronTitleListDeleteTitleResult>> PatronTitleListDeleteTitleAsync(string barcode, int listId, int position, string password = "", CancellationToken cancellationToken = default)
         {
             Require.Positive(listId);
             Require.Positive(position);
@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api
             var request = PapiRestRequest.Delete(url, password: password);
             request.QueryParameters.Add("list", listId);
             request.QueryParameters.Add("position", position);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PatronTitleListDeleteTitleResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,14 +1,15 @@
-using Clc.Polaris.Api.Models;
-using Clc.Rest;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Clc.Polaris.Api.Models;
+using Clc.Rest;
 
 namespace Clc.Polaris.Api
 {
     public static class PatronReadingHistoryClearExtensions
     {
-        public static Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(this IPapiClient client, string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        public static Task<IRestResponse<PatronReadingHistoryClearResult>> PatronReadingHistoryClearAsync(this IPapiClient client, string barcode, IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
             return client.PatronReadingHistoryClearAsync(barcode, "", ids, cancellationToken);
         }

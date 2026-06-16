@@ -9,7 +9,7 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public async Task<IRestResponse<PapiResponseCommon>> RequestsUpdateStatusAsync(int requestId, RequestStatusAction action, int? itemId = null, int? denyReason = null, int? organizationId = null, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PAPIResult>> RequestsUpdateStatusAsync(int requestId, RequestStatusAction action, int? itemId = null, int? denyReason = null, int? organizationId = null, CancellationToken cancellationToken = default)
         {
             Require.Positive(requestId);
             Require.PositiveIfProvided(itemId);
@@ -30,7 +30,7 @@ namespace Clc.Polaris.Api
                 request.QueryParameters.Add("denyreason", denyReason.Value);
             }
 
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PAPIResult>(request, cancellationToken).ConfigureAwait(false);
         }
 
         private static void ValidateRequestStatusActionParameters(RequestStatusAction action, int? itemId, int? denyReason)

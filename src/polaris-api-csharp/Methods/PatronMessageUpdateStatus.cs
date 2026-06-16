@@ -10,13 +10,13 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<PapiResponseCommon>> PatronMessageUpdateStatusAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PAPIResult>> PatronMessageUpdateStatusAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default)
         {
             Require.Positive(messageId);
 
             var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/messages/{messageType}/{messageId}";
             var request = PapiRestRequest.Put(url, password: password);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PAPIResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

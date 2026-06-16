@@ -13,7 +13,7 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<PapiResponseCommon>> RecordSetContentPutAsync(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PAPIResult>> RecordSetContentPutAsync(int recordSetId, IEnumerable<int> records, RecordSetContentPutActions action, int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
             Require.Positive(recordSetId);
             ArgumentNullException.ThrowIfNull(records);
@@ -37,7 +37,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("action", action);
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PAPIResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

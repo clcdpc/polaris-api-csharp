@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public async Task<IRestResponse<PapiResponseCommon>> PatronReadingHistoryClearAsync(string barcode, string password = "", IEnumerable<int>? ids = null, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PatronReadingHistoryClearResult>> PatronReadingHistoryClearAsync(string barcode, string password = "", IEnumerable<int>? ids = null, CancellationToken cancellationToken = default)
         {
             var idList = ids?.ToArray() ?? [];
 
@@ -28,7 +28,7 @@ namespace Clc.Polaris.Api
                 request.QueryParameters.Add("ids", string.Join(",", idList));
             }
 
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PatronReadingHistoryClearResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }
