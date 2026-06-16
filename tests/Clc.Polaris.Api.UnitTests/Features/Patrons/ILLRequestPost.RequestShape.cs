@@ -5,7 +5,7 @@ namespace Clc.Polaris.Api.UnitTests.Features.Patrons
     public sealed class ILLRequestPostRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
-        public async Task ILLRequestPostAsync_SendsPublicPostWithUtf8CompatibleXmlBody()
+        public async Task ILLRequestPostAsync_SendsPublicPostWithBody()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
             var client = CreateClient(handler);
@@ -16,12 +16,9 @@ namespace Clc.Polaris.Api.UnitTests.Features.Patrons
 
             Assert.AreEqual(HttpMethod.Post, GetLastRequest(handler).Method);
             Assert.AreEqual("/PAPIService/REST/public/v1/1033/100/101/illrequest", GetLastRequestUri(handler).AbsolutePath);
-            var body = GetLastRequestBody(handler);
-            Assert.DoesNotContain("encoding=\"utf-16\"", body, StringComparison.OrdinalIgnoreCase);
-            Assert.IsTrue(body.StartsWith("<ILLRequestCreateData", StringComparison.Ordinal), "Expected XML body to omit the declaration and start with the root element.");
-            Assert.Contains("<PatronID>12</PatronID>", body);
-            Assert.Contains("<Title>Title</Title>", body);
-            Assert.Contains("<PickupOrgID>0</PickupOrgID>", body);
+            AssertLastRequestBodyJsonPropertyValue(handler, "PatronID", 12);
+            AssertLastRequestBodyJsonPropertyValue(handler, "Title", "Title");
+            AssertLastRequestBodyJsonPropertyValue(handler, "PickupOrgID", 0);
         }
 
         [TestMethod]

@@ -1,9 +1,3 @@
-using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
@@ -19,22 +13,8 @@ namespace Clc.Polaris.Api
             Require.PositiveIfProvided(requestData.HoldPickupAreaID);
 
             var url = $"/public/v1/1033/100/{OrganizationId}/illrequest";
-            var request = PapiRestRequest.Post(url);
-            request.Content = new StringContent(SerializeXml(requestData), Encoding.UTF8, "application/xml");
+            var request = PapiRestRequest.Post(url, body: requestData);
             return await ExecutePapiAsync<ILLRequestResult>(request, cancellationToken).ConfigureAwait(false);
-        }
-
-        private static string SerializeXml<T>(T value)
-        {
-            var settings = new XmlWriterSettings
-            {
-                OmitXmlDeclaration = true
-            };
-
-            using var writer = new StringWriter();
-            using var xmlWriter = XmlWriter.Create(writer, settings);
-            new XmlSerializer(typeof(T)).Serialize(xmlWriter, value);
-            return writer.ToString();
         }
     }
 }
