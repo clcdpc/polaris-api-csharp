@@ -37,19 +37,6 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
         }
 
         [TestMethod]
-        public async Task JobsPurchaseOrdersPostAsync_WithMissingRequiredString_ThrowsBeforeSendingRequest()
-        {
-            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
-            var client = CreateConfiguredClient(handler);
-            var data = CreateValidData();
-            data.Vendor = " ";
-
-            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPostAsync(data, cancellationToken: TestContext.CancellationToken));
-
-            Assert.AreEqual(0, handler.RequestCount);
-        }
-
-        [TestMethod]
         public async Task JobsPurchaseOrdersPostAsync_WithMissingMarcLineItems_ThrowsBeforeSendingRequest()
         {
             var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
@@ -87,7 +74,6 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
 
             Assert.AreEqual(0, handler.RequestCount);
         }
-
 
         [TestMethod]
         [DataRow("Vendor")]
@@ -132,6 +118,7 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
 
             Assert.AreEqual(0, handler.RequestCount);
         }
+
         private static JobsPurchaseOrdersCreateData CreateValidData() => new()
         {
             Vendor = "VendorName",
@@ -152,7 +139,6 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
             }
         };
 
-
         private static void SetRequiredString(JobsPurchaseOrdersCreateData data, string propertyName, string value)
         {
             switch (propertyName)
@@ -172,8 +158,11 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
                 case "PONumber":
                     data.PONumber = value;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, "Unknown required string property.");
             }
         }
+
         private static PapiClient CreateConfiguredClient(CapturingHttpMessageHandler handler)
         {
             var client = CreateClient(handler);

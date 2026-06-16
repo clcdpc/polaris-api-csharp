@@ -1,4 +1,4 @@
-namespace Clc.Polaris.Api.UnitTests.Models
+namespace Clc.Polaris.Api.UnitTests.Features.CustomRequests
 {
     [TestClass]
     [UnitTest]
