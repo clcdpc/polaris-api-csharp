@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Bibliographic
 {
     [TestClass]
     [UnitTest]
-    public sealed class MultipartGetTests : PapiClientUnitTestBase
+    public sealed class MultipartGetRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task MultipartGetAsync_SendsExpectedRequestAndOptionalPickupLocation()

@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Circulation
 {
     [TestClass]
     [UnitTest]
-    public sealed class SysHoldStatusesGetTests : PapiClientUnitTestBase
+    public sealed class SysHoldStatusesGetRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task SysHoldStatusesGetAsync_SendsExpectedRequest()

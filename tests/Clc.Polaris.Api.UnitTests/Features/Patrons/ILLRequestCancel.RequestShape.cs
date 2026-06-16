@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Patrons
 {
     [TestClass]
     [UnitTest]
-    public sealed class ILLRequestCancelTests : PapiClientUnitTestBase
+    public sealed class ILLRequestCancelRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task ILLRequestCancelAsync_SendsExpectedPutRequest()

@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Search
 {
     [TestClass]
     [UnitTest]
-    public sealed class SortOptionsGetTests : PapiClientUnitTestBase
+    public sealed class SortOptionsGetRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task SortOptionsGetAsync_SendsExpectedRequest()

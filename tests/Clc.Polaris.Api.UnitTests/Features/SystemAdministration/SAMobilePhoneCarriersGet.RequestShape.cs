@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.SystemAdministration
 {
     [TestClass]
     [UnitTest]
-    public sealed class SAMobilePhoneCarriersGetTests : PapiClientUnitTestBase
+    public sealed class SAMobilePhoneCarriersGetRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task SAMobilePhoneCarriersGetAsync_SendsProtectedGetRequest()

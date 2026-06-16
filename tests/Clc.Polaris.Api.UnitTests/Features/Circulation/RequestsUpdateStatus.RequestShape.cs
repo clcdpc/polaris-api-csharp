@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Circulation
 {
     [TestClass]
     [UnitTest]
-    public sealed class RequestsUpdateStatusTests : PapiClientUnitTestBase
+    public sealed class RequestsUpdateStatusRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task RequestsUpdateStatusAsync_SendsExpectedProtectedPutRequest()

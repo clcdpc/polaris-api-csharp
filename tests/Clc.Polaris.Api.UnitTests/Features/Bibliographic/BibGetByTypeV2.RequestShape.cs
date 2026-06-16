@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Bibliographic
 {
     [TestClass]
     [UnitTest]
-    public sealed class BibGetByTypeV2Tests : PapiClientUnitTestBase
+    public sealed class BibGetByTypeV2RequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task BibGetByTypeV2Async_SendsExpectedRequest()

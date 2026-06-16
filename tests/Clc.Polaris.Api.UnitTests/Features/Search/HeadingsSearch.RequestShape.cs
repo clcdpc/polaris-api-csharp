@@ -1,8 +1,8 @@
-namespace Clc.Polaris.Api.UnitTests.Methods
+namespace Clc.Polaris.Api.UnitTests.Features.Search
 {
     [TestClass]
     [UnitTest]
-    public sealed class HeadingsSearchTests : PapiClientUnitTestBase
+    public sealed class HeadingsSearchRequestShape : PapiClientUnitTestBase
     {
         [TestMethod]
         public async Task HeadingsSearchAsync_SendsExpectedRequest()
