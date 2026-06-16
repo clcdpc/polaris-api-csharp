@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api
@@ -25,8 +26,14 @@ namespace Clc.Polaris.Api
 
         private static string SerializeXml<T>(T value)
         {
+            var settings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true
+            };
+
             using var writer = new StringWriter();
-            new XmlSerializer(typeof(T)).Serialize(writer, value);
+            using var xmlWriter = XmlWriter.Create(writer, settings);
+            new XmlSerializer(typeof(T)).Serialize(xmlWriter, value);
             return writer.ToString();
         }
     }

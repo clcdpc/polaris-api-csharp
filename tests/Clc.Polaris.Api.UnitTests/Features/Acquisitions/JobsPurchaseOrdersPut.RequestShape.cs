@@ -7,15 +7,141 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
         [TestMethod]
         public async Task JobsPurchaseOrdersPutAsync_SendsProtectedPutWithJsonBody()
         {
-            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson()); var client = CreateConfiguredClient(handler); client.Token = CreateToken();
-            await client.JobsPurchaseOrdersPutAsync(new JobsPurchaseOrdersPreorderValidationData { Vendor = "vendor" }, cancellationToken: TestContext.CancellationToken);
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            client.Token = CreateToken();
+
+            await client.JobsPurchaseOrdersPutAsync(CreateValidData(), cancellationToken: TestContext.CancellationToken);
+
             Assert.AreEqual(HttpMethod.Put, GetLastRequest(handler).Method);
             Assert.AreEqual("/PAPIService/REST/protected/v1/1033/100/101/protected-token/jobs/purchaseorders", GetLastRequestUri(handler).AbsolutePath);
-            AssertLastRequestQueryParameter(handler, "preordervalidation", "1"); AssertLastRequestBodyContains(handler, "vendor");
+            AssertLastRequestQueryParameter(handler, "preordervalidation", "1");
+            AssertLastRequestBodyContains(handler, "VendorName");
+            AssertLastRequestBodyContains(handler, "LineItems");
+            AssertLastRequestBodyContains(handler, "Segments");
+            AssertLastRequestBodyContains(handler, "General");
+            AssertLastRequestBodyContains(handler, "Materials");
         }
-        [TestMethod] public async Task JobsPurchaseOrdersPutAsync_WithNullRequest_Throws() => await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await CreateClient().JobsPurchaseOrdersPutAsync(null!, cancellationToken: TestContext.CancellationToken));
-        [TestMethod] public async Task JobsPurchaseOrdersPutAsync_WithInvalidPreorderValidation_Throws() => await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () => await CreateClient().JobsPurchaseOrdersPutAsync(new JobsPurchaseOrdersPreorderValidationData(), 2, cancellationToken: TestContext.CancellationToken));
-        private static PapiClient CreateConfiguredClient(CapturingHttpMessageHandler handler) { var client = CreateClient(handler); client.OrganizationId = 101; return client; }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithNullRequest_Throws() =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await CreateClient().JobsPurchaseOrdersPutAsync(null!, cancellationToken: TestContext.CancellationToken));
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithInvalidPreorderValidation_Throws() =>
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () => await CreateClient().JobsPurchaseOrdersPutAsync(CreateValidData(), 2, cancellationToken: TestContext.CancellationToken));
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithDefaultRequest_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(new JobsPurchaseOrdersPreorderValidationData(), cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithMissingRequiredString_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.PaymentMethod = " ";
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithMissingLineItems_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems = new List<JobsPurchaseOrdersPreorderValidationLineItem>();
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithInvalidLineItemValues_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Title = " ";
+            data.LineItems[0].ISBN = " ";
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithInvalidSegmentValues_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments![0].Copies = 0;
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithNegativeSegmentUnitPrice_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments![0].UnitPrice = -1;
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        private static JobsPurchaseOrdersPreorderValidationData CreateValidData() => new()
+        {
+            Vendor = "VendorName",
+            OrderedAtLocation = "Main",
+            OrderType = "Firm",
+            PaymentMethod = "Account",
+            LineItems = new List<JobsPurchaseOrdersPreorderValidationLineItem>
+            {
+                new()
+                {
+                    Title = "Title",
+                    ISBN = "9780000000000",
+                    Copies = 1,
+                    Segments = new List<JobsPurchaseOrdersPreorderValidationLineItemSegment>
+                    {
+                        new()
+                        {
+                            Collection = "General",
+                            Fund = "Materials",
+                            Copies = 1,
+                            UnitPrice = 12.99m
+                        }
+                    }
+                }
+            }
+        };
+
+        private static PapiClient CreateConfiguredClient(CapturingHttpMessageHandler handler)
+        {
+            var client = CreateClient(handler);
+            client.OrganizationId = 101;
+            return client;
+        }
+
         private static ProtectedToken CreateToken() => new() { AccessToken = "protected-token", AccessSecret = "protected-secret", ExpirationDate = ValidProtectedTokenExpirationDate };
     }
 }

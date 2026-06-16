@@ -7,14 +7,114 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
         [TestMethod]
         public async Task JobsPurchaseOrdersPostAsync_SendsProtectedPostWithJsonBody()
         {
-            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson()); var client = CreateConfiguredClient(handler); client.Token = CreateToken();
-            await client.JobsPurchaseOrdersPostAsync(new JobsPurchaseOrdersCreateData { PONumber = "PO-1" }, cancellationToken: TestContext.CancellationToken);
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            client.Token = CreateToken();
+
+            await client.JobsPurchaseOrdersPostAsync(CreateValidData(), cancellationToken: TestContext.CancellationToken);
+
             Assert.AreEqual(HttpMethod.Post, GetLastRequest(handler).Method);
             Assert.AreEqual("/PAPIService/REST/protected/v1/1033/100/101/protected-token/jobs/purchaseorders", GetLastRequestUri(handler).AbsolutePath);
+            AssertLastRequestBodyContains(handler, "VendorName");
             AssertLastRequestBodyContains(handler, "PO-1");
+            AssertLastRequestBodyContains(handler, "MARCLineItems");
+            AssertLastRequestBodyContains(handler, "leader");
         }
-        [TestMethod] public async Task JobsPurchaseOrdersPostAsync_WithNullRequest_Throws() => await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await CreateClient().JobsPurchaseOrdersPostAsync(null!, cancellationToken: TestContext.CancellationToken));
-        private static PapiClient CreateConfiguredClient(CapturingHttpMessageHandler handler) { var client = CreateClient(handler); client.OrganizationId = 101; return client; }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPostAsync_WithNullRequest_Throws() =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await CreateClient().JobsPurchaseOrdersPostAsync(null!, cancellationToken: TestContext.CancellationToken));
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPostAsync_WithDefaultRequest_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPostAsync(new JobsPurchaseOrdersCreateData(), cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPostAsync_WithMissingRequiredString_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.Vendor = " ";
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPostAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPostAsync_WithMissingMarcLineItems_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.MARCLineItems = new List<JobsPurchaseOrdersMarcLineItem>();
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPostAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPostAsync_WithInvalidLineItemCopies_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.MARCLineItems![0].Copies = 0;
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () => await client.JobsPurchaseOrdersPostAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPostAsync_WithMissingMarcRecord_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.MARCLineItems![0].MarcRecord = null;
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPostAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        private static JobsPurchaseOrdersCreateData CreateValidData() => new()
+        {
+            Vendor = "VendorName",
+            OrderedAtLocation = "Main",
+            OrderType = "Firm",
+            PaymentMethod = "Account",
+            PONumber = "PO-1",
+            MARCLineItems = new List<JobsPurchaseOrdersMarcLineItem>
+            {
+                new()
+                {
+                    Copies = 1,
+                    MarcRecord = new MarcRecord
+                    {
+                        Leader = "leader"
+                    }
+                }
+            }
+        };
+
+        private static PapiClient CreateConfiguredClient(CapturingHttpMessageHandler handler)
+        {
+            var client = CreateClient(handler);
+            client.OrganizationId = 101;
+            return client;
+        }
+
         private static ProtectedToken CreateToken() => new() { AccessToken = "protected-token", AccessSecret = "protected-secret", ExpirationDate = ValidProtectedTokenExpirationDate };
     }
 }
