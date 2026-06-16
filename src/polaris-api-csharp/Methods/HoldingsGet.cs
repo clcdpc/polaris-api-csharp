@@ -8,7 +8,6 @@ namespace Clc.Polaris.Api
         /// <param name="bibId">BibliograhpicRecordID of the record.</param>
         /// <returns>An object containing a list of holdings information for specified BibliographicRecordID.</returns>
         /// <seealso cref="BibHoldingsGetResult"/>
-
         public async Task<IRestResponse<BibHoldingsGetResult>> HoldingsGetAsync(int bibId, CancellationToken cancellationToken = default)
         {
             Require.Positive(bibId);

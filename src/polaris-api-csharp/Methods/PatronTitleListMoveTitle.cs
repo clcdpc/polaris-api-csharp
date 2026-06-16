@@ -3,7 +3,6 @@ namespace Clc.Polaris.Api
     public partial class PapiClient
     {
         /// <summary>
-        ///
         /// </summary>
         /// <param name="barcode"></param>
         /// <param name="fromRecordStoreId"></param>
@@ -11,7 +10,6 @@ namespace Clc.Polaris.Api
         /// <param name="toRecordStoreId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-
         public async Task<IRestResponse<PatronTitleListMoveTitleResult>> PatronTitleListMoveTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default)
         {
             Require.Positive(fromRecordStoreId);
