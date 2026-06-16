@@ -1,7 +1,7 @@
 namespace Clc.Polaris.Api.LiveIntegrationTests
 {
     [TestClass]
-    public sealed class FirstBatchSystemAdministrationLiveTests : IntegrationTestBase
+    public sealed class SystemAdministrationReadOnlyLiveTests : IntegrationTestBase
     {
         [TestMethod]
         [ReadOnlyLiveTest]
@@ -17,15 +17,6 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
         public async Task SysHoldStatusesGetAsync_ReturnsResponse()
         {
             var response = await Papi.SysHoldStatusesGetAsync(cancellationToken: TestContext.CancellationToken);
-
-            Assert.IsNotNull(response.Data);
-        }
-
-        [TestMethod]
-        [ReadOnlyLiveTest]
-        public async Task HeadingsSearchAsync_ReturnsResponse()
-        {
-            var response = await Papi.HeadingsSearchAsync(HeadingSearchQualifier.AU, 5, 1, cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response.Data);
         }

@@ -100,7 +100,7 @@ namespace Clc.Polaris.Api.UnitTests
             [nameof(IPapiClient.RecordSetRecordsGetAsync)] = new(LiveCoverageClassification.StaffReadOnly),
             [nameof(IPapiClient.RequestsUpdateStatusAsync)] = new(LiveCoverageClassification.Mutating),
             [nameof(IPapiClient.RemoteStorageItemsGetAsync)] = new(LiveCoverageClassification.NotLiveTestedWithReason, "Requires remote-storage configuration and date windows that are not generally available in disposable environments."),
-            [nameof(IPapiClient.SAMobilePhoneCarriersGetAsync)] = new(LiveCoverageClassification.ReadOnly),
+            [nameof(IPapiClient.SAMobilePhoneCarriersGetAsync)] = new(LiveCoverageClassification.StaffReadOnly),
             [nameof(IPapiClient.SA_GetValueByOrgAsync)] = new(LiveCoverageClassification.StaffReadOnly),
             [nameof(IPapiClient.SortOptionsGetAsync)] = new(LiveCoverageClassification.ReadOnly),
             [nameof(IPapiClient.ShelfLocationsGetAsync)] = new(LiveCoverageClassification.ReadOnly),

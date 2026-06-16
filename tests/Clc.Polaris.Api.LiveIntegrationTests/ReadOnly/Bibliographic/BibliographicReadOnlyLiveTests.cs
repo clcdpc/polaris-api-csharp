@@ -1,7 +1,7 @@
 namespace Clc.Polaris.Api.LiveIntegrationTests
 {
     [TestClass]
-    public sealed class FirstBatchBibliographicLiveTests : IntegrationTestBase
+    public sealed class BibliographicReadOnlyLiveTests : IntegrationTestBase
     {
         [TestMethod]
         [ReadOnlyLiveTest]
@@ -25,6 +25,15 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
             var patronId = RequirePositiveSetting(Settings.MultipartPatronId, nameof(Settings.MultipartPatronId));
 
             var response = await Papi.MultipartGetAsync(bibId, patronId, Settings.MultipartPickupLocationId, cancellationToken: TestContext.CancellationToken);
+
+            Assert.IsNotNull(response.Data);
+        }
+
+        [TestMethod]
+        [ReadOnlyLiveTest]
+        public async Task HeadingsSearchAsync_ReturnsResponse()
+        {
+            var response = await Papi.HeadingsSearchAsync(HeadingSearchQualifier.AU, 5, 1, cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response.Data);
         }
