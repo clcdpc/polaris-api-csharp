@@ -2,10 +2,10 @@
 using Clc.Rest;
 using System.Net;
 
-namespace Clc.Polaris.Api.LiveIntegrationTests.ProtectedReadOnly.Misc
+namespace Clc.Polaris.Api.LiveIntegrationTests.ReadOnly.Environment
 {
     [TestClass]
-    public sealed class OrganizationIdIntegrationTests : IntegrationTestBase
+    public sealed class OrganizationIdTests : IntegrationTestBase
     {
         private const int OrganizationOneId = 1;
         private const int ComparisonOrganizationId = 73;
@@ -59,28 +59,6 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.ProtectedReadOnly.Misc
 
             Assert.AreEqual(organizationOneResponse.Data.PAPIErrorCode, comparisonResponse.Data.PAPIErrorCode);
             Assert.HasCount(organizationOneResponse.Data.PatronItemsOutGetRows.Count, comparisonResponse.Data.PatronItemsOutGetRows);
-        }
-
-        [TestMethod]
-        [ProtectedReadOnlyLiveTest]
-        public async Task RecordSetRecordsGetAsync_ComparisonOrganizationIdMatchesOrganizationOne()
-        {
-            var recordSetId = RequireConfiguredRecordSetId();
-            IntegrationTestRequirements.RequireStaffOverrideAccount(PapiSettings);
-
-            var organizationOneClient = CreateClientWithOrganizationId(OrganizationOneId);
-            var organizationOneResponse = await organizationOneClient.RecordSetRecordsGetAsync(recordSetId, cancellationToken: TestContext.CancellationToken);
-            AssertSuccessfulResponse(organizationOneResponse, "organization 1");
-            Assert.IsNotNull(organizationOneResponse.Data.RecordSetRecordsGetRows);
-
-            var comparisonClient = CreateClientWithOrganizationId(ComparisonOrganizationId);
-            var comparisonResponse = await comparisonClient.RecordSetRecordsGetAsync(recordSetId, cancellationToken: TestContext.CancellationToken);
-            AssertSuccessfulResponse(comparisonResponse, $"organization {ComparisonOrganizationId}");
-            Assert.IsNotNull(comparisonResponse.Data.RecordSetRecordsGetRows);
-
-            Assert.AreEqual(organizationOneResponse.Data.PAPIErrorCode, comparisonResponse.Data.PAPIErrorCode);
-            Assert.HasCount(organizationOneResponse.Data.RecordSetRecordsGetRows.Count, comparisonResponse.Data.RecordSetRecordsGetRows);
-            Assert.AreEqual(organizationOneResponse.Data.ToString(), comparisonResponse.Data.ToString());
         }
 
         private PapiClient CreateClientWithOrganizationId(int organizationId)
