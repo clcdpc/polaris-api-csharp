@@ -1,6 +1,6 @@
 using Clc.Polaris.Api.Configuration;
 
-namespace Clc.Polaris.Api.LiveIntegrationTests.ProtectedReadOnly.Environment
+namespace Clc.Polaris.Api.LiveIntegrationTests.ProtectedReadOnly.StaffOverride
 {
     [TestClass]
     public sealed class ProtectedTokenStaffOverrideTests : IntegrationTestBase

@@ -80,16 +80,6 @@ namespace Clc.Polaris.Api.LiveIntegrationTests.ReadOnly.Environment
             };
         }
 
-        private int RequireConfiguredRecordSetId()
-        {
-            if (Settings.RecordSetId is not > 0)
-            {
-                Assert.Inconclusive("RecordSetRecordsGet OrganizationId integration coverage requires TestSettings:RecordSetId to be configured with an accessible record set ID.");
-            }
-
-            return Settings.RecordSetId.Value;
-        }
-
         private static void AssertSuccessfulResponse<T>(IRestResponse<T> response, string label)
         {
             Assert.IsNotNull(response, $"Expected {label} response.");
