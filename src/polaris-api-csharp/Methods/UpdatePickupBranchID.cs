@@ -10,7 +10,7 @@ namespace Clc.Polaris.Api
     {
 
 
-        public async Task<IRestResponse<PapiResponseCommon>> UpdatePickupBranchIDAsync(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<PAPIResult>> UpdatePickupBranchIDAsync(string barcode, int requestId, int pickupBranchId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default)
         {
             Require.Positive(requestId);
             Require.Positive(pickupBranchId);
@@ -22,7 +22,7 @@ namespace Clc.Polaris.Api
             request.QueryParameters.Add("userid", userId ?? UserId);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
             request.QueryParameters.Add("pickupbranchid", pickupBranchId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<PAPIResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

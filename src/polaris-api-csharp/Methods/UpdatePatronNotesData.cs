@@ -8,7 +8,7 @@ namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public async Task<IRestResponse<PapiResponseCommon>> UpdatePatronNotesDataAsync(string barcode, string? nonBlockingNote = null, string? blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
+        public async Task<IRestResponse<UpdatePatronNotesResult>> UpdatePatronNotesDataAsync(string barcode, string? nonBlockingNote = null, string? blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
         {
             Require.PositiveIfProvided(workstationId);
 
@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api
 
             var request = PapiRestRequest.Post(url, body: body);
             request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
-            return await ExecutePapiAsync<PapiResponseCommon>(request, cancellationToken).ConfigureAwait(false);
+            return await ExecutePapiAsync<UpdatePatronNotesResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }
