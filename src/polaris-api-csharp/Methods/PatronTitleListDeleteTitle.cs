@@ -1,9 +1,4 @@
 
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
@@ -17,7 +12,6 @@ namespace Clc.Polaris.Api
         /// <param name="position">starts at 1, not 0</param>
         /// <param name="password"></param>
         /// <returns></returns>
-
 
         public async Task<IRestResponse<PatronTitleListDeleteTitleResult>> PatronTitleListDeleteTitleAsync(string barcode, int listId, int position, string password = "", CancellationToken cancellationToken = default)
         {

@@ -1,10 +1,3 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
@@ -18,7 +11,6 @@ namespace Clc.Polaris.Api
             {
                 Require.Positive(id);
             }
-
 
             var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/readinghistory";
             var request = PapiRestRequest.Delete(url, password: password ?? "");

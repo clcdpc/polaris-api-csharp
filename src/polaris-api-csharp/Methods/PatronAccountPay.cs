@@ -1,14 +1,8 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
 
         public async Task<IRestResponse<PatronAccountPayResult>> PatronAccountPayAsync(string barcode, int txnId, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {

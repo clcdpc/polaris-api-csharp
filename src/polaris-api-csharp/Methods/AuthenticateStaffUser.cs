@@ -1,7 +1,3 @@
-using Clc.Polaris.Api.Models;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
@@ -13,7 +9,6 @@ namespace Clc.Polaris.Api
 
             return await ExecutePapiAsync<ProtectedToken>(request, cancellationToken).ConfigureAwait(false);
         }
-
 
     }
 }

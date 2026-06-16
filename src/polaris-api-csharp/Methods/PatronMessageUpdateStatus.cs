@@ -1,14 +1,8 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
 
         public async Task<IRestResponse<PAPIResult>> PatronMessageUpdateStatusAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default)
         {

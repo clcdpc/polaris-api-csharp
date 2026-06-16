@@ -1,8 +1,3 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
@@ -13,7 +8,6 @@ namespace Clc.Polaris.Api
         /// </summary>
         /// <param name="bibId"></param>
         /// <returns></returns>
-
 
         public async Task<IRestResponse<BibGetResult>> BibGetAsync(int bibId, int? branchId = null, CancellationToken cancellationToken = default)
         {

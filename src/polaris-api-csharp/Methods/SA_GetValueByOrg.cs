@@ -1,8 +1,3 @@
-using Clc.Polaris.Api.Models;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
@@ -14,7 +9,6 @@ namespace Clc.Polaris.Api
         /// <param name="orgId"></param>
         /// <param name="attribute"></param>
         /// <returns></returns>
-
 
         public async Task<IRestResponse<StringResult>> SA_GetValueByOrgAsync(string attribute, int? organizationId = null, CancellationToken cancellationToken = default)
         {

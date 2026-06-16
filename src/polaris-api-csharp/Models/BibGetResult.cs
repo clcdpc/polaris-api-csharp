@@ -1,5 +1,3 @@
-﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Clc.Polaris.Api.Models
 {
@@ -205,7 +203,6 @@ namespace Clc.Polaris.Api.Models
             return BibGetRows.Where(b => b.ElementID == id).Select(b => b.Value).OfType<string>().ToList();
         }
     }
-
 
     /// <summary>
     /// Contains a the value of a bibliographic record field.

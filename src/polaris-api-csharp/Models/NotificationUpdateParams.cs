@@ -1,4 +1,3 @@
-using System;
 
 namespace Clc.Polaris.Api.Models
 {

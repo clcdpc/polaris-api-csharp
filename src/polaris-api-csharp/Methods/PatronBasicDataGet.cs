@@ -1,14 +1,8 @@
-using Clc.Polaris.Api.Models;
-using Clc.Rest;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
 
         public async Task<IRestResponse<PatronBasicDataGetResult>> PatronBasicDataGetAsync(string barcode, string password = "", bool addresses = false, bool notes = false, CancellationToken cancellationToken = default)
         {
