@@ -33,7 +33,7 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
             var client = CreateClient(handler);
             var activationDate = DateTime.Now.AddDays(7);
 
-            var response = await client.HoldRequestReactivateAsync("AB C/+#?=", "1234", 1234, activationDate, userId: 9876, cancellationToken: TestContext.CancellationToken);
+            var response = await client.HoldRequestReactivateAsync("AB C/+#?=", 1234, activationDate, "1234", userId: 9876, cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Put, GetLastRequest(handler).Method);
@@ -65,10 +65,43 @@ namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
             client.UserId = 2468;
             var activationDate = DateTime.Now.AddDays(7);
 
-            var response = await client.HoldRequestReactivateAsync("AB C/+#?=", "1234", 1234, activationDate, cancellationToken: TestContext.CancellationToken);
+            var response = await client.HoldRequestReactivateAsync("AB C/+#?=", 1234, activationDate, "1234", cancellationToken: TestContext.CancellationToken);
 
             Assert.IsNotNull(response);
             AssertFlatActivationBody(handler, expectedUserId: 2468, expectedActivationDate: activationDate);
+        }
+
+        [TestMethod]
+        public async Task HoldRequestReactivateAsync_AllRequests_UsesZeroRequestId()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateClient(handler);
+            var activationDate = DateTime.Today.AddDays(30);
+
+            await client.HoldRequestReactivateAsync("21234000002105", 0, activationDate, "1234", cancellationToken: TestContext.CancellationToken);
+
+            Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
+            Assert.Contains("/patron/21234000002105/holdrequests/0/active", handler.LastRequest.RequestUri!.AbsolutePath);
+            Assert.IsNotNull(handler.LastRequest.Content);
+            Assert.IsNotNull(handler.LastRequestContent);
+            Assert.Contains(activationDate.ToString("yyyy-MM-dd"), handler.LastRequestContent);
+        }
+
+
+        [TestMethod]
+        public async Task HoldRequestSuspendAsync_AllRequests_UsesZeroRequestId()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateClient(handler);
+            var activationDate = DateTime.Today.AddDays(30);
+
+            await client.HoldRequestSuspendAsync("21234000002105", 0, activationDate, "1234", cancellationToken: TestContext.CancellationToken);
+
+            Assert.AreEqual(HttpMethod.Put, handler.LastRequest!.Method);
+            Assert.Contains("/patron/21234000002105/holdrequests/0/inactive", handler.LastRequest.RequestUri!.AbsolutePath);
+            Assert.IsNotNull(handler.LastRequest.Content);
+            Assert.IsNotNull(handler.LastRequestContent);
+            Assert.Contains(activationDate.ToString("yyyy-MM-dd"), handler.LastRequestContent);
         }
 
         private static void AssertFlatActivationBody(CapturingHttpMessageHandler handler, int expectedUserId, DateTime expectedActivationDate)

@@ -26,7 +26,7 @@ namespace Clc.Polaris.Api.LiveIntegrationTests
 			var suspendResponse = await Papi.HoldRequestSuspendAsync(Settings.PatronBarcode, requestId, DateTime.Today.AddDays(7), Settings.PatronPin, userId: Settings.StaffUserId.GetValueOrDefault(), cancellationToken: TestContext.CancellationToken);
 			Assert.AreEqual(0, suspendResponse.Data.PAPIErrorCode);
 
-			var reactivateResponse = await Papi.HoldRequestReactivateAsync(Settings.PatronBarcode, Settings.PatronPin, requestId, DateTime.Today, userId: Settings.StaffUserId.GetValueOrDefault(), cancellationToken: TestContext.CancellationToken);
+			var reactivateResponse = await Papi.HoldRequestReactivateAsync(Settings.PatronBarcode, requestId, DateTime.Today, Settings.PatronPin, userId: Settings.StaffUserId.GetValueOrDefault(), cancellationToken: TestContext.CancellationToken);
 			Assert.AreEqual(0, reactivateResponse.Data.PAPIErrorCode);
 
 			var cancelResponse = await Papi.HoldRequestCancelAsync(Settings.PatronBarcode, requestId, Settings.PatronPin, userId: Settings.StaffUserId.GetValueOrDefault(), workstationId: Settings.StaffWorkstationId.GetValueOrDefault(), cancellationToken: TestContext.CancellationToken);
