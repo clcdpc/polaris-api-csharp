@@ -16,9 +16,14 @@ namespace Clc.Polaris.Api.UnitTests.Features.Patrons
 
             Assert.AreEqual(HttpMethod.Post, GetLastRequest(handler).Method);
             Assert.AreEqual("/PAPIService/REST/public/v1/1033/100/101/illrequest", GetLastRequestUri(handler).AbsolutePath);
+            Assert.AreEqual("application/json", GetLastRequest(handler).Content!.Headers.ContentType!.MediaType);
             AssertLastRequestBodyJsonPropertyValue(handler, "PatronID", 12);
             AssertLastRequestBodyJsonPropertyValue(handler, "Title", "Title");
             AssertLastRequestBodyJsonPropertyValue(handler, "PickupOrgID", 0);
+            var body = GetLastRequestBody(handler);
+            Assert.DoesNotContain("<ILLRequestCreateData", body);
+            Assert.DoesNotContain("<PatronID>", body);
+            Assert.DoesNotContain("<?xml", body);
         }
 
         [TestMethod]

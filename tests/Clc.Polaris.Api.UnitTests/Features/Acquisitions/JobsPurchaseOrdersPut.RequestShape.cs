@@ -108,6 +108,114 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
             Assert.AreEqual(0, handler.RequestCount);
         }
 
+
+        [TestMethod]
+        [DataRow("Vendor")]
+        [DataRow("OrderedAtLocation")]
+        [DataRow("OrderType")]
+        [DataRow("PaymentMethod")]
+        public async Task JobsPurchaseOrdersPutAsync_WithWhitespaceRequiredString_ThrowsBeforeSendingRequest(string propertyName)
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            SetRequiredString(data, propertyName, " ");
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithNullLineItem_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0] = null!;
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithNullSegments_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments = null;
+
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithEmptySegments_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments = new List<JobsPurchaseOrdersPreorderValidationLineItemSegment>();
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithNullSegment_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments![0] = null!;
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithMissingCollection_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments![0].Collection = " ";
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithMissingFund_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Segments![0].Fund = " ";
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
+
+        [TestMethod]
+        public async Task JobsPurchaseOrdersPutAsync_WithInvalidLineItemCopies_ThrowsBeforeSendingRequest()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateConfiguredClient(handler);
+            var data = CreateValidData();
+            data.LineItems![0].Copies = 0;
+
+            await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () => await client.JobsPurchaseOrdersPutAsync(data, cancellationToken: TestContext.CancellationToken));
+
+            Assert.AreEqual(0, handler.RequestCount);
+        }
         private static JobsPurchaseOrdersPreorderValidationData CreateValidData() => new()
         {
             Vendor = "VendorName",
@@ -135,6 +243,25 @@ namespace Clc.Polaris.Api.UnitTests.Features.Acquisitions
             }
         };
 
+
+        private static void SetRequiredString(JobsPurchaseOrdersPreorderValidationData data, string propertyName, string value)
+        {
+            switch (propertyName)
+            {
+                case "Vendor":
+                    data.Vendor = value;
+                    break;
+                case "OrderedAtLocation":
+                    data.OrderedAtLocation = value;
+                    break;
+                case "OrderType":
+                    data.OrderType = value;
+                    break;
+                case "PaymentMethod":
+                    data.PaymentMethod = value;
+                    break;
+            }
+        }
         private static PapiClient CreateConfiguredClient(CapturingHttpMessageHandler handler)
         {
             var client = CreateClient(handler);

@@ -19,6 +19,8 @@ namespace Clc.Polaris.Api.UnitTests.Features.Bibliographic
             AssertLastRequestQueryParameter(handler, "ImportProfileName", "profile");
             AssertLastRequestQueryParameter(handler, "WorkstationID", "77");
             Assert.AreEqual(marcXml, GetLastRequestBody(handler));
+            Assert.AreEqual("application/xml", GetLastRequest(handler).Content!.Headers.ContentType!.MediaType);
+            Assert.AreEqual("utf-8", GetLastRequest(handler).Content!.Headers.ContentType!.CharSet);
         }
 
         [TestMethod]
