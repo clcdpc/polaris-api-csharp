@@ -53,6 +53,7 @@ namespace Clc.Polaris.Api.Models
             Method = request.Method;
             Path = request.Path;
             Body = request.Body;
+            Content = request.Content;
 
             foreach (var parameter in request.QueryParameters)
             {
