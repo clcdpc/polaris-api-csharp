@@ -8,7 +8,6 @@ namespace Clc.Polaris.Api
         /// <param name="orgId"></param>
         /// <param name="attribute"></param>
         /// <returns></returns>
-
         public async Task<IRestResponse<StringResult>> SA_GetValueByOrgAsync(string attribute, int? organizationId = null, CancellationToken cancellationToken = default)
         {
             Require.PositiveIfProvided(organizationId);

@@ -3,14 +3,12 @@ namespace Clc.Polaris.Api
     public partial class PapiClient
     {
         /// <summary>
-        ///
         /// </summary>
         /// <param name="barcode"></param>
         /// <param name="listId"></param>
         /// <param name="position">starts at 1, not 0</param>
         /// <param name="password"></param>
         /// <returns></returns>
-
         public async Task<IRestResponse<PatronTitleListDeleteTitleResult>> PatronTitleListDeleteTitleAsync(string barcode, int listId, int position, string password = "", CancellationToken cancellationToken = default)
         {
             Require.Positive(listId);

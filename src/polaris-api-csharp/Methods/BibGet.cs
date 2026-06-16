@@ -7,7 +7,6 @@ namespace Clc.Polaris.Api
         /// </summary>
         /// <param name="bibId"></param>
         /// <returns></returns>
-
         public async Task<IRestResponse<BibGetResult>> BibGetAsync(int bibId, int? branchId = null, CancellationToken cancellationToken = default)
         {
             Require.Positive(bibId);

@@ -3,7 +3,6 @@ namespace Clc.Polaris.Api
     public partial class PapiClient
     {
         /// <summary>
-        ///
         /// </summary>
         /// <param name="barcode"></param>
         /// <param name="fromRecordStoreId"></param>
