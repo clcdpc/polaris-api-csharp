@@ -29,6 +29,7 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<ApiResult>> ApiVersionGetAsync(CancellationToken cancellationToken = default);
         Task<IRestResponse<PatronAuthenticationResult>> AuthenticatePatronAsync(string barcode, string password, CancellationToken cancellationToken = default);
         Task<IRestResponse<ProtectedToken>> AuthenticateStaffUserAsync(PolarisUser staffUser, CancellationToken cancellationToken = default);
+        Task<IRestResponse<BibsPostResult>> BibsPostAsync(string marcXml, string? importProfileName = null, int? workstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<BibGetResult>> BibGetAsync(int bibId, int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<BibGetByTypeResult>> BibGetByTypeV2Async(string key, BibGetByTypeKeyType type = BibGetByTypeKeyType.Barcode, int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<BibSearchResult>> BibSearchAsync(BibSearchOptions options, CancellationToken cancellationToken = default);
@@ -46,9 +47,14 @@ namespace Clc.Polaris.Api
         Task<IRestResponse<ItemCheckInResult>> ItemCheckInPostAsync(string itemBarcode, int? logonBranchId = null, int? logonUserId = null, int? logonWorkstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<ItemCheckOutResult>> ItemCheckOutPostAsync(string patronBarcode, string itemBarcode, string password = "", int? logonBranchId = null, int? logonUserId = null, int? logonWorkstationId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<ILLRequestCancelResult>> ILLRequestCancelAsync(string barcode, int illRequestId, string password = "", int? userId = null, int? workstationId = null, CancellationToken cancellationToken = default);
+        Task<IRestResponse<ILLRequestResult>> ILLRequestPostAsync(ILLRequestCreateData requestData, CancellationToken cancellationToken = default);
         Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAsync(string barcode, int itemId, string password = "", ItemRenewOptions? renewOptions = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<ItemStatusesGetResult>> ItemStatusesGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<PAPIResult>> ItemUpdateBarcodeAsync(string newBarcode, int? itemRecordId = null, int? transactionBranchId = null, string oldBarcode = "", CancellationToken cancellationToken = default);
+        Task<IRestResponse<JobsPurchaseOrdersPreorderValidationResult>> JobsPurchaseOrdersPutAsync(JobsPurchaseOrdersPreorderValidationData data, int preOrderValidation = 1, CancellationToken cancellationToken = default);
+        Task<IRestResponse<JobsPurchaseOrdersPostResult>> JobsPurchaseOrdersPostAsync(JobsPurchaseOrdersCreateData data, CancellationToken cancellationToken = default);
+        Task<IRestResponse<JobsPurchaseOrdersResultGetResult>> JobsPurchaseOrdersResultGetAsync(Guid jobGuid, CancellationToken cancellationToken = default);
+        Task<IRestResponse<JobsPurchaseOrdersStatusGetResult>> JobsPurchaseOrdersStatusGetAsync(Guid jobGuid, CancellationToken cancellationToken = default);
         Task<IRestResponse<LimitFiltersGetResult>> LimitFiltersGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<MARCTypeOfMaterialsGetResult>> MARCTypeOfMaterialsGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
         Task<IRestResponse<MaterialTypesGetResult>> MaterialTypesGetAsync(int? branchId = null, CancellationToken cancellationToken = default);
