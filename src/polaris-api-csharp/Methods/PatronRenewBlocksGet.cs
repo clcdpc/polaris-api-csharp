@@ -1,9 +1,7 @@
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
         public async Task<IRestResponse<PatronRenewBlocksResult>> PatronRenewBlocksGetAsync(int patronId, int? branchId = null, CancellationToken cancellationToken = default)
         {
             Require.Positive(patronId);

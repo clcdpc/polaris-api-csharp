@@ -1,4 +1,3 @@
-
 namespace Clc.Polaris.Api.Models
 {
     public class HeadingsSearchResult : PapiResponseCommon

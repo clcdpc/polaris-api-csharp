@@ -1,4 +1,3 @@
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient

@@ -1,10 +1,7 @@
-
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
         public async Task<IRestResponse<PatronTitleListDeleteAllTitlesResult>> PatronTitleListDeleteAllTitlesAsync(string barcode, int listId, string password = "", CancellationToken cancellationToken = default)
         {
             Require.Positive(listId);

@@ -1,9 +1,7 @@
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-
         public async Task<IRestResponse<PatronAccountRefundCreditResult>> PatronAccountRefundCreditAsync(string barcode, double txnAmount, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
             Require.PositiveIfProvided(workstationId);

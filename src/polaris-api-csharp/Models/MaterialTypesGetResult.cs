@@ -1,4 +1,3 @@
-
 namespace Clc.Polaris.Api.Models
 {
     public class MaterialTypesGetResult : PapiResponseCommon

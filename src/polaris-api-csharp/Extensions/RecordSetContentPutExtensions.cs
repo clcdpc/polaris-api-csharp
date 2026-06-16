@@ -1,5 +1,3 @@
-
-
 namespace Clc.Polaris.Api
 {
     public static class RecordSetContentPutExtensions

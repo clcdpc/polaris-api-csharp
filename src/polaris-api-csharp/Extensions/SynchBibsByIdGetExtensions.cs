@@ -1,4 +1,3 @@
-
 namespace Clc.Polaris.Api
 {
     public static class SynchBibsByIdGetExtensions

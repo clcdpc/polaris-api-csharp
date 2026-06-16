@@ -1,4 +1,3 @@
-
 namespace Clc.Polaris.Api.Configuration
 {
     public class PapiSettings : IPapiSettings
