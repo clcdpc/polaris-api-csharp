@@ -1,6 +1,6 @@
 using Clc.Polaris.Api.Configuration;
 
-namespace Clc.Polaris.Api.LiveIntegrationTests
+namespace Clc.Polaris.Api.LiveIntegrationTests.Configuration
 {
     internal static class IntegrationTestRequirements
     {

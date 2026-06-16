@@ -1,4 +1,4 @@
-namespace Clc.Polaris.Api
+namespace Clc.Polaris.Api.LiveIntegrationTests.Configuration
 {
     public class TestSettings
     {
