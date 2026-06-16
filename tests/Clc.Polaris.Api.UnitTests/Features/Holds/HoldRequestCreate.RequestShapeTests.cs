@@ -1,6 +1,4 @@
-﻿using Clc.Polaris.Api.UnitTests.Infrastructure;
-using System.Net.Http;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
 {

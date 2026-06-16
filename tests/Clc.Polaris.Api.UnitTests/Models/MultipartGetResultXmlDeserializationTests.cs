@@ -1,4 +1,3 @@
-using System.IO;
 using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api.UnitTests.Models

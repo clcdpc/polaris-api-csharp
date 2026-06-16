@@ -1,5 +1,3 @@
-using Clc.Polaris.Api.Models;
-
 namespace Clc.Polaris.Api.UnitTests.Methods.RequestShape
 {
     [TestClass]

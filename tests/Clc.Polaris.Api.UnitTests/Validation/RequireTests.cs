@@ -1,5 +1,3 @@
-using Clc.Polaris.Api.UnitTests;
-
 namespace Clc.Polaris.Api.Validation.Tests
 {
     [TestClass]
