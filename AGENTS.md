@@ -16,6 +16,99 @@ This repository is a C#/.NET library and test suite for the Polaris API client. 
 - Keep changes scoped to the task. Avoid drive-by refactors outside touched code.
 - Before finishing, review the diff for accidental value changes, especially string literals used by assertions.
 
+
+## Test organization
+
+Tests use intent-first organization. Organize tests by the behavior they protect, not by mirroring production-code folders.
+
+- Unit tests go in `tests/Clc.Polaris.Api.UnitTests`.
+- Live integration tests go in `tests/Clc.Polaris.Api.LiveIntegrationTests`.
+- Do not add tests to legacy `src/polaris-api-csharpTests`.
+- Folder paths and namespaces carry behavior context.
+- Filenames should be simple subject-based names: `<Subject>Tests.cs`.
+- Do not use behavior-suffixed filenames such as:
+  - `PatronSearch.Request.Tests.cs`
+  - `PatronSearch.Cancellation.Tests.cs`
+  - `PatronSearch.ProtectedToken.Tests.cs`
+  - `BibSearch.Live.Tests.cs`
+  - `BibGetByTypeV2ReadOnly.LiveTests.cs`
+  - `JobsPurchaseOrdersPostResult.JsonDeserialization.Tests.cs`
+- Do not use generic leaf filenames such as `Tests.cs`, `RequestTests.cs`, or `ModelTests.cs`.
+
+### Unit test folders
+
+- `PublicApiContracts/`: direct public API behavior, cancellation-token propagation, custom execution API contracts, and direct async/public API behavior.
+- `EndpointRequests/`: endpoint-specific request construction such as route, HTTP method, query string, request body, content type, and endpoint-specific headers.
+- `RequestPipeline/`: shared request preparation and mutation behavior such as authorization headers, signing, content handling, routing, staff override, known-token insertion, and idempotency.
+- `AuthenticationAndTokens/`: staff authentication execution, protected-token acquisition, protected-token caching, protected-token expiration, token cache lock behavior, and token-specific model behavior.
+- `ValidationContracts/`: guard clauses, argument validation, options validation, configuration validation, and invalid input behavior.
+- `SerializationAndModels/`: JSON/XML serialization and deserialization, and general request/result model behavior that is not better classified elsewhere.
+- `Governance/`: meta-tests that enforce test coverage, folder conventions, naming conventions, API-surface coverage, and category conventions.
+- `Infrastructure/`: broadly reused test helpers only. Do not move endpoint-specific helpers into `Infrastructure/` unless they are reused across multiple test categories; keep one-off helpers private in the relevant test class.
+
+### Unit placement precedence
+
+When multiple folders seem plausible, use this order:
+
+1. Invalid input or invalid configuration behavior -> `ValidationContracts/`.
+2. Direct public API behavior, cancellation, or custom execution behavior -> `PublicApiContracts/`.
+3. Endpoint-specific URL/body/query/header shape -> `EndpointRequests/`.
+4. Shared request preformatting, signing, content, routing, token insertion, staff override, or idempotency -> `RequestPipeline/`.
+5. Staff authentication execution, protected-token acquisition, token caching, token expiration, token locks, or token-specific model behavior -> `AuthenticationAndTokens/`.
+6. JSON/XML serialization/deserialization or general request/result model behavior -> `SerializationAndModels/`.
+7. Test-suite rule enforcement -> `Governance/`.
+
+### Authentication and token boundaries
+
+Keep authentication-related tests separated by what they prove:
+
+- `EndpointRequests/Authentication/`: request shape for authentication endpoints, including route, HTTP method, request body, query string, and content type.
+- `RequestPipeline/Authorization/`: signing, authorization headers, preformatting, and authorization request mutation.
+- `RequestPipeline/Tokens/`: adding an already-known token to a request.
+- `AuthenticationAndTokens/`: executing authentication, acquiring protected tokens, caching protected tokens, refreshing/expiring tokens, lock behavior, and token-specific model behavior.
+
+Do not place protected-token acquisition/cache tests under `EndpointRequests/`. Do not place request-shape tests under `AuthenticationAndTokens/`.
+
+`AuthenticationAndTokens/TokenModel/` is only for token-specific model behavior. General request/result model behavior belongs in `SerializationAndModels/ModelBehavior/`.
+
+### Namespace rule
+
+Namespaces should follow the test folder taxonomy. For example, `tests/Clc.Polaris.Api.UnitTests/EndpointRequests/Patron/PatronSearchTests.cs` should use `namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Patron;`.
+
+### Live integration tests
+
+Live integration tests are organized by safety tier first, then domain. Use only these top-level folders, plus project files and global usings:
+
+- `Configuration/`
+- `Infrastructure/`
+- `ReadOnly/`
+- `ProtectedReadOnly/`
+- `Mutating/`
+- `ProtectedMutating/`
+- `Scenarios/`
+
+Use simple subject-based filenames: `<EndpointOrScenario>Tests.cs`. Do not include `.Live`, `ReadOnly`, `ProtectedReadOnly`, `Mutating`, or `ProtectedMutating` in the filename when the project/folder already supplies that classification.
+
+MSTest categories must align with the live integration folder:
+
+- `ReadOnly/` -> `TestCategory=ReadOnly`
+- `ProtectedReadOnly/` -> `TestCategory=ProtectedReadOnly`
+- `Mutating/` -> `TestCategory=Mutating`
+- `ProtectedMutating/` -> `TestCategory=ProtectedMutating`
+- `Scenarios/` -> `TestCategory=Lifecycle` or `TestCategory=ProtectedLifecycle`
+
+### Reorganization-only constraints
+
+For test organization changes:
+
+- Move and rename files only.
+- Update namespaces to match new folders.
+- Do not rewrite assertions, test data, response strings, helpers, or production code.
+- Do not add package references.
+- Do not change public APIs.
+- Do not introduce analyzer warnings, build warnings, or test failures.
+- Run tests and review the diff for accidental assertion/string changes before finishing.
+
 ## C# formatting style
 
 - Use ordinary C# formatting consistent with nearby files.
