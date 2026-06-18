@@ -14,6 +14,8 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         [XmlElement(ElementName = "BibHoldingsGetRows")]
         public List<BibHoldingsGetRow> BibHoldingsGetRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", BibHoldingsGetRows ?? Enumerable.Empty<BibHoldingsGetRow>());
     }
 
     /// <summary>
@@ -159,5 +161,7 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         [XmlElement(ElementName = "IsElectronicItem")]
         public string? IsElectronicItem { get; set; }
+
+        public override string ToString() => $"{Barcode ?? string.Empty} - {LocationName ?? string.Empty} - {CollectionName ?? string.Empty} - {CallNumber ?? string.Empty} - {ShelfLocation ?? string.Empty} - {CircStatus ?? string.Empty} - {MaterialType ?? string.Empty} - {DueDate ?? string.Empty}";
     }
 }

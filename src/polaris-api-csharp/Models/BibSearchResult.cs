@@ -19,6 +19,8 @@ namespace Clc.Polaris.Api.Models
         /// A row that contains bibliographic record information of the search results.
         /// </summary>
         public List<BibSearchRow> BibSearchRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", BibSearchRows ?? Enumerable.Empty<BibSearchRow>());
     }
 
     /// <summary>

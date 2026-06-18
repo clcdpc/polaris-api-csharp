@@ -9,5 +9,7 @@
         /// The result of the item renewal.
         /// </summary>
         public ItemRenewResultWrapper? ItemRenewResult { get; set; }
+
+        public override string ToString() => ItemRenewResult?.ToString() ?? base.ToString();
     }
 }
