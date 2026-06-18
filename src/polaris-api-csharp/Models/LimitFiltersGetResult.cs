@@ -3,6 +3,8 @@ namespace Clc.Polaris.Api.Models
     public class LimitFiltersGetResult : PapiResponseCommon
     {
         public LimitFiltersRow[] LimitFiltersRows { get; set; } = Array.Empty<LimitFiltersRow>();
+
+        public override string ToString() => string.Join("\r\n", LimitFiltersRows ?? Enumerable.Empty<LimitFiltersRow>());
     }
 
     public class LimitFiltersRow

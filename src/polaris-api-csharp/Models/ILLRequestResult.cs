@@ -15,5 +15,7 @@ namespace Clc.Polaris.Api.Models
         public string? StatusType { get; set; }
         public string? StatusValue { get; set; }
         public string? Message { get; set; }
+
+        public override string ToString() => $"{RequestGUID ?? string.Empty} - {StatusType ?? string.Empty} - {StatusValue ?? string.Empty} - {Message ?? string.Empty}";
     }
 }

@@ -12,5 +12,7 @@ namespace Clc.Polaris.Api.Models
         public List<PickupBranchesRow> PickupBranchesRows { get; set; } = new();
 
         public List<int> PickupBranches => PickupBranchesRows.Select(b => b.ID).ToList();
+
+        public override string ToString() => string.Join(", ", PickupBranchesRows ?? Enumerable.Empty<PickupBranchesRow>());
     }
 }

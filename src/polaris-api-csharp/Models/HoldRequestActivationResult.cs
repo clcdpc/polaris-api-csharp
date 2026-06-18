@@ -9,6 +9,8 @@ namespace Clc.Polaris.Api.Models
         /// Information about activated holds.
         /// </summary>
         public List<HoldActivationRow> HoldActivationRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", HoldActivationRows ?? Enumerable.Empty<HoldActivationRow>());
     }
 
     /// <summary>
@@ -41,5 +43,7 @@ namespace Clc.Polaris.Api.Models
         /// The error message if not sucessful.
         /// </summary>
         public string? ErrorMessage { get; set; }
+
+        public override string ToString() => $"{SysHoldRequestID} - {ReturnCode} - {NewActivationDate:O} - {NewExpirationDate:O} - {ErrorMessage ?? string.Empty}";
     }
 }
