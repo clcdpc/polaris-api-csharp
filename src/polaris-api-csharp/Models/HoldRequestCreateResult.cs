@@ -44,5 +44,7 @@ namespace Clc.Polaris.Api.Models
         /// Total number of holds in the queue.
         /// </summary>
         public int QueueTotal { get; set; }
+
+        public override string ToString() => RequestGuid?.ToString() ?? string.Empty;
     }
 }

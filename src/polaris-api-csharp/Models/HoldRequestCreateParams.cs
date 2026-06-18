@@ -70,6 +70,8 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public Guid? TargetGUID { get; set; }
 
+        public override string ToString() => $"PatronID={PatronID}, BibID={BibID}, PickupOrgID={PickupOrgID}, RequestingOrgID={RequestingOrgID?.ToString() ?? string.Empty}";
+
         public HoldRequestCreateParams()
         {
 

@@ -6,5 +6,7 @@ namespace Clc.Polaris.Api.Models
     public class BibsPostResult : PapiResponseCommon
     {
         public int? ImportJobID { get; set; }
+
+        public override string ToString() => ImportJobID?.ToString() ?? string.Empty;
     }
 }
