@@ -4,9 +4,8 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Holds
 {
     [TestClass]
     [UnitTest]
-    public class HoldRequestSuspendTests : PapiClientUnitTestBase
+    public class UpdatePickupBranchIDTests : PapiClientUnitTestBase
     {
-
         [TestMethod]
         public async Task UpdatePickupBranchID_EncodesBarcodeAndConstructsQuery()
         {
