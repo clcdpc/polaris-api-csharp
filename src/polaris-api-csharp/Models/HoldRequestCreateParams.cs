@@ -1,3 +1,5 @@
+using Clc.Polaris.Api.Internal;
+
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -70,7 +72,7 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public Guid? TargetGUID { get; set; }
 
-        public override string ToString() => $"PatronID={PatronID}, BibID={BibID}, PickupOrgID={PickupOrgID}, RequestingOrgID={RequestingOrgID?.ToString() ?? string.Empty}";
+        public override string ToString() => $"PatronID={ModelDisplayFormatter.MaskLeadingDigits(PatronID)}, BibID={BibID}, PickupOrgID={PickupOrgID}, RequestingOrgID={RequestingOrgID?.ToString() ?? string.Empty}";
 
         public HoldRequestCreateParams()
         {
