@@ -1,23 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<RootNamespace>Clc.Polaris</RootNamespace>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Clc.Polaris.Api</RootNamespace>
 		<PackageId>Clc.Polaris.Api</PackageId>
 		<Authors>Central Library Consortium, Michael Fields</Authors>
 		<Description>A helper library that assists in the consumption of the Polaris ILS API</Description>
 		<PackageTags>clc; polaris; papi; polarisapi</PackageTags>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-		<Version>3.1.5</Version>
 		<Title>Polaris Api Library Helper Library</Title>
-		<PackageProjectUrl>https://bitbucket.org/clcdpc/polaris-api-csharp</PackageProjectUrl>
-		<RepositoryUrl>https://bitbucket.org/clcdpc/polaris-api-csharp</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/clcdpc/polaris-api-csharp</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/clcdpc/polaris-api-csharp</RepositoryUrl>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReleaseNotes>Upgrade to RestClient 3.x; move to net8.0; make public client APIs async-only with CancellationToken support; add protected-token acquisition and caching for staff override requests; support custom PAPI request execution through ExecutePapiAsync; restrict public staff override behavior to patron-account routes; encode barcode route segments; improve ItemUpdateBarcodeAsync validation and barcode lookup behavior.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Clc.Rest.Client" Version="2.2.1-beta" />
+		<PackageReference Include="Clc.Rest.Client" Version="3.0.0-beta.3" />
 	</ItemGroup>
 
 </Project>

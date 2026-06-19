@@ -1,10 +1,4 @@
-﻿
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace Clc.Polaris.Api.Models
@@ -15,15 +9,17 @@ namespace Clc.Polaris.Api.Models
     [XmlRoot(ElementName = "AuthenticationResult")]
     public class ProtectedToken : PapiResponseCommon
     {
+        public const string Placeholder = "__PAPI_PROTECTED_ACCESS_TOKEN__";
+
         /// <summary>
         /// Access token
         /// </summary>
-        public string AccessToken { get; set; }
+        public string? AccessToken { get; set; }
 
         /// <summary>
         /// Access secret
         /// </summary>
-        public string AccessSecret { get; set; }
+        public string? AccessSecret { get; set; }
 
         /// <summary>
         /// Token expiration date

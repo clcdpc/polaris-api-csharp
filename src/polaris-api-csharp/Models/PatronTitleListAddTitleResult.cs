@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Clc.Polaris.Api.Models
+﻿namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Result of a PatronTitleListAddTitle request
@@ -20,5 +14,7 @@ namespace Clc.Polaris.Api.Models
         /// Unique Identifier for the title in the list
         /// </summary>
         public int RecordID { get; set; }
+
+        public override string ToString() => $"{Position} - {RecordID}";
     }
 }

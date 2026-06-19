@@ -8,12 +8,12 @@
         /// <summary>
         /// Txn group qualifier.
         /// </summary>
-        public string TxnGroupQualifier { get; set; }
+        public string? TxnGroupQualifier { get; set; }
 
         /// <summary>
         /// Txn qualifier.
         /// </summary>
-        public string TxnQualifier { get; set; }
+        public string? TxnQualifier { get; set; }
 
         /// <summary>
         /// The org ID of the branch processing the request.
@@ -34,5 +34,7 @@
         /// 5 - Accept local hold policy (charge)
         /// </summary>
         public int State { get; set; }
+
+        public override string ToString() => $"{TxnGroupQualifier ?? string.Empty} - {TxnQualifier ?? string.Empty} - {RequestingOrgID} - {Answer} - {State}";
     }
 }

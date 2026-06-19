@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Result of a PatronSearch call
     /// </summary>
 	public class PatronSearchResult : PapiResponseCommon
-	{
+    {
         /// <summary>
         /// List of keywords
         /// </summary>
-		public string WordList { get; set; }
+		public string? WordList { get; set; }
 
         /// <summary>
         /// Total records found
@@ -23,14 +18,14 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron search results
         /// </summary>
-		public List<PatronSearchRow> PatronSearchRows { get; set; }
-	}
+		public List<PatronSearchRow> PatronSearchRows { get; set; } = new();
+    }
 
     /// <summary>
     /// Patron search result
     /// </summary>
 	public class PatronSearchRow
-	{
+    {
         /// <summary>
         /// Patron ID
         /// </summary>
@@ -39,7 +34,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron barcode
         /// </summary>
-		public string Barcode { get; set; }
+		public string? Barcode { get; set; }
 
         /// <summary>
         /// Patron registered branch
@@ -49,7 +44,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron first and last name
         /// </summary>
-		public string PatronFirstLastName { get; set; }
+		public string? PatronFirstLastName { get; set; }
 
         public override string ToString() => $"{PatronID} | {Barcode} | {OrganizationID} | {PatronFirstLastName}";
     }

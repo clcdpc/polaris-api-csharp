@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -14,7 +8,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Search term
         /// </summary>
-        public string Term { get; set; }
+        public string? Term { get; set; }
 
         /// <summary>
         /// Search type, keyword or boolean
@@ -34,12 +28,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Limit by filter you want to apply
         /// </summary>
-        public string Limit { get; set; }
+        public string? Limit { get; set; }
 
         /// <summary>
         /// Branch to search
         /// </summary>
-        public int Branch { get; set; } = 1;
+        public int? Branch { get; set; }
 
         /// <summary>
         /// Page

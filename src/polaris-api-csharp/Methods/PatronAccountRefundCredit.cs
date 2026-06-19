@@ -1,26 +1,18 @@
-﻿using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Xml.Linq;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
-
-        public IRestResponse<PapiResponseCommon> PatronAccountRefundCredit(string barcode, double txnAmount, int? workstationId = null, int? userId = null, string note = "")
+        public async Task<IRestResponse<PatronAccountRefundCreditResult>> PatronAccountRefundCreditAsync(string barcode, double txnAmount, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/lumpsumrefundcredit?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            Require.PositiveIfProvided(workstationId);
+            Require.PositiveIfProvided(userId);
+
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/account/lumpsumrefundcredit";
             var body = new PatronAccountRefundCreditData { TxnAmount = txnAmount, FreeTextNote = note };
-            var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
-            return Execute<PapiResponseCommon>(request);
+            var request = PapiRestRequest.Put(url, body: body);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
+            return await ExecutePapiAsync<PatronAccountRefundCreditResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

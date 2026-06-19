@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Result of an OrganizationsGet call
     /// </summary>
 	public class OrganizationsGetResult : PapiResponseCommon
-	{
+    {
         /// <summary>
         /// List of organization data
         /// </summary>
-		public List<OrganizationsGetRow> OrganizationsGetRows { get; set; }
-	}
+		public List<OrganizationsGetRow> OrganizationsGetRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", OrganizationsGetRows ?? Enumerable.Empty<OrganizationsGetRow>());
+    }
 
     /// <summary>
     /// Organization data
     /// </summary>
 	public class OrganizationsGetRow
-	{
+    {
         /// <summary>
         /// OrganizationID
         /// </summary>
@@ -39,21 +36,21 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Name
         /// </summary>
-		public string Name { get; set; }
+		public string? Name { get; set; }
 
         /// <summary>
         /// Abbreviation
         /// </summary>
-		public string Abbreviation { get; set; }
+		public string? Abbreviation { get; set; }
 
         /// <summary>
         /// Display name
         /// </summary>
-		public string DisplayName { get; set; }
+		public string? DisplayName { get; set; }
 
         public override string ToString()
         {
             return $"{OrganizationID} - {Abbreviation} - {Name}";
         }
-    }	
+    }
 }

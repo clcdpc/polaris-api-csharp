@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -15,19 +9,31 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// The branch where the renewal takes place
         /// </summary>
-        public int LogonBranchID { get; set; } = 1;
+        public int? LogonBranchID { get; set; }
 
         /// <summary>
         /// The user performing the renewal
         /// </summary>
-        public int LogonUserID { get; set; } = 1;
+        public int? LogonUserID { get; set; }
 
         /// <summary>
         /// The workstation the renewal takes place
         /// </summary>
-        public int LogonWorkstationID { get; set; } = 1;
+        public int? LogonWorkstationID { get; set; }
 
         public RenewData RenewData { get; set; } = new RenewData();
+
+        public ItemRenewOptions()
+        {
+
+        }
+
+        public ItemRenewOptions(int logonBranchId, int logonUserId, int logonWorkstationId)
+        {
+            LogonBranchID = logonBranchId;
+            LogonUserID = logonUserId;
+            LogonWorkstationID = logonWorkstationId;
+        }
 
     }
 
