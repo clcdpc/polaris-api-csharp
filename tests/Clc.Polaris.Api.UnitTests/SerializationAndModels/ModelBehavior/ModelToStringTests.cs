@@ -21,15 +21,30 @@ namespace Clc.Polaris.Api.UnitTests.SerializationAndModels.ModelBehavior
         }
 
         [TestMethod]
-        public void HoldRequestCreateParams_ToString_UsesStableRequestShapeFields()
+        public void HoldRequestCreateParams_ToString_MasksPatronIdAndUsesStableRequestShapeFields()
         {
-            var parameters = new HoldRequestCreateParams(patronId: 10, bibId: 20, pickupBranchId: 30, requestingOrgId: 40)
+            var parameters = new HoldRequestCreateParams(patronId: 1234567, bibId: 20, pickupBranchId: 30, requestingOrgId: 40)
             {
                 ItemBarcode = "item-barcode",
                 PatronNotes = "patron note"
             };
 
-            Assert.AreEqual("PatronID=10, BibID=20, PickupOrgID=30, RequestingOrgID=40", parameters.ToString());
+            Assert.AreEqual("PatronID=***4567, BibID=20, PickupOrgID=30, RequestingOrgID=40", parameters.ToString());
+        }
+
+        [TestMethod]
+        public void HoldRequestCreateParams_ToString_DoesNotExposeBarcodeOrPatronNotes()
+        {
+            var parameters = new HoldRequestCreateParams(patronId: 1234567, bibId: 20, pickupBranchId: 30, requestingOrgId: 40)
+            {
+                ItemBarcode = "item-barcode",
+                PatronNotes = "patron note"
+            };
+
+            var text = parameters.ToString();
+
+            Assert.DoesNotContain("item-barcode", text);
+            Assert.DoesNotContain("patron note", text);
         }
 
         [TestMethod]
