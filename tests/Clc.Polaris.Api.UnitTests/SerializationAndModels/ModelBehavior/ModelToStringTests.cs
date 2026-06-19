@@ -288,7 +288,8 @@ namespace Clc.Polaris.Api.UnitTests.SerializationAndModels.ModelBehavior
 
             var text = result.ToString();
 
-            Assert.AreEqual("200 - Checkout title - 2026-06-18T12:30:00.0000000Z - 4 - 8 - 16", text);
+            Assert.AreEqual("200 - Checkout title - 2026-06-18T12:30:00.0000000Z - 4 - 8", text);
+            Assert.DoesNotContain("16", text);
             Assert.DoesNotContain("32", text);
             Assert.DoesNotContain("Patron", text);
         }
@@ -380,6 +381,47 @@ namespace Clc.Polaris.Api.UnitTests.SerializationAndModels.ModelBehavior
             Assert.DoesNotContain("alt@example.org", text);
             Assert.DoesNotContain("555-0100", text);
             Assert.DoesNotContain("sms@example.org", text);
+        }
+
+
+        [TestMethod]
+        public void PatronTitleListAddTitleResult_ToString_ReturnsPositionAndRecordId()
+        {
+            var result = new PatronTitleListAddTitleResult { Position = 3, RecordID = 456 };
+
+            Assert.AreEqual("3 - 456", result.ToString());
+        }
+
+        [TestMethod]
+        public void PatronTitleListAddTitleData_ToString_ReturnsRecordStoreAndLocalControlNumber()
+        {
+            var data = new PatronTitleListAddTitleData { RecordStoreId = 12, LocalControlNumber = 345 };
+
+            Assert.AreEqual("12 - 345", data.ToString());
+        }
+
+        [TestMethod]
+        public void PatronTitleListCopyTitleData_ToString_ReturnsSourcePositionAndDestination()
+        {
+            var data = new PatronTitleListCopyTitleData { FromRecordStoreId = 12, FromPosition = 5, ToRecordStoreId = 34 };
+
+            Assert.AreEqual("12 - 5 - 34", data.ToString());
+        }
+
+        [TestMethod]
+        public void PatronTitleListCopyAllTitlesData_ToString_ReturnsSourceAndDestination()
+        {
+            var data = new PatronTitleListCopyAllTitlesData { FromRecordStoreId = 12, ToRecordStoreId = 34 };
+
+            Assert.AreEqual("12 - 34", data.ToString());
+        }
+
+        [TestMethod]
+        public void PatronTitleListMoveTitleData_ToString_ReturnsSourcePositionAndDestination()
+        {
+            var data = new PatronTitleListMoveTitleData { FromRecordStoreId = 12, FromPosition = 5, ToRecordStoreId = 34 };
+
+            Assert.AreEqual("12 - 5 - 34", data.ToString());
         }
 
     }

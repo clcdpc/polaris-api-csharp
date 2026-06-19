@@ -4,5 +4,7 @@
     {
         public int FromRecordStoreId { get; set; }
         public int ToRecordStoreId { get; set; }
+
+        public override string ToString() => $"{FromRecordStoreId} - {ToRecordStoreId}";
     }
 }
