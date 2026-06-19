@@ -3,6 +3,8 @@ namespace Clc.Polaris.Api.Models
     public class MARCTypeOfMaterialsGetResult : PapiResponseCommon
     {
         public MARCTypeOfMaterialsRow[] MARCTypeOfMaterialsRows { get; set; } = Array.Empty<MARCTypeOfMaterialsRow>();
+
+        public override string ToString() => string.Join("\r\n", MARCTypeOfMaterialsRows ?? Enumerable.Empty<MARCTypeOfMaterialsRow>());
     }
 
     public class MARCTypeOfMaterialsRow

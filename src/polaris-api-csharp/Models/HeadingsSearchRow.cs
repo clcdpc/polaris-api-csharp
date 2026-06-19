@@ -8,5 +8,7 @@ namespace Clc.Polaris.Api.Models
         public string? DisplayTerm { get; set; }
         public int? GlobalOccurrences { get; set; }
         public string? HeadingID { get; set; }
+
+        public override string ToString() => $"{Position?.ToString() ?? string.Empty} - {HeadingID ?? string.Empty} - {DisplayTerm ?? DisplayConstant ?? string.Empty}";
     }
 }

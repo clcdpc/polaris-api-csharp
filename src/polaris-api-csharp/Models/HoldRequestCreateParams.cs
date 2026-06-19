@@ -1,3 +1,5 @@
+using Clc.Polaris.Api.Internal;
+
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -69,6 +71,8 @@ namespace Clc.Polaris.Api.Models
         /// GUID of search target. ONLY USED IF NOT LOCAL.
         /// </summary>
         public Guid? TargetGUID { get; set; }
+
+        public override string ToString() => $"PatronID={ModelDisplayFormatter.MaskLeadingDigits(PatronID)}, BibID={BibID}, PickupOrgID={PickupOrgID}, RequestingOrgID={RequestingOrgID?.ToString() ?? string.Empty}";
 
         public HoldRequestCreateParams()
         {

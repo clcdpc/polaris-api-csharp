@@ -61,7 +61,7 @@ namespace Clc.Polaris.Api.Models
         public string? SortTitle { get; set; }
         public string? SortAuthor { get; set; }
 
-        public override string ToString() => $"{ItemRecordID} - {ItemBarcode} - {BrowseTitle} - {PatronFullName}";
+        public override string ToString() => $"{ItemRecordID} - {ItemBarcode ?? string.Empty} - {BrowseTitle ?? string.Empty}";
     }
 
 }

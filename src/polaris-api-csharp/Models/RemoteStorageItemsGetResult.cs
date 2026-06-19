@@ -7,6 +7,8 @@ namespace Clc.Polaris.Api.Models
         public int RecordCount { get; set; }
         public int RowCount { get; set; }
         public RemoteStorageItemsGetRow[] RemoteStorageItemsGetRows { get; set; } = Array.Empty<RemoteStorageItemsGetRow>();
+
+        public override string ToString() => string.Join("\r\n", RemoteStorageItemsGetRows ?? Enumerable.Empty<RemoteStorageItemsGetRow>());
     }
 
     public class RemoteStorageItemsGetRow
@@ -25,5 +27,7 @@ namespace Clc.Polaris.Api.Models
         public string? CallNumber { get; set; }
         public object? CopyNumber { get; set; }
         public object? VolumeNumber { get; set; }
+
+        public override string ToString() => $"{ItemRecordID} - {Barcode ?? string.Empty} - {BibliographicRecordID} - {BrowseTitle ?? string.Empty} - {MaterialType ?? string.Empty} - {Collection ?? string.Empty} - {ShelfLocation ?? string.Empty} - {CallNumber ?? string.Empty}";
     }
 }

@@ -3,6 +3,8 @@ namespace Clc.Polaris.Api.Models
     public class CollectionsGetResult : PapiResponseCommon
     {
         public List<CollectionsRow> CollectionsRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", CollectionsRows ?? Enumerable.Empty<CollectionsRow>());
     }
 
     public class CollectionsRow

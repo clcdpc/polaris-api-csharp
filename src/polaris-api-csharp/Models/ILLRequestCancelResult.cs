@@ -6,5 +6,7 @@ namespace Clc.Polaris.Api.Models
     {
         [XmlArray(IsNullable = true)]
         public List<ILLRequestCancelRow>? ILLRequestCancelRows { get; set; }
+
+        public override string ToString() => string.Join("\r\n", ILLRequestCancelRows ?? Enumerable.Empty<ILLRequestCancelRow>());
     }
 }

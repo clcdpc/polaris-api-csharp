@@ -163,6 +163,8 @@ namespace Clc.Polaris.Api.Models
         public int DDM_MediaFormatID { get; set; }
         public string? Title { get; set; }
 
+        public override string ToString() => $"{ItemRecordID} - {Title ?? string.Empty} - {DueDate:O} - {MaterialTypeID} - {ItemBlockFlags}";
+
         public CheckoutPatronBlockReasons PatronBlockReasons => (CheckoutPatronBlockReasons)PatronBlockFlags;
         public CheckoutItemBlockReasons ItemBlockReasons => (CheckoutItemBlockReasons)ItemBlockFlags;
         public CheckoutRenewalBlockReasons RenewalBlockReasons => (CheckoutRenewalBlockReasons)RenewalBlockFlags;

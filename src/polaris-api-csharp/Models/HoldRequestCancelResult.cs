@@ -9,6 +9,8 @@ namespace Clc.Polaris.Api.Models
         /// Information about cancelled holds.
         /// </summary>
         public List<HoldRequestCancelRow> HoldRequestCancelRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", HoldRequestCancelRows ?? Enumerable.Empty<HoldRequestCancelRow>());
     }
 
     /// <summary>
@@ -30,5 +32,7 @@ namespace Clc.Polaris.Api.Models
         /// The error message returned by the Polaris API.
         /// </summary>
         public string? ErrorMessage { get; set; }
+
+        public override string ToString() => $"{SysHoldRequestID} - {ReturnCode} - {ErrorMessage ?? string.Empty}";
     }
 }

@@ -23,6 +23,8 @@ namespace Clc.Polaris.Api.Models
         public string? Comment { get; set; }
         public ItemCheckInHoldData? HoldData { get; set; }
         public ItemCheckInTransitResult? InTransitResult { get; set; }
+
+        public override string ToString() => $"{ItemRecordID} - {ItemBarcode ?? string.Empty} - {Title ?? string.Empty} - {ItemStatusID} - {PreviousItemStatusID} - {ShelfLocation ?? string.Empty} - {CallNumber ?? string.Empty}";
     }
 
     public class ItemCheckInHoldData
@@ -31,6 +33,8 @@ namespace Clc.Polaris.Api.Models
         public string? TrappingPatronName { get; set; }
         public string? PickupBranchName { get; set; }
         public string? PickupArea { get; set; }
+
+        public override string ToString() => $"{PickupBranchName ?? string.Empty} - {PickupArea ?? string.Empty}";
     }
 
     public class ItemCheckInTransitResult
@@ -40,5 +44,7 @@ namespace Clc.Polaris.Api.Models
         public DateTime? ItemStatusDate { get; set; }
         public DateTime? InTransitSentDate { get; set; }
         public string? Status { get; set; }
+
+        public override string ToString() => $"{InTransitSentBranchID} - {InTransitRecvdBranchID} - {ItemStatusDate:O} - {InTransitSentDate:O} - {Status ?? string.Empty}";
     }
 }

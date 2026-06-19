@@ -34,5 +34,7 @@
         /// 5 - Accept local hold policy (charge)
         /// </summary>
         public int State { get; set; }
+
+        public override string ToString() => $"{TxnGroupQualifier ?? string.Empty} - {TxnQualifier ?? string.Empty} - {RequestingOrgID} - {Answer} - {State}";
     }
 }

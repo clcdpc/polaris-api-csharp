@@ -14,5 +14,7 @@
         /// Unique Identifier for the title in the list
         /// </summary>
         public int RecordID { get; set; }
+
+        public override string ToString() => $"{Position} - {RecordID}";
     }
 }

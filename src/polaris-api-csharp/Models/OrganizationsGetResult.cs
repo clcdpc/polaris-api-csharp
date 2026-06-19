@@ -9,6 +9,8 @@ namespace Clc.Polaris.Api.Models
         /// List of organization data
         /// </summary>
 		public List<OrganizationsGetRow> OrganizationsGetRows { get; set; } = new();
+
+        public override string ToString() => string.Join("\r\n", OrganizationsGetRows ?? Enumerable.Empty<OrganizationsGetRow>());
     }
 
     /// <summary>
