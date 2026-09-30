@@ -5,14 +5,14 @@ namespace Clc.Polaris.Api
         public async Task<IRestResponse<HoldRequestReplyResult>> HoldRequestReplyAsync(HoldRequestCreateResult holdCreateResult, int requestingOrgId, HoldRequestReplyAnswer answer, HoldRequestReplyState state, CancellationToken cancellationToken = default)
         {
             Require.Argument(holdCreateResult);
-            Require.Argument(holdCreateResult.TxnGroupQualifier);
+            Require.Argument(holdCreateResult.TxnGroupQualifer);
             Require.Argument(holdCreateResult.TxnQualifier);
             Require.Positive(requestingOrgId);
 
             var url = $"/public/v1/1033/100/{OrganizationId}/holdrequest/{holdCreateResult.RequestGuid}";
             var body = new HoldRequestReplyData
             {
-                TxnGroupQualifier = holdCreateResult.TxnGroupQualifier,
+                TxnGroupQualifier = holdCreateResult.TxnGroupQualifer,
                 TxnQualifier = holdCreateResult.TxnQualifier,
                 RequestingOrgID = requestingOrgId,
                 Answer = (int)answer,

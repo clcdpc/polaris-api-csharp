@@ -7,24 +7,23 @@ namespace Clc.Polaris.Api.UnitTests.SerializationAndModels.Json.Deserialization
     public sealed class HoldRequestCreateResultTests
     {
         [TestMethod]
-        [DataRow("TxnGroupQualifier", "TxnGroupQualifer")]
-        [DataRow("TxnGroupQualifer", "TxnGroupQualifier")]
-        public void CanonicalQualifierTakesPrecedenceRegardlessOfFieldOrder(string first, string second)
+        public void DocumentedMisspelledQualifierMapsDirectly()
         {
-            var fields = new Dictionary<string, object>
-            {
-                [first] = first == "TxnGroupQualifier" ? "canonical" : "legacy",
-                [second] = second == "TxnGroupQualifier" ? "canonical" : "legacy"
-            };
-            var json = JsonSerializer.Serialize(fields);
+            const string json = """
+                {
+                  "TxnGroupQualifer": "group"
+                }
+                """;
 
             var result = JsonSerializer.Deserialize<HoldRequestCreateResult>(json);
             var newtonsoftResult = Newtonsoft.Json.JsonConvert.DeserializeObject<HoldRequestCreateResult>(json);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(newtonsoftResult);
-            Assert.AreEqual("canonical", result.TxnGroupQualifier);
-            Assert.AreEqual("canonical", newtonsoftResult.TxnGroupQualifier);
+            Assert.AreEqual("group", result.TxnGroupQualifer);
+            Assert.AreEqual("group", newtonsoftResult.TxnGroupQualifer);
+            Assert.IsNotNull(typeof(HoldRequestCreateResult).GetProperty("TxnGroupQualifer"));
+            Assert.IsNull(typeof(HoldRequestCreateResult).GetProperty("TxnGroupQualifier"));
         }
 
         [TestMethod]

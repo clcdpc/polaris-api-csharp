@@ -6,9 +6,6 @@ namespace Clc.Polaris.Api.Models
     [System.Xml.Serialization.XmlRoot("HoldRequestResult")]
     public class HoldRequestCreateResult : PapiResponseCommon
     {
-        private string? _txnGroupQualifier;
-        private string? _legacyTxnGroupQualifier;
-
         /// <summary>
         /// Hold request GUID.
         /// </summary>
@@ -30,22 +27,10 @@ namespace Clc.Polaris.Api.Models
         }
 
         /// <summary>
-        /// TxnGroupQualifier of the hold request.
+        /// Transaction group qualifier.
+        /// The property name intentionally matches PAPI's misspelled response field "TxnGroupQualifer".
         /// </summary>
-        public string? TxnGroupQualifier
-        {
-            get => _txnGroupQualifier ?? _legacyTxnGroupQualifier;
-            set => _txnGroupQualifier = value;
-        }
-
-        /// <summary>
-        /// Legacy PAPI spelling of the transaction group qualifier. Prefer <see cref="TxnGroupQualifier"/>.
-        /// </summary>
-        public string? TxnGroupQualifer
-        {
-            get => _legacyTxnGroupQualifier;
-            set => _legacyTxnGroupQualifier = value;
-        }
+        public string? TxnGroupQualifer { get; set; }
 
         /// <summary>
         /// TxnQualifier of the hold request.

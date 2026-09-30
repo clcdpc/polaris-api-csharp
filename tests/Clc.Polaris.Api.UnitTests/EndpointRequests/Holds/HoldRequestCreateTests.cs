@@ -34,21 +34,19 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Holds
         }
 
         [TestMethod]
-        [DataRow("TxnGroupQualifier")]
-        [DataRow("TxnGroupQualifer")]
-        public async Task HoldRequestCreateAsync_MapsBothDocumentedQualifierSpellings(string groupField)
+        public async Task HoldRequestCreateAsync_MapsDocumentedMisspelledQualifierResponseField()
         {
             var requestGuid = Guid.Parse("7f279d6e-cfde-4ae3-be96-ee12305cdf11");
-            var handler = new CapturingHttpMessageHandler(CreateJson(new Dictionary<string, object>
+            var handler = new CapturingHttpMessageHandler(CreateJson(new
             {
-                ["PAPIErrorCode"] = 0,
-                ["RequestGUID"] = requestGuid,
-                [groupField] = "group",
-                ["TxnQualifier"] = "qualifier",
-                ["StatusType"] = 3,
-                ["StatusValue"] = 5,
-                ["QueuePosition"] = 2,
-                ["QueueTotal"] = 3
+                PAPIErrorCode = 0,
+                RequestGUID = requestGuid,
+                TxnGroupQualifer = "group",
+                TxnQualifier = "qualifier",
+                StatusType = 3,
+                StatusValue = 5,
+                QueuePosition = 2,
+                QueueTotal = 3
             }));
             var client = CreateClient(handler);
 
@@ -57,7 +55,7 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Holds
 
             Assert.IsNotNull(response.Data);
             Assert.AreEqual(requestGuid, response.Data.RequestGuid);
-            Assert.AreEqual("group", response.Data.TxnGroupQualifier);
+            Assert.AreEqual("group", response.Data.TxnGroupQualifer);
             Assert.AreEqual("qualifier", response.Data.TxnQualifier);
             Assert.AreEqual(3, response.Data.StatusType);
             Assert.AreEqual(5, response.Data.StatusValue);

@@ -7,16 +7,14 @@ namespace Clc.Polaris.Api.UnitTests.SerializationAndModels.Xml.Deserialization
     public sealed class HoldRequestCreateResultTests
     {
         [TestMethod]
-        [DataRow("TxnGroupQualifier")]
-        [DataRow("TxnGroupQualifer")]
-        public void DocumentedResponseMapsGuidQualifierAndQueuePosition(string groupField)
+        public void DocumentedResponseMapsGuidMisspelledQualifierAndQueuePosition()
         {
             var requestGuid = Guid.Parse("7f279d6e-cfde-4ae3-be96-ee12305cdf11");
             var xml = $"""
                 <HoldRequestResult>
                   <PAPIErrorCode>0</PAPIErrorCode>
                   <RequestGUID>{requestGuid}</RequestGUID>
-                  <{groupField}>group</{groupField}>
+                  <TxnGroupQualifer>group</TxnGroupQualifer>
                   <TxnQualifier>qualifier</TxnQualifier>
                   <StatusType>3</StatusType>
                   <StatusValue>5</StatusValue>
@@ -29,7 +27,7 @@ namespace Clc.Polaris.Api.UnitTests.SerializationAndModels.Xml.Deserialization
             var result = (HoldRequestCreateResult)new XmlSerializer(typeof(HoldRequestCreateResult)).Deserialize(reader)!;
 
             Assert.AreEqual(requestGuid, result.RequestGuid);
-            Assert.AreEqual("group", result.TxnGroupQualifier);
+            Assert.AreEqual("group", result.TxnGroupQualifer);
             Assert.AreEqual("qualifier", result.TxnQualifier);
             Assert.AreEqual(3, result.StatusType);
             Assert.AreEqual(5, result.StatusValue);

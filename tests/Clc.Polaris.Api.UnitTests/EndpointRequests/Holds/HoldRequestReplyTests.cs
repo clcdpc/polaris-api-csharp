@@ -27,7 +27,7 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Holds
             var conversation = new HoldRequestCreateResult
             {
                 RequestGuid = requestGuid,
-                TxnGroupQualifier = "prior-group",
+                TxnGroupQualifer = "prior-group",
                 TxnQualifier = "prior-qualifier"
             };
 
@@ -39,13 +39,14 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Holds
             using var document = JsonDocument.Parse(GetLastRequestBody(handler));
             var body = document.RootElement;
             Assert.AreEqual("prior-group", body.GetProperty("TxnGroupQualifier").GetString());
+            Assert.IsFalse(body.TryGetProperty("TxnGroupQualifer", out _));
             Assert.AreEqual("prior-qualifier", body.GetProperty("TxnQualifier").GetString());
             Assert.AreEqual(73, body.GetProperty("RequestingOrgID").GetInt32());
             Assert.AreEqual(1, body.GetProperty("Answer").GetInt32());
             Assert.AreEqual(3, body.GetProperty("State").GetInt32());
             Assert.IsNotNull(response.Data);
             Assert.AreEqual(requestGuid, response.Data.RequestGuid);
-            Assert.AreEqual("next-group", response.Data.TxnGroupQualifier);
+            Assert.AreEqual("next-group", response.Data.TxnGroupQualifer);
             Assert.AreEqual("next-qualifier", response.Data.TxnQualifier);
             Assert.AreEqual(2, response.Data.StatusType);
             Assert.AreEqual(1, response.Data.StatusValue);
@@ -72,7 +73,7 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Holds
             var conversation = new HoldRequestCreateResult
             {
                 RequestGuid = Guid.Parse("7f279d6e-cfde-4ae3-be96-ee12305cdf11"),
-                TxnGroupQualifier = "group",
+                TxnGroupQualifer = "group",
                 TxnQualifier = "qualifier"
             };
 

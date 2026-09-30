@@ -26,6 +26,6 @@
         /// </summary>
         public int State { get; set; }
 
-        public override string ToString() => $"{TxnGroupQualifier ?? string.Empty} - {TxnQualifier ?? string.Empty} - {RequestingOrgID} - {Answer} - {State}";
+        public override string ToString() => $"{TxnGroupQualifer ?? string.Empty} - {TxnQualifier ?? string.Empty} - {RequestingOrgID} - {Answer} - {State}";
     }
 }
