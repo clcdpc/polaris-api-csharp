@@ -14,7 +14,7 @@
 		<RepositoryUrl>https://github.com/clcdpc/polaris-api-csharp</RepositoryUrl>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageReleaseNotes>Upgrade to RestClient 3.x; move to net8.0; make public client APIs async-only with CancellationToken support; add protected-token acquisition and caching for staff override requests; support custom PAPI request execution through ExecutePapiAsync; restrict public staff override behavior to patron-account routes; encode barcode route segments; improve ItemUpdateBarcodeAsync validation and barcode lookup behavior.</PackageReleaseNotes>
+    <PackageReleaseNotes>Use RestClient 3.0.0-beta.3; strengthen operation validation and organization routing; expand typed PAPI endpoint coverage; correct hold create/reply response GUID, status, qualifier, and queue fields, including documented legacy qualifier spelling and empty XML GUIDs.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>

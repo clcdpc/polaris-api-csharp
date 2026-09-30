@@ -3,18 +3,9 @@
     /// <summary>
     /// The response to a HoldRequestReply call.
     /// </summary>
-    public class HoldRequestReplyResult : PapiResponseCommon
+    [System.Xml.Serialization.XmlRoot("HoldRequestResult")]
+    public class HoldRequestReplyResult : HoldRequestCreateResult
     {
-        /// <summary>
-        /// Txn group qualifier.
-        /// </summary>
-        public string? TxnGroupQualifier { get; set; }
-
-        /// <summary>
-        /// Txn qualifier.
-        /// </summary>
-        public string? TxnQualifier { get; set; }
-
         /// <summary>
         /// The org ID of the branch processing the request.
         /// </summary>
