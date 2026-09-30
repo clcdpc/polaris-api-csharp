@@ -222,14 +222,14 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
                 Term = "UPC=\"733961758009\"",
                 Branch = 77,
                 SearchType = BibSearchTypes.boolean,
-                SortOption = SearchSortOptions.PDTI
+                SortOption = SearchSortOptions.TITOM
             }, TestContext.CancellationToken);
 
             var uri = GetLastRequestUri(handler);
             Assert.AreEqual("/PAPIService/REST/public/v1/1033/100/77/search/bibs/boolean", uri.AbsolutePath);
             var query = ParseQuery(uri.Query);
             Assert.AreEqual("UPC=\"733961758009\"", query["q"]);
-            Assert.AreEqual("PDTI", query["sortby"]);
+            Assert.AreEqual("TITOM", query["sortby"]);
             Assert.IsFalse(query.ContainsKey("notran"));
             AssertAuthorizationHashesSentUri(handler.LastRequest!, string.Empty);
         }

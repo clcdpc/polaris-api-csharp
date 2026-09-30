@@ -78,6 +78,11 @@
         /// <summary>
         /// Call Number then Publication Date Descending
         /// </summary>
-        CALLPD
+        CALLPD,
+
+        /// <summary>
+        /// Title then Type of Material
+        /// </summary>
+        TITOM
     }
 }
