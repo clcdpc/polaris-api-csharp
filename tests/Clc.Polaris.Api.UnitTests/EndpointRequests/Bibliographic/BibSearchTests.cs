@@ -26,11 +26,11 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
             Assert.Contains("/public/v1/1033/100/1/search/bibs/keyword/KW", handler.LastRequest.RequestUri!.AbsolutePath);
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sort=MP&page=2&bibsperpage=15&limit=3";
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sortby=MP&page=2&bibsperpage=15&limit=3";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
             Assert.AreEqual("harry potter & stone", query["q"]);
-            Assert.AreEqual("MP", query["sort"]);
+            Assert.AreEqual("MP", query["sortby"]);
             Assert.AreEqual("2", query["page"]);
             Assert.AreEqual("15", query["bibsperpage"]);
             Assert.AreEqual("3", query["limit"]);
@@ -79,11 +79,11 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
             Assert.Contains("/public/v1/1033/100/7/search/bibs/keyword/KW", handler.LastRequest.RequestUri!.AbsolutePath);
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/7/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sort=MP&page=2&bibsperpage=15";
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/7/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sortby=MP&page=2&bibsperpage=15";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
             Assert.AreEqual("harry potter & stone", query["q"]);
-            Assert.AreEqual("MP", query["sort"]);
+            Assert.AreEqual("MP", query["sortby"]);
             Assert.AreEqual("2", query["page"]);
             Assert.AreEqual("15", query["bibsperpage"]);
             Assert.IsNull(handler.LastRequest.Content);
@@ -104,7 +104,7 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
             Assert.Contains("/public/v1/1033/100/42/search/bibs/keyword/KW", handler.LastRequest!.RequestUri!.AbsolutePath);
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/keyword/KW?q=default%20branch%20search&sort=MP&page=1&bibsperpage=10";
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/keyword/KW?q=default%20branch%20search&sortby=MP&page=1&bibsperpage=10";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
@@ -121,11 +121,11 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
             Assert.IsNotNull(handler.LastRequest);
             Assert.AreEqual(HttpMethod.Get, handler.LastRequest!.Method);
             Assert.Contains("/public/v1/1033/100/8/search/bibs/boolean", handler.LastRequest.RequestUri!.AbsolutePath);
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/8/search/bibs/boolean?q=TI%3DHarry%20Potter&sort=AU&page=3&bibsperpage=20";
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/8/search/bibs/boolean?q=TI%3DHarry%20Potter&sortby=AU&page=3&bibsperpage=20";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
             Assert.AreEqual("TI=Harry Potter", query["q"]);
-            Assert.AreEqual("AU", query["sort"]);
+            Assert.AreEqual("AU", query["sortby"]);
             Assert.AreEqual("3", query["page"]);
             Assert.AreEqual("20", query["bibsperpage"]);
             Assert.IsNull(handler.LastRequest.Content);
@@ -146,7 +146,7 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
             Assert.Contains("/public/v1/1033/100/42/search/bibs/boolean", handler.LastRequest!.RequestUri!.AbsolutePath);
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/boolean?q=TI%3DDefault%20Branch&sort=MP&page=1&bibsperpage=10";
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/42/search/bibs/boolean?q=TI%3DDefault%20Branch&sortby=MP&page=1&bibsperpage=10";
             Assert.AreEqual(expectedUri, handler.LastRequest.RequestUri.AbsoluteUri);
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
         }
@@ -171,11 +171,67 @@ namespace Clc.Polaris.Api.UnitTests.EndpointRequests.Bibliographic
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(handler.LastRequest);
-            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sort=MP&page=2&bibsperpage=15";
+            var expectedUri = "https://example.test/PAPIService/REST/public/v1/1033/100/1/search/bibs/keyword/KW?q=harry%20potter%20%26%20stone&sortby=MP&page=2&bibsperpage=15";
             Assert.AreEqual(expectedUri, handler.LastRequest!.RequestUri!.AbsoluteUri);
             var query = ParseQuery(handler.LastRequest.RequestUri.Query);
             Assert.IsFalse(query.ContainsKey("limit"));
+            Assert.IsFalse(query.ContainsKey("sort"));
+            Assert.IsFalse(query.ContainsKey("notran"));
             AssertAuthorizationHashesSentUri(handler.LastRequest, string.Empty);
+        }
+
+        [TestMethod]
+        public async Task BibSearchAsync_MapsNativeMaterialTypeAndSuppressesTransactionWhenRequested()
+        {
+            var handler = new CapturingHttpMessageHandler(CreateJson(new
+            {
+                PAPIErrorCode = 1,
+                TotalRecordsFound = 1,
+                BibSearchRows = new[] { new { ControlNumber = 9001, PrimaryTypeOfMaterial = 36 } }
+            }));
+            var client = CreateClient(handler);
+            var response = await client.BibSearchAsync(new BibSearchOptions
+            {
+                Term = "test title",
+                Branch = 43,
+                Qualifier = SearchQualifiers.TI,
+                SortOption = SearchSortOptions.PDTI,
+                NoTransaction = true
+            }, TestContext.CancellationToken);
+
+            Assert.IsNotNull(response.Data);
+            Assert.HasCount(1, response.Data.BibSearchRows);
+            Assert.AreEqual(9001, response.Data.BibSearchRows[0].ControlNumber);
+            Assert.AreEqual(36, response.Data.BibSearchRows[0].PrimaryTypeOfMaterial);
+            var uri = GetLastRequestUri(handler);
+            Assert.AreEqual("/PAPIService/REST/public/v1/1033/100/43/search/bibs/keyword/TI", uri.AbsolutePath);
+            var query = ParseQuery(uri.Query);
+            Assert.AreEqual("PDTI", query["sortby"]);
+            Assert.AreEqual("1", query["notran"]);
+            Assert.IsFalse(query.ContainsKey("sort"));
+            AssertAuthorizationHashesSentUri(handler.LastRequest!, string.Empty);
+        }
+
+        [TestMethod]
+        public async Task BibSearchAsync_UsesDocumentedBooleanUpcAccessPoint()
+        {
+            var handler = new CapturingHttpMessageHandler(CreatePapiResponseJson());
+            var client = CreateClient(handler);
+            await client.BibSearchAsync(new BibSearchOptions
+            {
+                Term = "UPC=\"733961758009\"",
+                Branch = 77,
+                SearchType = BibSearchTypes.boolean,
+                SortOption = SearchSortOptions.PDTI
+            }, TestContext.CancellationToken);
+
+            var uri = GetLastRequestUri(handler);
+            Assert.AreEqual("/PAPIService/REST/public/v1/1033/100/77/search/bibs/boolean", uri.AbsolutePath);
+            var query = ParseQuery(uri.Query);
+            Assert.AreEqual("UPC=\"733961758009\"", query["q"]);
+            Assert.AreEqual("PDTI", query["sortby"]);
+            Assert.IsFalse(query.ContainsKey("notran"));
+            AssertAuthorizationHashesSentUri(handler.LastRequest!, string.Empty);
         }
     }
 }

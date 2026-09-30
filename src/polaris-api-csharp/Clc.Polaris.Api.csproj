@@ -14,7 +14,7 @@
 		<RepositoryUrl>https://github.com/clcdpc/polaris-api-csharp</RepositoryUrl>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageReleaseNotes>Use RestClient 3.0.0-beta.3; strengthen operation validation and organization routing; expand typed PAPI endpoint coverage; correct hold create/reply response GUID, status, qualifier, and queue fields, including the documented misspelled response qualifier field and empty XML GUIDs.</PackageReleaseNotes>
+    <PackageReleaseNotes>Use RestClient 3.0.0-beta.3; strengthen operation validation and organization routing; expand typed PAPI endpoint coverage; correct hold create/reply response GUID, status, qualifier, and queue fields, including the documented misspelled response qualifier field and empty XML GUIDs; expose native primary material type and documented BIB sort/transaction options.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>

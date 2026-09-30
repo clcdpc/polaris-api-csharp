@@ -89,6 +89,11 @@ namespace Clc.Polaris.Api.Models
         public string? TypeOfMaterial { get; set; }
 
         /// <summary>
+        /// Numeric ID of the primary Polaris type of material, when supplied by PAPI.
+        /// </summary>
+        public int? PrimaryTypeOfMaterial { get; set; }
+
+        /// <summary>
         /// Call number of this record.
         /// </summary>
         public string? CallNumber { get; set; }

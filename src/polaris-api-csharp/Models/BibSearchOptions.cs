@@ -44,5 +44,10 @@ namespace Clc.Polaris.Api.Models
         /// Page size
         /// </summary>
         public int PageSize { get; set; } = 10;
+
+        /// <summary>
+        /// Do not record this search in the Polaris Transactions database.
+        /// </summary>
+        public bool NoTransaction { get; set; }
     }
 }
