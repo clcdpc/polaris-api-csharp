@@ -1,21 +1,12 @@
-﻿using Clc.Polaris.Api.Models;
-using Clc.Polaris.Models;
-using Clc.Rest;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<PapiResponseCommon> UpdatePatronNotesData(string barcode, string nonBlockingNote = null, string blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null)
+        public async Task<IRestResponse<UpdatePatronNotesResult>> UpdatePatronNotesDataAsync(string barcode, string? nonBlockingNote = null, string? blockingNote = null, UpdateNoteMode updateMode = UpdateNoteMode.Prepend, int? workstationId = null, CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/notes?wsid={workstationId ?? WorkstationId}";
+            Require.PositiveIfProvided(workstationId);
+
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/notes";
             var body = new UpdatePatronNotesData();
 
             if (!string.IsNullOrWhiteSpace(nonBlockingNote))
@@ -34,7 +25,9 @@ namespace Clc.Polaris.Api
                 body.BlockingNoteMode = (int)updateMode;
             }
 
-            return Post<PapiResponseCommon>(url, body: body);
+            var request = PapiRestRequest.Post(url, body: body);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            return await ExecutePapiAsync<UpdatePatronNotesResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

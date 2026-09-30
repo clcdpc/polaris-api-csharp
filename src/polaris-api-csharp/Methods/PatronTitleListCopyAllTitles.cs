@@ -1,26 +1,16 @@
-﻿
-using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
-
-        public IRestResponse<PapiResponseCommon> PatronTitleListCopyAllTitles(string barcode, int fromRecordStoreId, int toRecordStoreId, string password = "")
+        public async Task<IRestResponse<PatronTitleListCopyAllTitlesResult>> PatronTitleListCopyAllTitlesAsync(string barcode, int fromRecordStoreId, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistcopyalltitles/";
+            Require.Positive(fromRecordStoreId);
+            Require.Positive(toRecordStoreId);
+
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistcopyalltitles/";
             var body = new PatronTitleListCopyAllTitlesData { FromRecordStoreId = fromRecordStoreId, ToRecordStoreId = toRecordStoreId };
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
-            return Execute<PapiResponseCommon>(request);
+            var request = PapiRestRequest.Post(url, body: body, password: password);
+            return await ExecutePapiAsync<PatronTitleListCopyAllTitlesResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

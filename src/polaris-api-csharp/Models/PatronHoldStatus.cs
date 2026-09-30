@@ -54,5 +54,5 @@
         /// Holds that have been cancelled. Cancelled holds can never be filled but may be reactivated or deleted.
         /// </summary>
         cancelled
-    }    
+    }
 }

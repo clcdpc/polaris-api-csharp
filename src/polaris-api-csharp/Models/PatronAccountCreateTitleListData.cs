@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Clc.Polaris.Api.Models
+﻿namespace Clc.Polaris.Api.Models
 {
     public class PatronAccountCreateTitleListData
     {
-        public string RecordStoreName { get; set; }
+        public string RecordStoreName { get; set; } = string.Empty;
     }
 }

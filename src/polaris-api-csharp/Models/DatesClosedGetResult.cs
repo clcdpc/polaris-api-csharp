@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Clc.Polaris.Api.Models
 {
     public class DatesClosedGetResult
     {
-        public List<DatesClosedRow> DatesClosedRows { get; set; }
+        public List<DatesClosedRow> DatesClosedRows { get; set; } = new();
 
         public override string ToString()
         {

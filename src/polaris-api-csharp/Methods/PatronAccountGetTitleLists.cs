@@ -1,23 +1,12 @@
-﻿using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Net;
-using System.Linq;
-using System.Text;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
-
-        public IRestResponse<PatronAccountGetTitleListsResult> PatronAccountGetTitleLists(string barcode, string password = "")
+        public async Task<IRestResponse<PatronAccountGetTitleListsResult>> PatronAccountGetTitleListsAsync(string barcode, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patronaccountgettitlelists";
-            var request = new PapiRestRequest(url) { Password = password };
-            return Execute<PatronAccountGetTitleListsResult>(request);
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patronaccountgettitlelists";
+            var request = PapiRestRequest.Get(url, password: password);
+            return await ExecutePapiAsync<PatronAccountGetTitleListsResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -12,11 +8,11 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron information for the supplied patron.
         /// </summary>
-        public PatronData PatronBasicData { get; set; }
+        public PatronData? PatronBasicData { get; set; }
 
         public override string ToString()
         {
-            if (PatronBasicData?.PatronID == 0) return base.ToString();
+            if (PatronBasicData == null || PatronBasicData.PatronID == 0) return base.ToString();
             return $"{PatronBasicData.PatronID} - {PatronBasicData.Barcode} - {PatronBasicData.NameFirst} {PatronBasicData.NameLast}";
         }
     }
@@ -27,12 +23,12 @@ namespace Clc.Polaris.Api.Models
     public class PatronData
     {
         public int PatronID { get; set; }
-        public string Barcode { get; set; }
-        public string NameFirst { get; set; }
-        public string NameLast { get; set; }
-        public string NameMiddle { get; set; }
-        public string PhoneNumber { get; set; }
-        public string EmailAddress { get; set; }
+        public string? Barcode { get; set; }
+        public string? NameFirst { get; set; }
+        public string? NameLast { get; set; }
+        public string? NameMiddle { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? EmailAddress { get; set; }
         public int ItemsOutCount { get; set; }
         public int ItemsOverdueCount { get; set; }
         public int ItemsOutLostCount { get; set; }
@@ -44,16 +40,16 @@ namespace Clc.Polaris.Api.Models
         public double ChargeBalance { get; set; }
         public double CreditBalance { get; set; }
         public double DepositBalance { get; set; }
-        public string NameTitle { get; set; }
-        public string NameSuffix { get; set; }
-        public string PhoneNumber2 { get; set; }
-        public string PhoneNumber3 { get; set; }
+        public string? NameTitle { get; set; }
+        public string? NameSuffix { get; set; }
+        public string? PhoneNumber2 { get; set; }
+        public string? PhoneNumber3 { get; set; }
         public int Phone1CarrierID { get; set; }
         public int Phone2CarrierID { get; set; }
         public int Phone3CarrierID { get; set; }
-        public string CellPhone { get; set; }
+        public string? CellPhone { get; set; }
         public int CellPhoneCarrierID { get; set; }
-        public string AltEmailAddress { get; set; }
+        public string? AltEmailAddress { get; set; }
         public DateTime? BirthDate { get; set; }
         public DateTime? RegistrationDate { get; set; }
         public DateTime? LastActivityDate { get; set; }
@@ -69,26 +65,26 @@ namespace Clc.Polaris.Api.Models
         public int EReceiptOptionID { get; set; }
         public int TxtPhoneNumber { get; set; }
         public int EmailFormatID { get; set; }
-        public string LegalNameFirst { get; set; }
-        public string LegalNameLast { get; set; }
-        public string LegalNameMiddle { get; set; }
+        public string? LegalNameFirst { get; set; }
+        public string? LegalNameLast { get; set; }
+        public string? LegalNameMiddle { get; set; }
         public bool UseLegalNameOnNotices { get; set; }
-        public string LegalFullName { get; set; }
-        public List<PatronAddress> PatronAddresses { get; set; }
+        public string? LegalFullName { get; set; }
+        public List<PatronAddress> PatronAddresses { get; set; } = new();
         public DateTime ExpirationDate { get; set; }
         public int RequestPickupBranchID { get; set; }
-        public string User1 { get; set; }
-        public string User2 { get; set; }
-        public string User3 { get; set; }
-        public string User4 { get; set; }
-        public string User5 { get; set; }
+        public string? User1 { get; set; }
+        public string? User2 { get; set; }
+        public string? User3 { get; set; }
+        public string? User4 { get; set; }
+        public string? User5 { get; set; }
         public int LanguageID { get; set; }
-        public string FormerID { get; set; }
+        public string? FormerID { get; set; }
         public int StatisticalClassID { get; set; }
         public PatronNotes? PatronNotes { get; set; }
-        public PatronSystemBlock[] PatronSystemBlocks { get; set; }
+        public PatronSystemBlock[] PatronSystemBlocks { get; set; } = Array.Empty<PatronSystemBlock>();
 
-        string fixpn(string pn) => new string(pn.Where(c => char.IsDigit(c)).ToArray());
+        string fixpn(string? pn) => string.IsNullOrEmpty(pn) ? string.Empty : new string(pn.Where(c => char.IsDigit(c)).ToArray());
 
         public string TxtDeliveryPhoneNumber => TxtPhoneNumber == 1 ? fixpn(PhoneNumber) : TxtPhoneNumber == 2 ? fixpn(PhoneNumber2) : TxtPhoneNumber == 3 ? fixpn(PhoneNumber3) : "";
 
@@ -104,7 +100,7 @@ namespace Clc.Polaris.Api.Models
                         var street = !string.IsNullOrWhiteSpace(address.StreetTwo) ? $"{address.StreetOne} {address.StreetTwo}" : address.StreetOne;
                         return $"{street} {address.City}, {address.State} {address.PostalCode}";
                     case 2:
-                        return EmailAddress;
+                        return EmailAddress ?? string.Empty;
                     case 3:
                         return fixpn(PhoneNumber);
                     case 4:
@@ -123,7 +119,7 @@ namespace Clc.Polaris.Api.Models
     public class PatronSystemBlock
     {
         public int BlockID { get; set; }
-        public string BlockDescription { get; set; }
+        public string? BlockDescription { get; set; }
 
         public override string ToString() => $"{BlockID} | {BlockDescription}";
     }

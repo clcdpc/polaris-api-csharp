@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Clc.Polaris.Api.Models
 {
     public partial class RecordSetRecordsGetResult : PapiResponseCommon
     {
-        public List<RecordSetRecordsGetRow> RecordSetRecordsGetRows { get; set; }
+        public List<RecordSetRecordsGetRow> RecordSetRecordsGetRows { get; set; } = new();
 
         public IEnumerable<int> Ids { get { return RecordSetRecordsGetRows.Select(r => r.RecordID); } }
 

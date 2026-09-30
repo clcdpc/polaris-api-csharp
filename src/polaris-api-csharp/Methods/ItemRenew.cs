@@ -1,21 +1,19 @@
-﻿
-using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System.Net;
-using System.Net.Http;
-using System.Xml.Linq;
-using System.Threading.Tasks;
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        public IRestResponse<ItemRenewResultWrapper> ItemRenew(string barcode, int itemId, string password = "", ItemRenewOptions renewOptions = null)
+        public async Task<IRestResponse<ItemRenewResultWrapper>> ItemRenewAsync(string barcode, int itemId, string password = "", ItemRenewOptions? renewOptions = null, CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/itemsout/{itemId}";
-            var request = new PapiRestRequest(HttpMethod.Put, url) { Password = password, Body = renewOptions ?? new ItemRenewOptions() };
-            return Execute<ItemRenewResultWrapper>(request);
+            Require.NonNegative(itemId);
+
+            renewOptions ??= new ItemRenewOptions();
+            renewOptions.LogonBranchID = Require.PositiveIfProvidedOrDefault(renewOptions.LogonBranchID, OrganizationId);
+            renewOptions.LogonUserID = Require.PositiveIfProvidedOrDefault(renewOptions.LogonUserID, UserId);
+            renewOptions.LogonWorkstationID = Require.PositiveIfProvidedOrDefault(renewOptions.LogonWorkstationID, WorkstationId);
+
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/itemsout/{itemId}";
+            var request = PapiRestRequest.Put(url, body: renewOptions, password: password);
+            return await ExecutePapiAsync<ItemRenewResultWrapper>(request, cancellationToken).ConfigureAwait(false);
         }
-        public IRestResponse<ItemRenewResultWrapper> ItemRenewAllForPatron(string barcode, string password = "", ItemRenewOptions renewOptions = null)
-            => ItemRenew(barcode, 0, password, renewOptions);
     }
 }
