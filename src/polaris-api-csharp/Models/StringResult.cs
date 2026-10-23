@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Clc.Polaris.Api.Models
+﻿namespace Clc.Polaris.Api.Models
 {
     /// <summary>
     /// Result of a SA_GetValueByOrg call
@@ -14,7 +8,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Value
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Returns value
@@ -22,7 +16,7 @@ namespace Clc.Polaris.Api.Models
         /// <returns></returns>
         public override string ToString()
         {
-            return Value;
+            return Value ?? string.Empty;
         }
     }
 }

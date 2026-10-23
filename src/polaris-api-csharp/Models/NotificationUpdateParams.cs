@@ -1,11 +1,9 @@
-﻿using System;
-
 namespace Clc.Polaris.Api.Models
 {
-	/// <summary>
-	/// The parameters required to perform a NotificationUpdate.
-	/// </summary>
-	public class NotificationUpdateParams
+    /// <summary>
+    /// The parameters required to perform a NotificationUpdate.
+    /// </summary>
+    public class NotificationUpdateParams
     {
         /// <summary>
         /// The type of notification it was.
@@ -15,19 +13,19 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Branch where the notification is being updates
         /// </summary>
-        public int LogonBranchId { get; set; } = 1;
+        public int? LogonBranchId { get; set; }
 
         /// <summary>
         /// User updating the notification
         /// </summary>
-        public int LogonUserId { get; set; } = 1;
+        public int? LogonUserId { get; set; }
 
         /// <summary>
         /// Workstation the notification is being updated on
         /// </summary>
-        public int LogonWorkstationId { get; set; } = 1;
+        public int? LogonWorkstationId { get; set; }
 
-        public int ReportingOrgID { get; set; } = 1;
+        public int? ReportingOrgID { get; set; }
 
         /// <summary>
         /// The status of the notification.
@@ -44,15 +42,15 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public int DeliveryOptionId { get; set; }
 
-		/// <summary>
-		/// How the message was delivered. In the currently implementation this is the patron's phone number.
-		/// </summary>
-		public string DeliveryString { get; set; }
+        /// <summary>
+        /// How the message was delivered. In the currently implementation this is the patron's phone number.
+        /// </summary>
+        public string DeliveryString { get; set; } = string.Empty;
 
         /// <summary>
         /// Any additional data/notes.
         /// </summary>
-        public string Details { get; set; }
+        public string? Details { get; set; }
 
         /// <summary>
         /// The ID of the patron.
@@ -64,6 +62,6 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public int? ItemRecordId { get; set; }
 
-        public string ItemBarcode { get; set; }
+        public string? ItemBarcode { get; set; }
     }
 }

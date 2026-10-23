@@ -1,24 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System.Net;
-using System.Net.Http;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
-
-        public IRestResponse<PapiResponseCommon> PatronAccountCreateTitleList(string barcode, string listName, string password = "")
+        public async Task<IRestResponse<PatronAccountCreateTitleListResult>> PatronAccountCreateTitleListAsync(string barcode, string listName, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patronaccountcreatetitlelist";
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patronaccountcreatetitlelist";
             var body = new PatronAccountCreateTitleListData { RecordStoreName = listName };
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
-            return Execute<PapiResponseCommon>(request);
+            var request = PapiRestRequest.Post(url, body: body, password: password);
+            return await ExecutePapiAsync<PatronAccountCreateTitleListResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

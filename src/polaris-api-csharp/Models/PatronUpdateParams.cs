@@ -1,7 +1,3 @@
-﻿using Clc.Polaris.Models;
-using System;
-using System.Collections.Generic;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -12,7 +8,21 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Enable or Disable the reading list feature for the patron.
         /// </summary>
-        public bool? ReadingListEnabled { get; set; }
+        private int? _readingListFlag;
+
+        public int? ReadingListFlag
+        {
+            get => _readingListFlag;
+            set
+            {
+                if (value.HasValue && value != 0 && value != 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "ReadingListFlag must be 0 or 1.");
+                }
+
+                _readingListFlag = value;
+            }
+        }
 
         /// <summary>
         /// The format the patron wishes to receive email in. 1 = Plain Text, 2 = HTML
@@ -35,19 +45,19 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// The patron's email address.
         /// </summary>
-        public string EmailAddress { get; set; }
+        public string? EmailAddress { get; set; }
 
         /// <summary>
 		/// The patron's alternate email address.
 		/// </summary>
-		public string AltEmailAddress { get; set; }
+		public string? AltEmailAddress { get; set; }
 
         /// <summary>
         /// The patron's phone number.
         /// </summary>
-        public string PhoneVoice1 { get; set; }
-        public string PhoneVoice2 { get; set; }
-        public string PhoneVoice3 { get; set; }
+        public string? PhoneVoice1 { get; set; }
+        public string? PhoneVoice2 { get; set; }
+        public string? PhoneVoice3 { get; set; }
 
         public int? Phone1CarrierID { get; set; }
         public int? Phone2CarrierID { get; set; }
@@ -63,7 +73,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// The patron's new Password/PIN
         /// </summary>
-        public string NewPassword { get; set; }
+        public string? NewPassword { get; set; }
 
         public DateTime? AddrCheckDate { get; set; }
         public DateTime? ExpirationDate { get; set; }
@@ -73,29 +83,28 @@ namespace Clc.Polaris.Api.Models
         /// </summary>
         public int? EReceiptOptionID { get; set; }
 
+        public List<PatronAddress> PatronAddresses { get; set; } = new();
 
-        public List<PatronAddress> PatronAddresses { get; set; }
-
         /// <summary>
         /// User-defined field
         /// </summary>
-        public string User1 { get; set; }
+        public string? User1 { get; set; }
         /// <summary>
         /// User-defined field
         /// </summary>
-        public string User2 { get; set; }
+        public string? User2 { get; set; }
         /// <summary>
         /// User-defined field
         /// </summary>
-        public string User3 { get; set; }
+        public string? User3 { get; set; }
         /// <summary>
         /// User-defined field
         /// </summary>
-        public string User4 { get; set; }
+        public string? User4 { get; set; }
         /// <summary>
         /// User-defined field
         /// </summary>
-        public string User5 { get; set; }
+        public string? User5 { get; set; }
 
         public int? RequestPickupBranchID { get; set; }
         public int? PatronCode { get; set; }

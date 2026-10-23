@@ -1,23 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Clc.Polaris.Api.Validation;
-using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System.Net;
-using System.Net.Http;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
-
-        public IRestResponse<PapiResponseCommon> PatronMessageDelete(string barcode, PatronMessageType messageType, int messageId, string password = "")
+        public async Task<IRestResponse<PAPIResult>> PatronMessageDeleteAsync(string barcode, PatronMessageType messageType, int messageId, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/messages/{messageType}/{messageId}";
-            var request = new PapiRestRequest(HttpMethod.Delete, url) { Password = password };
-            return Execute<PapiResponseCommon>(request);
+            Require.Positive(messageId);
+
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/messages/{messageType}/{messageId}";
+            var request = PapiRestRequest.Delete(url, password: password);
+            return await ExecutePapiAsync<PAPIResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,20 +1,8 @@
-﻿
-using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="barcode"></param>
         /// <param name="fromRecordStoreId"></param>
@@ -22,14 +10,16 @@ namespace Clc.Polaris.Api
         /// <param name="toRecordStoreId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        
-
-        public IRestResponse<PapiResponseCommon> PatronTitleListMoveTitle(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "")
+        public async Task<IRestResponse<PatronTitleListMoveTitleResult>> PatronTitleListMoveTitleAsync(string barcode, int fromRecordStoreId, int fromPosition, int toRecordStoreId, string password = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/public/v1/1033/100/1/patron/{WebUtility.UrlEncode(barcode)}/patrontitlelistmovetitle/";
+            Require.Positive(fromRecordStoreId);
+            Require.Positive(fromPosition);
+            Require.Positive(toRecordStoreId);
+
+            var url = $"/public/v1/1033/100/{OrganizationId}/patron/{EncodeBarcodePathSegment(barcode)}/patrontitlelistmovetitle/";
             var body = new PatronTitleListMoveTitleData { FromRecordStoreId = fromRecordStoreId, FromPosition = fromPosition, ToRecordStoreId = toRecordStoreId };
-            var request = new PapiRestRequest(HttpMethod.Post, url) { Password = password, Body = body };
-            return Execute<PapiResponseCommon>(request);
+            var request = PapiRestRequest.Post(url, body: body, password: password);
+            return await ExecutePapiAsync<PatronTitleListMoveTitleResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

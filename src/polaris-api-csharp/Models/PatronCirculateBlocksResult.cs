@@ -1,10 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-
 namespace Clc.Polaris.Api.Models
 {
     /// <summary>
@@ -15,7 +8,7 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron's barcode
         /// </summary>
-        public string Barcode { get; set; }
+        public string? Barcode { get; set; }
 
         /// <summary>
         /// Valid patron
@@ -40,12 +33,12 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// The patron's barcode
         /// </summary>
-        public string PatronBarcode { get; set; }
+        public string? PatronBarcode { get; set; }
 
         /// <summary>
         /// Assigned branch name
         /// </summary>
-        public string AssignedBranchName { get; set; }
+        public string? AssignedBranchName { get; set; }
 
         /// <summary>
         /// Account expiration date
@@ -61,8 +54,7 @@ namespace Clc.Polaris.Api.Models
         /// List of blocks on the patron's account
         /// </summary>
         ////public Blocks Blocks { get; set; }
-
-        public List<Block> Blocks { get; set; }
+        public List<Block> Blocks { get; set; } = new();
 
         /// <summary>
         /// Can the patron check out items
@@ -72,22 +64,22 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Email address
         /// </summary>
-        public string EmailAddress { get; set; }
+        public string? EmailAddress { get; set; }
 
         /// <summary>
         /// First name
         /// </summary>
-        public string NameFirst { get; set; }
+        public string? NameFirst { get; set; }
 
         /// <summary>
         /// Last name
         /// </summary>
-        public string NameLast { get; set; }
+        public string? NameLast { get; set; }
 
         /// <summary>
         /// Middle name
         /// </summary>
-        public string NameMiddle { get; set; }
+        public string? NameMiddle { get; set; }
     }
 
     /// <summary>
@@ -103,11 +95,11 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Patron name
         /// </summary>
-        public string PatronName { get; set; }
+        public string? PatronName { get; set; }
 
         /// <summary>
         /// Block description
         /// </summary>
-        public string BlockDescription { get; set; }
+        public string? BlockDescription { get; set; }
     }
 }

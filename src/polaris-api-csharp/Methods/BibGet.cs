@@ -1,12 +1,3 @@
-﻿using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
@@ -16,13 +7,14 @@ namespace Clc.Polaris.Api
         /// </summary>
         /// <param name="bibId"></param>
         /// <returns></returns>
-        
-
-        public IRestResponse<BibGetResult> BibGet(int bibId, int? branchId = null)
+        public async Task<IRestResponse<BibGetResult>> BibGetAsync(int bibId, int? branchId = null, CancellationToken cancellationToken = default)
         {
+            Require.Positive(bibId);
+            Require.PositiveIfProvided(branchId);
+
             var url = $"/public/v1/1033/100/{branchId ?? OrganizationId}/bib/{bibId}";
-            var request = new PapiRestRequest(url);
-            return Execute<BibGetResult>(request);
+            var request = PapiRestRequest.Get(url);
+            return await ExecutePapiAsync<BibGetResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

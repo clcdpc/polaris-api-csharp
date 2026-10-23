@@ -1,26 +1,19 @@
-﻿using Clc.Rest;
-using Clc.Polaris.Api.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Xml.Linq;
-
 namespace Clc.Polaris.Api
 {
     public partial class PapiClient
     {
-        
-
-        public IRestResponse<PapiResponseCommon> PatronAccountPay(string barcode, int txnId, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "")
+        public async Task<IRestResponse<PatronAccountPayResult>> PatronAccountPayAsync(string barcode, int txnId, double txnAmount, PaymentMethod paymentMethod, int? workstationId = null, int? userId = null, string note = "", CancellationToken cancellationToken = default)
         {
-            var url = $"/protected/v1/1033/100/1/{Token.AccessToken}/patron/{WebUtility.UrlEncode(barcode)}/account/{txnId}/pay?wsid={workstationId ?? WorkstationId}&userid={userId ?? UserId}";
+            Require.Positive(txnId);
+            Require.PositiveIfProvided(workstationId);
+            Require.PositiveIfProvided(userId);
+
+            var url = $"/protected/v1/1033/100/{OrganizationId}/{ProtectedToken.Placeholder}/patron/{EncodeBarcodePathSegment(barcode)}/account/{txnId}/pay";
             var body = new PatronAccountPayData { TxnAmount = txnAmount, PaymentMethodId = paymentMethod, FreeTextNote = note };
-            var request = new PapiRestRequest(HttpMethod.Put, url) { Body = body };
-            return Execute<PapiResponseCommon>(request);
+            var request = PapiRestRequest.Put(url, body: body);
+            request.QueryParameters.Add("wsid", workstationId ?? WorkstationId);
+            request.QueryParameters.Add("userid", userId ?? UserId);
+            return await ExecutePapiAsync<PatronAccountPayResult>(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }
