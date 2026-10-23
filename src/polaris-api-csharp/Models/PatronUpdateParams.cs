@@ -8,7 +8,21 @@ namespace Clc.Polaris.Api.Models
         /// <summary>
         /// Enable or Disable the reading list feature for the patron.
         /// </summary>
-        public bool? ReadingListEnabled { get; set; }
+        private int? _readingListFlag;
+
+        public int? ReadingListFlag
+        {
+            get => _readingListFlag;
+            set
+            {
+                if (value.HasValue && value != 0 && value != 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "ReadingListFlag must be 0 or 1.");
+                }
+
+                _readingListFlag = value;
+            }
+        }
 
         /// <summary>
         /// The format the patron wishes to receive email in. 1 = Plain Text, 2 = HTML
